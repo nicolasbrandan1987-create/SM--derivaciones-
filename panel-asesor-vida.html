@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Derivaciones — Swiss Medical VIDA</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    padding: 0 0 48px;
+  }
+  .header {
+    background: #003366;
+    padding: 20px 20px 16px;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; }
+  .header .logo { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6; margin-bottom: 4px; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header .asesor-name { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+
+  .stats-bar {
+    display: flex;
+    gap: 0;
+    background: #002244;
+  }
+  .stat {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat:last-child { border-right: none; }
+  .stat .val { font-size: 22px; font-weight: 700; color: white; }
+  .stat .lbl { font-size: 10px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 1px; }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    background: white;
+    border-bottom: 1px solid #eee;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #dde3ec;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    background: white;
+    color: #555;
+    transition: all 0.15s;
+  }
+  .filter-btn.active {
+    background: #003366;
+    border-color: #003366;
+    color: white;
+  }
+
+  .list { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    border-left: 4px solid #ccc;
+  }
+  .card.estado-pendiente { border-left-color: #f59e0b; }
+  .card.estado-contactado { border-left-color: #3b82f6; }
+  .card.estado-en-proceso { border-left-color: #8b5cf6; }
+  .card.estado-cerrado { border-left-color: #10b981; }
+  .card.estado-perdido { border-left-color: #ef4444; }
+
+  .card-header {
+    padding: 14px 14px 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .cliente-info { flex: 1; }
+  .cliente-nombre { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .cliente-tel { font-size: 13px; color: #555; margin-top: 2px; }
+  .badge-estado {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-pendiente { background: #fef3c7; color: #92400e; }
+  .badge-contactado { background: #dbeafe; color: #1e40af; }
+  .badge-en-proceso { background: #ede9fe; color: #5b21b6; }
+  .badge-cerrado { background: #d1fae5; color: #065f46; }
+  .badge-perdido { background: #fee2e2; color: #991b1b; }
+
+  .card-meta {
+    padding: 0 14px 10px;
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-meta span { display: flex; align-items: center; gap: 3px; }
+
+  .card-obs {
+    padding: 8px 14px 10px;
+    background: #fafbfd;
+    border-top: 1px solid #f0f0f0;
+    font-size: 13px;
+    color: #444;
+    font-style: italic;
+  }
+
+  .card-actions {
+    display: flex;
+    border-top: 1px solid #f0f0f0;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 11px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #444;
+    border-right: 1px solid #f0f0f0;
+    transition: background 0.15s;
+  }
+  .action-btn:last-child { border-right: none; }
+  .action-btn:hover { background: #f5f7fa; }
+  .action-btn.wa { color: #25d366; }
+
+  /* Estado selector */
+  .estado-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    background: #fafbfd;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #888;
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  /* Modal para cambiar estado */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    max-width: 480px;
+    padding: 24px 20px 32px;
+  }
+  .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1a1a1a; }
+  .estado-options { display: flex; flex-direction: column; gap: 10px; }
+  .estado-opt {
+    padding: 13px 16px;
+    border-radius: 10px;
+    border: 1.5px solid #eee;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+  .estado-opt:hover { border-color: #003366; background: #eef4ff; }
+  .modal-cancel {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #f0f4f8;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Swiss Medical · VIDA</div>
+  <div class="header-top">
+    <div>
+      <h1>Mis Derivaciones</h1>
+      <div class="asesor-name" id="nombreAsesor">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="val" id="statTotal">0</div><div class="lbl">Total</div></div>
+  <div class="stat"><div class="val" id="statPendiente">0</div><div class="lbl">Pendientes</div></div>
+  <div class="stat"><div class="val" id="statProceso">0</div><div class="lbl">En proceso</div></div>
+  <div class="stat"><div class="val" id="statCerrado">0</div><div class="lbl">Cerrados</div></div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filtrar('todos', this)">Todos</button>
+  <button class="filter-btn" onclick="filtrar('pendiente', this)">⏳ Pendientes</button>
+  <button class="filter-btn" onclick="filtrar('contactado', this)">📞 Contactados</button>
+  <button class="filter-btn" onclick="filtrar('en-proceso', this)">🔄 En proceso</button>
+  <button class="filter-btn" onclick="filtrar('cerrado', this)">✅ Cerrados</button>
+  <button class="filter-btn" onclick="filtrar('perdido', this)">❌ Perdidos</button>
+</div>
+
+<div class="list" id="listaDerivaciones"></div>
+
+<!-- Modal cambio de estado -->
+<div class="modal-overlay" id="modalEstado">
+  <div class="modal">
+    <h3>Actualizar estado</h3>
+    <div class="estado-options">
+      <div class="estado-opt" onclick="cambiarEstado('pendiente')">⏳ Pendiente</div>
+      <div class="estado-opt" onclick="cambiarEstado('contactado')">📞 Contactado</div>
+      <div class="estado-opt" onclick="cambiarEstado('en-proceso')">🔄 En proceso</div>
+      <div class="estado-opt" onclick="cambiarEstado('cerrado')">✅ Cerrado con venta</div>
+      <div class="estado-opt" onclick="cambiarEstado('perdido')">❌ No interesado / Perdido</div>
+    </div>
+    <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURACIÓN
+  // ============================================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
+
+  // Para demo: obtener asesor desde URL param ?asesor=nombre
+  const urlParams = new URLSearchParams(window.location.search);
+  const asesorId = urlParams.get('asesor') || 'demo';
+  // ============================================================
+
+  // DATOS DEMO (se reemplazan con fetch real al Apps Script)
+  const DEMO_DATA = [
+    {
+      id: 1,
+      clienteNombre: 'Carlos Ramírez',
+      clienteTel: '1156789012',
+      productos: 'SMG Plus',
+      observacion: 'Consultó espontáneamente por cobertura de vida. Tiene 2 hijos. Muy receptivo.',
+      asesorPrepaga: 'Lucía Torres',
+      fecha: '12/03/2026 09:14',
+      estado: 'pendiente'
+    },
+    {
+      id: 2,
+      clienteNombre: 'Verónica Suárez',
+      clienteTel: '1167890123',
+      productos: 'SMG Platinum',
+      observacion: 'Gerente de empresa. Mencionó que quiere proteger a su familia. Buen perfil.',
+      asesorPrepaga: 'Martín Gómez',
+      fecha: '11/03/2026 15:32',
+      estado: 'contactado'
+    },
+    {
+      id: 3,
+      clienteNombre: 'Roberto Iglesias',
+      clienteTel: '1178901234',
+      productos: 'SMG Gold',
+      observacion: 'Renovó plan premium. Preguntó si hay seguros adicionales. Interés real.',
+      asesorPrepaga: 'Lucía Torres',
+      fecha: '10/03/2026 11:05',
+      estado: 'en-proceso'
+    },
+    {
+      id: 4,
+      clienteNombre: 'Daniela Herrera',
+      clienteTel: '1189012345',
+      productos: 'SMG Silver',
+      observacion: 'Autónoma, mencionó que tiene pocos ahorros. Podría interesarle un seguro de vida básico.',
+      asesorPrepaga: 'Martín Gómez',
+      fecha: '07/03/2026 10:20',
+      estado: 'cerrado'
+    }
+  ];
+
+  let derivaciones = [...DEMO_DATA];
+  let filtroActual = 'todos';
+  let cardActiva = null;
+
+  document.getElementById('nombreAsesor').textContent = asesorId !== 'demo'
+    ? 'Asesor: ' + decodeURIComponent(asesorId)
+    : 'Vista de demostración';
+
+  function calcularStats() {
+    document.getElementById('statTotal').textContent = derivaciones.length;
+    document.getElementById('statPendiente').textContent = derivaciones.filter(d => d.estado === 'pendiente').length;
+    document.getElementById('statProceso').textContent = derivaciones.filter(d => d.estado === 'en-proceso' || d.estado === 'contactado').length;
+    document.getElementById('statCerrado').textContent = derivaciones.filter(d => d.estado === 'cerrado').length;
+  }
+
+  function badgeLabel(estado) {
+    const map = {
+      'pendiente': 'Pendiente',
+      'contactado': 'Contactado',
+      'en-proceso': 'En proceso',
+      'cerrado': 'Cerrado ✓',
+      'perdido': 'Perdido'
+    };
+    return map[estado] || estado;
+  }
+
+  function renderLista() {
+    const lista = document.getElementById('listaDerivaciones');
+    const filtradas = filtroActual === 'todos'
+      ? derivaciones
+      : derivaciones.filter(d => d.estado === filtroActual);
+
+    if (filtradas.length === 0) {
+      lista.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No hay derivaciones en este estado</p></div>`;
+      return;
+    }
+
+    lista.innerHTML = filtradas.map(d => `
+      <div class="card estado-${d.estado}" id="card-${d.id}">
+        <div class="card-header">
+          <div class="cliente-info">
+            <div class="cliente-nombre">${d.clienteNombre}</div>
+            <div class="cliente-tel">📱 ${d.clienteTel}</div>
+          </div>
+          <span class="badge-estado badge-${d.estado}">${badgeLabel(d.estado)}</span>
+        </div>
+        <div class="card-meta">
+          <span>📦 ${d.productos}</span>
+          <span>👤 ${d.asesorPrepaga}</span>
+          <span>📅 ${d.fecha}</span>
+        </div>
+        <div class="card-obs">"${d.observacion}"</div>
+        <div class="card-actions">
+          <button class="action-btn wa" onclick="contactarWA('${d.clienteTel}', '${d.clienteNombre}')">
+            💬 WhatsApp
+          </button>
+          <button class="action-btn" onclick="llamar('${d.clienteTel}')">
+            📞 Llamar
+          </button>
+          <button class="action-btn" onclick="abrirModal(${d.id})">
+            ✏️ Estado
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filtrar(estado, btn) {
+    filtroActual = estado;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLista();
+  }
+
+  function contactarWA(tel, nombre) {
+    const msg = encodeURIComponent(`Hola ${nombre}, te contacto de Swiss Medical Seguros de Vida. ¿Tenés unos minutos para conversar?`);
+    window.open(`https://wa.me/549${tel}?text=${msg}`, '_blank');
+  }
+
+  function llamar(tel) {
+    window.location.href = `tel:+549${tel}`;
+  }
+
+  function abrirModal(id) {
+    cardActiva = id;
+    document.getElementById('modalEstado').classList.add('open');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalEstado').classList.remove('open');
+    cardActiva = null;
+  }
+
+  async function cambiarEstado(nuevoEstado) {
+    if (!cardActiva) return;
+    const idx = derivaciones.findIndex(d => d.id === cardActiva);
+    if (idx === -1) return;
+
+    derivaciones[idx].estado = nuevoEstado;
+    cerrarModal();
+    calcularStats();
+    renderLista();
+
+    // Enviar al backend
+    if (!APPS_SCRIPT_URL.includes('TU_DEPLOYMENT_ID')) {
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accion: 'actualizarEstado',
+            id: cardActiva,
+            estado: nuevoEstado,
+            asesorVida: asesorId
+          })
+        });
+      } catch(e) { /* silencioso */ }
+    }
+  }
+
+  // Cerrar modal al hacer tap fuera
+  document.getElementById('modalEstado').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+
+  // Init
+  calcularStats();
+  renderLista();
+</script>
+</body>
+</html>

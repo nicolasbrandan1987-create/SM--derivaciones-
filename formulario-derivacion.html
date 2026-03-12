@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivar a Seguros de Vida — Swiss Medical</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 48px;
+  }
+  .container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+  }
+  .header {
+    background: #003366;
+    padding: 24px 24px 20px;
+    color: white;
+  }
+  .header .logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .header p {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 6px;
+  }
+  .form-body { padding: 24px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #003366;
+    margin-bottom: 14px;
+    margin-top: 8px;
+  }
+  .field { margin-bottom: 18px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  label span.req { color: #c00; margin-left: 2px; }
+  input, select, textarea {
+    width: 100%;
+    border: 1.5px solid #dde3ec;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 15px;
+    color: #1a1a1a;
+    background: #fafbfd;
+    transition: border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #003366;
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .divider {
+    border: none;
+    border-top: 1px solid #eef0f4;
+    margin: 20px 0;
+  }
+  .asesor-row {
+    display: flex;
+    gap: 12px;
+  }
+  .asesor-row .field { flex: 1; }
+
+  /* Criterios */
+  .criteria-box {
+    background: #eef4ff;
+    border: 1px solid #c3d6f5;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+  }
+  .criteria-box .criteria-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #003366;
+    margin-bottom: 6px;
+  }
+  .criteria-list { list-style: none; }
+  .criteria-list li {
+    font-size: 12px;
+    color: #334;
+    padding: 2px 0;
+  }
+  .criteria-list li::before {
+    content: '✓ ';
+    color: #0066cc;
+    font-weight: 700;
+  }
+
+  /* Productos checkboxes */
+  .productos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .prod-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fafbfd;
+    border: 1.5px solid #dde3ec;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+  }
+  .prod-option input[type=checkbox] {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    accent-color: #003366;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+  .prod-option:has(input:checked) {
+    border-color: #003366;
+    background: #eef4ff;
+    color: #003366;
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: #003366;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-submit:hover { background: #004488; }
+  .btn-submit:active { background: #002244; }
+  .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* Success state */
+  .success-screen {
+    display: none;
+    padding: 48px 24px;
+    text-align: center;
+  }
+  .success-icon {
+    width: 72px; height: 72px;
+    background: #e6f4ea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+  }
+  .success-screen h2 { font-size: 22px; color: #1a3a1a; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: #555; margin-bottom: 24px; line-height: 1.5; }
+  .btn-nueva {
+    background: #003366;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .loading { display: none; text-align: center; padding: 20px; color: #555; font-size: 14px; }
+  .error-msg { color: #c00; font-size: 12px; margin-top: 4px; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">Swiss Medical Grupo · VIDA</div>
+    <h1>Derivar cliente a<br>Seguros de Vida</h1>
+    <p>Completá el formulario — el especialista VIDA lo recibe al instante</p>
+  </div>
+
+  <div class="form-body" id="formBody">
+
+    <!-- Criterios orientativos -->
+    <div class="criteria-box">
+      <div class="criteria-title">¿Cuándo derivar?</div>
+      <ul class="criteria-list">
+        <li>El cliente preguntó por cobertura de vida o accidentes</li>
+        <li>Tiene familia o dependientes económicos</li>
+        <li>Mencionó interés en ahorro o inversión</li>
+        <li>Titular entre 25 y 60 años</li>
+        <li>Intuición / buen perfil comercial</li>
+      </ul>
+    </div>
+
+    <!-- Sección: Datos del cliente -->
+    <div class="section-label">Datos del cliente</div>
+
+    <div class="field">
+      <label>Nombre y apellido <span class="req">*</span></label>
+      <input type="text" id="clienteNombre" placeholder="Ej: María González" autocomplete="off">
+      <div class="error-msg" id="err-nombre">Este campo es obligatorio</div>
+    </div>
+
+    <div class="field">
+      <label>Teléfono <span class="req">*</span></label>
+      <input type="tel" id="clienteTel" placeholder="Ej: 1145678901" autocomplete="off">
+      <div class="error-msg" id="err-tel">Ingresá un teléfono válido</div>
+    </div>
+
+    <div class="field">
+      <label>Producto prepaga que tiene <span class="req">*</span></label>
+      <div class="productos-grid" id="productosGrid">
+        <label class="prod-option"><input type="checkbox" value="S2"> S2</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 20"> SMG 20</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 30"> SMG 30</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 40"> SMG 40</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 50"> SMG 50</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 60"> SMG 60</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 70"> SMG 70</label>
+        <label class="prod-option"><input type="checkbox" value="Otro"> Otro</label>
+      </div>
+      <div class="error-msg" id="err-producto">Seleccioná al menos un producto</div>
+    </div>
+
+    <div class="field">
+      <label>Observación <span class="req">*</span></label>
+      <textarea id="observacion" placeholder="¿Por qué lo derivás? ¿Qué mencionó el cliente? Cualquier dato útil para el especialista..."></textarea>
+      <div class="error-msg" id="err-obs">Escribí una observación breve</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Sección: Datos del asesor -->
+    <div class="section-label">Tus datos</div>
+
+    <div class="asesor-row">
+      <div class="field">
+        <label>Tu nombre <span class="req">*</span></label>
+        <input type="text" id="asesorNombre" placeholder="Tu nombre" autocomplete="off">
+        <div class="error-msg" id="err-asesor">Campo obligatorio</div>
+      </div>
+      <div class="field">
+        <label>Tu sucursal / zona</label>
+        <input type="text" id="asesorZona" placeholder="Ej: AMBA Norte" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="loading" id="loadingMsg">⏳ Enviando derivación...</div>
+
+    <button class="btn-submit" id="btnEnviar" onclick="enviarDerivacion()">
+      Derivar cliente →
+    </button>
+
+  </div>
+
+  <!-- Pantalla de éxito -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✅</div>
+    <h2>¡Derivación enviada!</h2>
+    <p>El especialista VIDA recibió los datos del cliente y lo va a contactar en breve.<br><br>
+    Gracias por derivar — tu colaboración hace crecer el equipo.</p>
+    <button class="btn-nueva" onclick="nuevaDerivacion()">Derivar otro cliente</button>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURACIÓN — reemplazar con URL real del Apps Script
+  // ============================================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
+  // ============================================================
+
+  function getProductosSeleccionados() {
+    const checks = document.querySelectorAll('#productosGrid input[type=checkbox]:checked');
+    return Array.from(checks).map(c => c.value).join(', ');
+  }
+
+  function showError(id, show) {
+    document.getElementById(id).style.display = show ? 'block' : 'none';
+  }
+
+  function validar() {
+    let ok = true;
+    const nombre = document.getElementById('clienteNombre').value.trim();
+    const tel = document.getElementById('clienteTel').value.trim();
+    const productos = getProductosSeleccionados();
+    const obs = document.getElementById('observacion').value.trim();
+    const asesor = document.getElementById('asesorNombre').value.trim();
+
+    showError('err-nombre', !nombre); if (!nombre) ok = false;
+    showError('err-tel', !tel || tel.length < 8); if (!tel || tel.length < 8) ok = false;
+    showError('err-producto', !productos); if (!productos) ok = false;
+    showError('err-obs', !obs); if (!obs) ok = false;
+    showError('err-asesor', !asesor); if (!asesor) ok = false;
+
+    return ok;
+  }
+
+  async function enviarDerivacion() {
+    if (!validar()) return;
+
+    const btn = document.getElementById('btnEnviar');
+    const loading = document.getElementById('loadingMsg');
+    btn.disabled = true;
+    loading.style.display = 'block';
+
+    const payload = {
+      accion: 'nuevaDerivacion',
+      clienteNombre: document.getElementById('clienteNombre').value.trim(),
+      clienteTel: document.getElementById('clienteTel').value.trim(),
+      productos: getProductosSeleccionados(),
+      observacion: document.getElementById('observacion').value.trim(),
+      asesorPrepaga: document.getElementById('asesorNombre').value.trim(),
+      asesorZona: document.getElementById('asesorZona').value.trim(),
+      fecha: new Date().toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'})
+    };
+
+    try {
+      // Para pruebas sin backend conectado, simular éxito
+      if (APPS_SCRIPT_URL.includes('TU_DEPLOYMENT_ID')) {
+        await new Promise(r => setTimeout(r, 1200)); // simular latencia
+        mostrarExito();
+        return;
+      }
+
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarExito();
+    } catch (e) {
+      alert('Error al enviar. Revisá tu conexión e intentá de nuevo.');
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  }
+
+  function mostrarExito() {
+    document.getElementById('formBody').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+  }
+
+  function nuevaDerivacion() {
+    document.getElementById('formBody').style.display = 'block';
+    document.getElementById('successScreen').style.display = 'none';
+    document.getElementById('clienteNombre').value = '';
+    document.getElementById('clienteTel').value = '';
+    document.getElementById('observacion').value = '';
+    document.querySelectorAll('#productosGrid input').forEach(c => c.checked = false);
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('btnEnviar').disabled = false;
+  }
+</script>
+</body>
+</html>
