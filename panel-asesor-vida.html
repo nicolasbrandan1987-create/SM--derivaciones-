@@ -273,57 +273,40 @@
   const asesorId = urlParams.get('asesor') || 'demo';
   // ============================================================
 
-  // DATOS DEMO (se reemplazan con fetch real al Apps Script)
-  const DEMO_DATA = [
-    {
-      id: 1,
-      clienteNombre: 'Carlos Ramírez',
-      clienteTel: '1156789012',
-      productos: 'SMG Plus',
-      observacion: 'Consultó espontáneamente por cobertura de vida. Tiene 2 hijos. Muy receptivo.',
-      asesorPrepaga: 'Lucía Torres',
-      fecha: '12/03/2026 09:14',
-      estado: 'pendiente'
-    },
-    {
-      id: 2,
-      clienteNombre: 'Verónica Suárez',
-      clienteTel: '1167890123',
-      productos: 'SMG Platinum',
-      observacion: 'Gerente de empresa. Mencionó que quiere proteger a su familia. Buen perfil.',
-      asesorPrepaga: 'Martín Gómez',
-      fecha: '11/03/2026 15:32',
-      estado: 'contactado'
-    },
-    {
-      id: 3,
-      clienteNombre: 'Roberto Iglesias',
-      clienteTel: '1178901234',
-      productos: 'SMG Gold',
-      observacion: 'Renovó plan premium. Preguntó si hay seguros adicionales. Interés real.',
-      asesorPrepaga: 'Lucía Torres',
-      fecha: '10/03/2026 11:05',
-      estado: 'en-proceso'
-    },
-    {
-      id: 4,
-      clienteNombre: 'Daniela Herrera',
-      clienteTel: '1189012345',
-      productos: 'SMG Silver',
-      observacion: 'Autónoma, mencionó que tiene pocos ahorros. Podría interesarle un seguro de vida básico.',
-      asesorPrepaga: 'Martín Gómez',
-      fecha: '07/03/2026 10:20',
-      estado: 'cerrado'
-    }
-  ];
+  let derivaciones = [];
 
-  let derivaciones = [...DEMO_DATA];
+  async function cargarDerivaciones() {
+    document.getElementById('listaDerivaciones').innerHTML = `<div style="text-align:center;padding:40px;color:#888">Cargando derivaciones...</div>`;
+    try {
+      const url = APPS_SCRIPT_URL + '?accion=getDerivaciones&asesorVida=' + encodeURIComponent(asesorId);
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.ok && data.derivaciones.length > 0) {
+        derivaciones = data.derivaciones.map((d, i) => ({
+          id: d['ID'] || i,
+          clienteNombre: d['Cliente Nombre'] || '',
+          clienteTel: d['Cliente Teléfono'] || '',
+          productos: d['Producto Prepaga'] || '',
+          observacion: d['Observación'] || '',
+          asesorPrepaga: d['Asesor Prepaga'] || '',
+          fecha: d['Fecha'] || '',
+          estado: (d['Estado'] || 'pendiente').toLowerCase().replace(' ', '-')
+        }));
+      } else {
+        derivaciones = [];
+      }
+    } catch(e) {
+      derivaciones = [];
+    }
+    calcularStats();
+    renderLista();
+  }
   let filtroActual = 'todos';
   let cardActiva = null;
 
   document.getElementById('nombreAsesor').textContent = asesorId !== 'demo'
     ? 'Asesor: ' + decodeURIComponent(asesorId)
-    : 'Vista de demostración';
+    : 'Vista general';
 
   function calcularStats() {
     document.getElementById('statTotal').textContent = derivaciones.length;
@@ -444,8 +427,7 @@
   });
 
   // Init
-  calcularStats();
-  renderLista();
+  cargarDerivaciones();
 </script>
 </body>
 </html>
