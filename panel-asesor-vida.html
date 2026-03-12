@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,10 @@
         prima: extras.prima || '',
         fechaVenta: extras.fechaVenta || ''
       });
-      await fetch(APPS_SCRIPT_URL + '?' + params.toString());
+      const url = APPS_SCRIPT_URL + '?' + params.toString();
+      // Image trick: evita bloqueo CORS del navegador
+      const img = new Image();
+      img.src = url;
     } catch(e) {}
   }
 
