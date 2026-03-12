@@ -304,11 +304,16 @@
     calcularStats();
     renderLista();
     try {
-      await fetch(APPS_SCRIPT_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accion: 'actualizarEstado', id: cardActiva, estado: nuevoEstado, ...extras, asesorVida: asesorId })
+      const params = new URLSearchParams({
+        accion: 'actualizarEstado',
+        id: cardActiva,
+        estado: nuevoEstado,
+        asesorVida: asesorId,
+        productoVida: extras.productoVida || '',
+        prima: extras.prima || '',
+        fechaVenta: extras.fechaVenta || ''
       });
+      await fetch(APPS_SCRIPT_URL + '?' + params.toString());
     } catch(e) {}
   }
 
