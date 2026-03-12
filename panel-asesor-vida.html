@@ -6,345 +6,222 @@
 <title>Mis Derivaciones — Swiss Medical VIDA</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f0f4f8;
-    min-height: 100vh;
-    padding: 0 0 48px;
-  }
-  .header {
-    background: #003366;
-    padding: 20px 20px 16px;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .header-top { display: flex; align-items: center; justify-content: space-between; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 0 0 48px; }
+
+  .header { background: #003366; padding: 20px 20px 16px; color: white; position: sticky; top: 0; z-index: 10; }
   .header .logo { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6; margin-bottom: 4px; }
   .header h1 { font-size: 18px; font-weight: 700; }
   .header .asesor-name { font-size: 13px; opacity: 0.8; margin-top: 2px; }
 
-  .stats-bar {
-    display: flex;
-    gap: 0;
-    background: #002244;
-  }
-  .stat {
-    flex: 1;
-    padding: 12px 8px;
-    text-align: center;
-    border-right: 1px solid rgba(255,255,255,0.1);
-  }
+  .stats-bar { display: flex; background: #002244; }
+  .stat { flex: 1; padding: 12px 8px; text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
   .stat:last-child { border-right: none; }
   .stat .val { font-size: 22px; font-weight: 700; color: white; }
   .stat .lbl { font-size: 10px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 1px; }
 
-  .filters {
-    display: flex;
-    gap: 8px;
-    padding: 14px 16px;
-    overflow-x: auto;
-    background: white;
-    border-bottom: 1px solid #eee;
-  }
-  .filter-btn {
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1.5px solid #dde3ec;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    background: white;
-    color: #555;
-    transition: all 0.15s;
-  }
-  .filter-btn.active {
-    background: #003366;
-    border-color: #003366;
-    color: white;
-  }
+  .filters { display: flex; gap: 8px; padding: 14px 16px; overflow-x: auto; background: white; border-bottom: 1px solid #eee; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid #dde3ec; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; background: white; color: #555; transition: all 0.15s; }
+  .filter-btn.active { background: #003366; border-color: #003366; color: white; }
 
   .list { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
 
-  .card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    overflow: hidden;
-    border-left: 4px solid #ccc;
-  }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; border-left: 4px solid #ccc; }
   .card.estado-pendiente { border-left-color: #f59e0b; }
-  .card.estado-contactado { border-left-color: #3b82f6; }
-  .card.estado-en-proceso { border-left-color: #8b5cf6; }
-  .card.estado-cerrado { border-left-color: #10b981; }
-  .card.estado-perdido { border-left-color: #ef4444; }
+  .card.estado-cotizado { border-left-color: #3b82f6; }
+  .card.estado-imposible { border-left-color: #94a3b8; }
+  .card.estado-cerrado-venta { border-left-color: #10b981; }
+  .card.estado-cerrado-sin-venta { border-left-color: #ef4444; }
 
-  .card-header {
-    padding: 14px 14px 10px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-  }
+  .card-header { padding: 14px 14px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .cliente-info { flex: 1; }
   .cliente-nombre { font-size: 16px; font-weight: 700; color: #1a1a1a; }
   .cliente-tel { font-size: 13px; color: #555; margin-top: 2px; }
-  .badge-estado {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+
+  .badge-estado { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
   .badge-pendiente { background: #fef3c7; color: #92400e; }
-  .badge-contactado { background: #dbeafe; color: #1e40af; }
-  .badge-en-proceso { background: #ede9fe; color: #5b21b6; }
-  .badge-cerrado { background: #d1fae5; color: #065f46; }
-  .badge-perdido { background: #fee2e2; color: #991b1b; }
+  .badge-cotizado { background: #dbeafe; color: #1e40af; }
+  .badge-imposible { background: #f1f5f9; color: #475569; }
+  .badge-cerrado-venta { background: #d1fae5; color: #065f46; }
+  .badge-cerrado-sin-venta { background: #fee2e2; color: #991b1b; }
 
-  .card-meta {
-    padding: 0 14px 10px;
-    font-size: 12px;
-    color: #888;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .card-meta span { display: flex; align-items: center; gap: 3px; }
+  .card-meta { padding: 0 14px 10px; font-size: 12px; color: #888; display: flex; gap: 12px; flex-wrap: wrap; }
+  .card-obs { padding: 8px 14px 10px; background: #fafbfd; border-top: 1px solid #f0f0f0; font-size: 13px; color: #444; font-style: italic; }
+  .venta-info { padding: 8px 14px 10px; background: #f0fdf4; border-top: 1px solid #bbf7d0; font-size: 12px; color: #065f46; display: flex; gap: 16px; flex-wrap: wrap; }
+  .venta-info span { font-weight: 600; }
 
-  .card-obs {
-    padding: 8px 14px 10px;
-    background: #fafbfd;
-    border-top: 1px solid #f0f0f0;
-    font-size: 13px;
-    color: #444;
-    font-style: italic;
-  }
-
-  .card-actions {
-    display: flex;
-    border-top: 1px solid #f0f0f0;
-  }
-  .action-btn {
-    flex: 1;
-    padding: 11px 8px;
-    font-size: 12px;
-    font-weight: 600;
-    border: none;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    color: #444;
-    border-right: 1px solid #f0f0f0;
-    transition: background 0.15s;
-  }
+  .card-actions { display: flex; border-top: 1px solid #f0f0f0; }
+  .action-btn { flex: 1; padding: 11px 8px; font-size: 12px; font-weight: 600; border: none; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; color: #444; border-right: 1px solid #f0f0f0; transition: background 0.15s; }
   .action-btn:last-child { border-right: none; }
   .action-btn:hover { background: #f5f7fa; }
   .action-btn.wa { color: #25d366; }
 
-  /* Estado selector */
-  .estado-select {
-    width: 100%;
-    padding: 10px 14px;
-    border: none;
-    border-top: 1px solid #f0f0f0;
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-    background: #fafbfd;
-    cursor: pointer;
-    font-family: inherit;
-    outline: none;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 48px 24px;
-    color: #888;
-  }
+  .empty-state { text-align: center; padding: 48px 24px; color: #888; }
   .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 15px; }
 
-  /* Modal para cambiar estado */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 100;
-    align-items: flex-end;
-    justify-content: center;
-  }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: white;
-    border-radius: 16px 16px 0 0;
-    width: 100%;
-    max-width: 480px;
-    padding: 24px 20px 32px;
-  }
+  .modal { background: white; border-radius: 16px 16px 0 0; width: 100%; max-width: 480px; padding: 24px 20px 32px; max-height: 90vh; overflow-y: auto; }
   .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1a1a1a; }
   .estado-options { display: flex; flex-direction: column; gap: 10px; }
-  .estado-opt {
-    padding: 13px 16px;
-    border-radius: 10px;
-    border: 1.5px solid #eee;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.15s;
-  }
+  .estado-opt { padding: 13px 16px; border-radius: 10px; border: 1.5px solid #eee; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.15s; }
   .estado-opt:hover { border-color: #003366; background: #eef4ff; }
-  .modal-cancel {
-    margin-top: 12px;
-    width: 100%;
-    padding: 12px;
-    border: none;
-    background: #f0f4f8;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    color: #555;
-  }
+
+  .venta-form { display: none; margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px; }
+  .venta-form.show { display: block; }
+  .venta-form .field { margin-bottom: 14px; }
+  .venta-form label { display: block; font-size: 12px; font-weight: 700; color: #333; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .venta-form input, .venta-form select { width: 100%; border: 1.5px solid #dde3ec; border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; }
+  .venta-form input:focus, .venta-form select:focus { border-color: #003366; }
+  .btn-confirmar { width: 100%; background: #10b981; color: white; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+  .modal-cancel { margin-top: 12px; width: 100%; padding: 12px; border: none; background: #f0f4f8; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; color: #555; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="logo">Swiss Medical · VIDA</div>
-  <div class="header-top">
-    <div>
-      <h1>Mis Derivaciones</h1>
-      <div class="asesor-name" id="nombreAsesor">Cargando...</div>
-    </div>
-  </div>
+  <h1>Mis Derivaciones</h1>
+  <div class="asesor-name" id="nombreAsesor">Cargando...</div>
 </div>
 
 <div class="stats-bar">
   <div class="stat"><div class="val" id="statTotal">0</div><div class="lbl">Total</div></div>
   <div class="stat"><div class="val" id="statPendiente">0</div><div class="lbl">Pendientes</div></div>
-  <div class="stat"><div class="val" id="statProceso">0</div><div class="lbl">En proceso</div></div>
-  <div class="stat"><div class="val" id="statCerrado">0</div><div class="lbl">Cerrados</div></div>
+  <div class="stat"><div class="val" id="statCotizado">0</div><div class="lbl">Cotizados</div></div>
+  <div class="stat"><div class="val" id="statCerrado">0</div><div class="lbl">Ventas</div></div>
 </div>
 
 <div class="filters">
   <button class="filter-btn active" onclick="filtrar('todos', this)">Todos</button>
   <button class="filter-btn" onclick="filtrar('pendiente', this)">⏳ Pendientes</button>
-  <button class="filter-btn" onclick="filtrar('contactado', this)">📞 Contactados</button>
-  <button class="filter-btn" onclick="filtrar('en-proceso', this)">🔄 En proceso</button>
-  <button class="filter-btn" onclick="filtrar('cerrado', this)">✅ Cerrados</button>
-  <button class="filter-btn" onclick="filtrar('perdido', this)">❌ Perdidos</button>
+  <button class="filter-btn" onclick="filtrar('cotizado', this)">💬 Cotizados</button>
+  <button class="filter-btn" onclick="filtrar('cerrado-venta', this)">✅ Con venta</button>
+  <button class="filter-btn" onclick="filtrar('cerrado-sin-venta', this)">❌ Sin venta</button>
+  <button class="filter-btn" onclick="filtrar('imposible', this)">🚫 Imposible</button>
 </div>
 
 <div class="list" id="listaDerivaciones"></div>
 
-<!-- Modal cambio de estado -->
 <div class="modal-overlay" id="modalEstado">
   <div class="modal">
     <h3>Actualizar estado</h3>
     <div class="estado-options">
-      <div class="estado-opt" onclick="cambiarEstado('pendiente')">⏳ Pendiente</div>
-      <div class="estado-opt" onclick="cambiarEstado('contactado')">📞 Contactado</div>
-      <div class="estado-opt" onclick="cambiarEstado('en-proceso')">🔄 En proceso</div>
-      <div class="estado-opt" onclick="cambiarEstado('cerrado')">✅ Cerrado con venta</div>
-      <div class="estado-opt" onclick="cambiarEstado('perdido')">❌ No interesado / Perdido</div>
+      <div class="estado-opt" onclick="seleccionarEstado('pendiente')">⏳ Pendiente</div>
+      <div class="estado-opt" onclick="seleccionarEstado('cotizado')">💬 Cotizado</div>
+      <div class="estado-opt" onclick="seleccionarEstado('imposible')">🚫 Imposible contactar</div>
+      <div class="estado-opt" onclick="seleccionarEstado('cerrado-venta')">✅ Cerrado con venta</div>
+      <div class="estado-opt" onclick="seleccionarEstado('cerrado-sin-venta')">❌ Cerrado sin venta</div>
     </div>
+
+    <div class="venta-form" id="ventaForm">
+      <div class="field">
+        <label>Producto VIDA vendido</label>
+        <select id="productoVida">
+          <option value="">Seleccioná...</option>
+          <option value="APP">APP</option>
+          <option value="Zafiro Amatista">Zafiro Amatista</option>
+          <option value="Life Planning">Life Planning</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Prima vendida ($)</label>
+        <input type="number" id="primaVendida" placeholder="Ej: 15000">
+      </div>
+      <div class="field">
+        <label>Fecha de venta</label>
+        <input type="date" id="fechaVenta">
+      </div>
+      <button class="btn-confirmar" onclick="confirmarCerradoVenta()">✅ Confirmar venta</button>
+    </div>
+
     <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
   </div>
 </div>
 
 <script>
-  // ============================================================
-  // CONFIGURACIÓN
-  // ============================================================
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
-
-  // Para demo: obtener asesor desde URL param ?asesor=nombre
   const urlParams = new URLSearchParams(window.location.search);
-  const asesorId = urlParams.get('asesor') || 'demo';
-  // ============================================================
+  const asesorId = urlParams.get('asesor') || '';
 
   let derivaciones = [];
+  let filtroActual = 'todos';
+  let cardActiva = null;
+  let estadoSeleccionado = null;
+
+  function formatFecha(f) {
+    if (!f) return '';
+    try {
+      const d = new Date(f);
+      if (isNaN(d)) return f;
+      return d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'America/Argentina/Buenos_Aires' });
+    } catch(e) { return f; }
+  }
+
+  function normalizarEstado(e) {
+    if (!e) return 'pendiente';
+    const s = e.toLowerCase().trim();
+    if (s.includes('cotizado')) return 'cotizado';
+    if (s.includes('imposible')) return 'imposible';
+    if (s.includes('cerrado con venta') || s === 'cerrado-venta') return 'cerrado-venta';
+    if (s.includes('cerrado sin venta') || s === 'cerrado-sin-venta') return 'cerrado-sin-venta';
+    return 'pendiente';
+  }
+
+  function badgeClass(e) {
+    const map = { pendiente:'badge-pendiente', cotizado:'badge-cotizado', imposible:'badge-imposible', 'cerrado-venta':'badge-cerrado-venta', 'cerrado-sin-venta':'badge-cerrado-sin-venta' };
+    return map[e] || 'badge-pendiente';
+  }
+  function badgeLabel(e) {
+    const map = { pendiente:'Pendiente', cotizado:'Cotizado', imposible:'Imposible contactar', 'cerrado-venta':'Cerrado c/ venta ✓', 'cerrado-sin-venta':'Cerrado s/ venta' };
+    return map[e] || e;
+  }
 
   async function cargarDerivaciones() {
-    document.getElementById('listaDerivaciones').innerHTML = `<div style="text-align:center;padding:40px;color:#888">Cargando derivaciones...</div>`;
+    document.getElementById('listaDerivaciones').innerHTML = `<div style="text-align:center;padding:40px;color:#888">Cargando...</div>`;
     try {
       const url = APPS_SCRIPT_URL + '?accion=getDerivaciones&asesorVida=' + encodeURIComponent(asesorId);
       const res = await fetch(url);
       const data = await res.json();
-      if (data.ok && data.derivaciones.length > 0) {
-        derivaciones = data.derivaciones.map((d, i) => ({
-          id: d['ID'] || i,
-          clienteNombre: d['Cliente Nombre'] || '',
-          clienteTel: d['Cliente Teléfono'] || '',
-          productos: d['Producto Prepaga'] || '',
-          observacion: d['Observación'] || '',
-          asesorPrepaga: d['Asesor Prepaga'] || '',
-          fecha: d['Fecha'] || '',
-          estado: (d['Estado'] || 'pendiente').toLowerCase().replace(' ', '-')
-        }));
-      } else {
-        derivaciones = [];
-      }
-    } catch(e) {
-      derivaciones = [];
-    }
+      derivaciones = data.ok && data.derivaciones.length ? data.derivaciones.map((d,i) => ({
+        id: d['ID'] || i,
+        clienteNombre: d['Cliente Nombre'] || '',
+        clienteTel: d['Cliente Teléfono'] || '',
+        productos: d['Producto Prepaga'] || '',
+        observacion: d['Observación'] || '',
+        asesorPrepaga: d['Asesor Prepaga'] || '',
+        fecha: formatFecha(d['Fecha']),
+        estado: normalizarEstado(d['Estado']),
+        productoVida: d['Producto VIDA'] || '',
+        prima: d['Prima'] || '',
+        fechaVenta: d['Fecha Venta'] || ''
+      })) : [];
+    } catch(e) { derivaciones = []; }
     calcularStats();
     renderLista();
   }
-  let filtroActual = 'todos';
-  let cardActiva = null;
-
-  document.getElementById('nombreAsesor').textContent = asesorId !== 'demo'
-    ? 'Asesor: ' + decodeURIComponent(asesorId)
-    : 'Vista general';
 
   function calcularStats() {
     document.getElementById('statTotal').textContent = derivaciones.length;
     document.getElementById('statPendiente').textContent = derivaciones.filter(d => d.estado === 'pendiente').length;
-    document.getElementById('statProceso').textContent = derivaciones.filter(d => d.estado === 'en-proceso' || d.estado === 'contactado').length;
-    document.getElementById('statCerrado').textContent = derivaciones.filter(d => d.estado === 'cerrado').length;
-  }
-
-  function badgeLabel(estado) {
-    const map = {
-      'pendiente': 'Pendiente',
-      'contactado': 'Contactado',
-      'en-proceso': 'En proceso',
-      'cerrado': 'Cerrado ✓',
-      'perdido': 'Perdido'
-    };
-    return map[estado] || estado;
+    document.getElementById('statCotizado').textContent = derivaciones.filter(d => d.estado === 'cotizado').length;
+    document.getElementById('statCerrado').textContent = derivaciones.filter(d => d.estado === 'cerrado-venta').length;
   }
 
   function renderLista() {
     const lista = document.getElementById('listaDerivaciones');
-    const filtradas = filtroActual === 'todos'
-      ? derivaciones
-      : derivaciones.filter(d => d.estado === filtroActual);
-
-    if (filtradas.length === 0) {
+    const filtradas = filtroActual === 'todos' ? derivaciones : derivaciones.filter(d => d.estado === filtroActual);
+    if (!filtradas.length) {
       lista.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No hay derivaciones en este estado</p></div>`;
       return;
     }
-
     lista.innerHTML = filtradas.map(d => `
-      <div class="card estado-${d.estado}" id="card-${d.id}">
+      <div class="card estado-${d.estado}">
         <div class="card-header">
           <div class="cliente-info">
             <div class="cliente-nombre">${d.clienteNombre}</div>
             <div class="cliente-tel">📱 ${d.clienteTel}</div>
           </div>
-          <span class="badge-estado badge-${d.estado}">${badgeLabel(d.estado)}</span>
+          <span class="badge-estado ${badgeClass(d.estado)}">${badgeLabel(d.estado)}</span>
         </div>
         <div class="card-meta">
           <span>📦 ${d.productos}</span>
@@ -352,16 +229,16 @@
           <span>📅 ${d.fecha}</span>
         </div>
         <div class="card-obs">"${d.observacion}"</div>
+        ${d.estado === 'cerrado-venta' && d.productoVida ? `
+        <div class="venta-info">
+          <span>🛡️ ${d.productoVida}</span>
+          ${d.prima ? `<span>💰 $${d.prima}</span>` : ''}
+          ${d.fechaVenta ? `<span>📅 Venta: ${d.fechaVenta}</span>` : ''}
+        </div>` : ''}
         <div class="card-actions">
-          <button class="action-btn wa" onclick="contactarWA('${d.clienteTel}', '${d.clienteNombre}')">
-            💬 WhatsApp
-          </button>
-          <button class="action-btn" onclick="llamar('${d.clienteTel}')">
-            📞 Llamar
-          </button>
-          <button class="action-btn" onclick="abrirModal(${d.id})">
-            ✏️ Estado
-          </button>
+          <button class="action-btn wa" onclick="contactarWA('${d.clienteTel}', '${d.clienteNombre.replace(/'/g,"\\'")}')">💬 WhatsApp</button>
+          <button class="action-btn" onclick="llamar('${d.clienteTel}')">📞 Llamar</button>
+          <button class="action-btn" onclick="abrirModal('${d.id}')">✏️ Estado</button>
         </div>
       </div>
     `).join('');
@@ -379,12 +256,15 @@
     window.open(`https://wa.me/549${tel}?text=${msg}`, '_blank');
   }
 
-  function llamar(tel) {
-    window.location.href = `tel:+549${tel}`;
-  }
+  function llamar(tel) { window.location.href = `tel:+549${tel}`; }
 
   function abrirModal(id) {
     cardActiva = id;
+    estadoSeleccionado = null;
+    document.getElementById('ventaForm').classList.remove('show');
+    document.getElementById('productoVida').value = '';
+    document.getElementById('primaVendida').value = '';
+    document.getElementById('fechaVenta').value = new Date().toISOString().split('T')[0];
     document.getElementById('modalEstado').classList.add('open');
   }
 
@@ -393,40 +273,47 @@
     cardActiva = null;
   }
 
-  async function cambiarEstado(nuevoEstado) {
-    if (!cardActiva) return;
-    const idx = derivaciones.findIndex(d => d.id === cardActiva);
-    if (idx === -1) return;
-
-    derivaciones[idx].estado = nuevoEstado;
-    cerrarModal();
-    calcularStats();
-    renderLista();
-
-    // Enviar al backend
-    if (!APPS_SCRIPT_URL.includes('TU_DEPLOYMENT_ID')) {
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            accion: 'actualizarEstado',
-            id: cardActiva,
-            estado: nuevoEstado,
-            asesorVida: asesorId
-          })
-        });
-      } catch(e) { /* silencioso */ }
+  function seleccionarEstado(estado) {
+    estadoSeleccionado = estado;
+    if (estado === 'cerrado-venta') {
+      document.getElementById('ventaForm').classList.add('show');
+    } else {
+      document.getElementById('ventaForm').classList.remove('show');
+      cambiarEstado(estado, {});
     }
   }
 
-  // Cerrar modal al hacer tap fuera
-  document.getElementById('modalEstado').addEventListener('click', function(e) {
-    if (e.target === this) cerrarModal();
-  });
+  async function confirmarCerradoVenta() {
+    const producto = document.getElementById('productoVida').value;
+    const prima = document.getElementById('primaVendida').value;
+    const fecha = document.getElementById('fechaVenta').value;
+    if (!producto) { alert('Seleccioná el producto vendido'); return; }
+    await cambiarEstado('cerrado-venta', { productoVida: producto, prima, fechaVenta: fecha });
+  }
 
-  // Init
+  async function cambiarEstado(nuevoEstado, extras) {
+    if (!cardActiva) return;
+    const idx = derivaciones.findIndex(d => String(d.id) === String(cardActiva));
+    if (idx !== -1) {
+      derivaciones[idx].estado = nuevoEstado;
+      if (extras.productoVida) derivaciones[idx].productoVida = extras.productoVida;
+      if (extras.prima) derivaciones[idx].prima = extras.prima;
+      if (extras.fechaVenta) derivaciones[idx].fechaVenta = extras.fechaVenta;
+    }
+    cerrarModal();
+    calcularStats();
+    renderLista();
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accion: 'actualizarEstado', id: cardActiva, estado: nuevoEstado, ...extras, asesorVida: asesorId })
+      });
+    } catch(e) {}
+  }
+
+  document.getElementById('modalEstado').addEventListener('click', function(e) { if (e.target === this) cerrarModal(); });
+  document.getElementById('nombreAsesor').textContent = asesorId ? 'Asesor: ' + decodeURIComponent(asesorId) : 'Vista general';
   cargarDerivaciones();
 </script>
 </body>
