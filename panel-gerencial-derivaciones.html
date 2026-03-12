@@ -221,19 +221,36 @@
 <script>
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
 
-  // DATOS DEMO
-  const TODOS = [
-    { fecha: '12/03/2026 09:14', clienteNombre: 'Carlos Ramírez', clienteTel: '1156789012', productos: 'SMG Plus', observacion: 'Consultó espontáneamente por cobertura de vida. Tiene 2 hijos.', asesorPrepaga: 'Lucía Torres', asesorVida: 'Diego Fernández', estado: 'pendiente' },
-    { fecha: '11/03/2026 15:32', clienteNombre: 'Verónica Suárez', clienteTel: '1167890123', productos: 'SMG Platinum', observacion: 'Gerente de empresa. Quiere proteger a su familia.', asesorPrepaga: 'Martín Gómez', asesorVida: 'Ana López', estado: 'contactado' },
-    { fecha: '10/03/2026 11:05', clienteNombre: 'Roberto Iglesias', clienteTel: '1178901234', productos: 'SMG Gold', observacion: 'Renovó plan premium. Preguntó por seguros adicionales.', asesorPrepaga: 'Lucía Torres', asesorVida: 'Diego Fernández', estado: 'en-proceso' },
-    { fecha: '07/03/2026 10:20', clienteNombre: 'Daniela Herrera', clienteTel: '1189012345', productos: 'SMG Silver', observacion: 'Autónoma. Podría interesarle un seguro básico.', asesorPrepaga: 'Lucía Torres', asesorVida: 'Ana López', estado: 'cerrado' },
-    { fecha: '06/03/2026 16:45', clienteNombre: 'Facundo Molina', clienteTel: '1190123456', productos: 'SMG Plus', observacion: 'Joven soltero, sin dependientes. Potencial a largo plazo.', asesorPrepaga: 'Martín Gómez', asesorVida: 'Diego Fernández', estado: 'perdido' },
-    { fecha: '05/03/2026 09:30', clienteNombre: 'Sofía Ramos', clienteTel: '1101234567', productos: 'SMG Platinum', observacion: 'Empresaria. Muy interesada en ahorro + cobertura.', asesorPrepaga: 'Paula Ríos', asesorVida: 'Ana López', estado: 'cerrado' },
-    { fecha: '04/03/2026 14:10', clienteNombre: 'Nicolás Castro', clienteTel: '1112345678', productos: 'SMG Gold', observacion: 'Padre de 3 hijos. Consulta activa sobre seguros.', asesorPrepaga: 'Paula Ríos', asesorVida: 'Diego Fernández', estado: 'en-proceso' },
-    { fecha: '03/03/2026 11:55', clienteNombre: 'Laura Benítez', clienteTel: '1123456789', productos: 'SMG Base', observacion: 'Menciona ahorros limitados pero perfil interesante.', asesorPrepaga: 'Martín Gómez', asesorVida: 'Ana López', estado: 'pendiente' },
-  ];
+  let TODOS = [];
+  let datosFiltrados = [];
 
-  let datosFiltrados = [...TODOS];
+  async function cargarDatos() {
+    document.getElementById('tablaBody').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa">Cargando datos...</td></tr>`;
+    try {
+      const res = await fetch(APPS_SCRIPT_URL + '?accion=getDerivaciones');
+      const data = await res.json();
+      if (data.ok && data.derivaciones.length > 0) {
+        TODOS = data.derivaciones.map(d => ({
+          fecha: d['Fecha'] || '',
+          clienteNombre: d['Cliente Nombre'] || '',
+          clienteTel: d['Cliente Teléfono'] || '',
+          productos: d['Producto Prepaga'] || '',
+          observacion: d['Observación'] || '',
+          asesorPrepaga: d['Asesor Prepaga'] || '',
+          asesorVida: d['Asesor VIDA'] || '',
+          estado: (d['Estado'] || 'pendiente').toLowerCase().replace(' ', '-')
+        }));
+      } else {
+        TODOS = [];
+      }
+    } catch(e) {
+      TODOS = [];
+    }
+    datosFiltrados = [...TODOS];
+    poblarFiltros();
+    renderTabla();
+    renderStats();
+  }
 
   function poblarFiltros() {
     const prepagaSet = [...new Set(TODOS.map(d => d.asesorPrepaga))].sort();
@@ -340,9 +357,7 @@
     a.click();
   }
 
-  poblarFiltros();
-  renderTabla();
-  renderStats();
+  cargarDatos();
 </script>
 </body>
 </html>
