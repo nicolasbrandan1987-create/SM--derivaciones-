@@ -314,10 +314,10 @@
         prima: extras.prima || '',
         fechaVenta: extras.fechaVenta || ''
       });
-      const url = APPS_SCRIPT_URL + '?' + params.toString();
-      // Image trick: evita bloqueo CORS del navegador
-      const img = new Image();
-      img.src = url;
+     window[cbName] = function() { delete window[cbName]; sc.remove(); };
+const sc = document.createElement('script');
+sc.src = APPS_SCRIPT_URL + '?' + params.toString() + '&callback=' + cbName;
+document.body.appendChild(sc);
     } catch(e) {}
   }
 
