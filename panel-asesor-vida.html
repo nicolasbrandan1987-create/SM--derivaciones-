@@ -119,11 +119,11 @@ var BC = {Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',Cer
 
 function norm(e) {
   if (!e) return 'Pendiente';
-  var s = e.toLowerCase();
+  var s = e.toLowerCase().trim();
+  if (s === 'cerradoventa' || s.indexOf('cerrado con venta') >= 0) return 'CerradoVenta';
+  if (s === 'cerradosinventa' || s.indexOf('cerrado sin venta') >= 0) return 'CerradoSinVenta';
   if (s.indexOf('cotizado') >= 0) return 'Cotizado';
   if (s.indexOf('imposible') >= 0) return 'Imposible';
-  if (s.indexOf('cerrado con venta') >= 0) return 'CerradoVenta';
-  if (s.indexOf('cerrado sin venta') >= 0) return 'CerradoSinVenta';
   return 'Pendiente';
 }
 
