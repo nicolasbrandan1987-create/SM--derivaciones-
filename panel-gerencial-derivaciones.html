@@ -7,74 +7,21 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
-
-  .header {
-    background: #003366;
-    padding: 20px 24px;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
+  .header { background: #003366; padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
   .header .logo { font-size: 11px; letter-spacing: 1.5px; opacity: 0.6; text-transform: uppercase; margin-bottom: 4px; }
   .header h1 { font-size: 20px; font-weight: 700; }
-
-  /* Stats KPI */
-  .kpis {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0;
-    background: #002244;
-  }
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; background: #002244; }
   @media(max-width: 600px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
-  .kpi {
-    padding: 14px 10px;
-    text-align: center;
-    border-right: 1px solid rgba(255,255,255,0.08);
-  }
+  .kpi { padding: 14px 10px; text-align: center; border-right: 1px solid rgba(255,255,255,0.08); }
   .kpi:last-child { border-right: none; }
   .kpi .val { font-size: 24px; font-weight: 800; color: white; }
   .kpi .lbl { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
   .kpi .pct { font-size: 12px; color: #7dd3b0; font-weight: 600; margin-top: 1px; }
-
-  /* Barra de filtros */
-  .toolbar {
-    background: white;
-    border-bottom: 1px solid #eee;
-    padding: 12px 16px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .toolbar select, .toolbar input {
-    padding: 7px 12px;
-    border: 1.5px solid #dde3ec;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: inherit;
-    color: #333;
-    background: #fafbfd;
-    outline: none;
-  }
+  .toolbar { background: white; border-bottom: 1px solid #eee; padding: 12px 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .toolbar select, .toolbar input { padding: 7px 12px; border: 1.5px solid #dde3ec; border-radius: 8px; font-size: 13px; font-family: inherit; color: #333; background: #fafbfd; outline: none; }
   .toolbar select:focus, .toolbar input:focus { border-color: #003366; }
   .toolbar label { font-size: 12px; font-weight: 600; color: #555; white-space: nowrap; }
-
-  .btn-export {
-    margin-left: auto;
-    background: #003366;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  /* Tabla */
+  .btn-export { margin-left: auto; background: #003366; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
   .table-wrap { overflow-x: auto; padding: 16px; }
   table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.07); font-size: 13px; }
   thead { background: #003366; color: white; }
@@ -82,76 +29,27 @@
   td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: top; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #f8fafc; }
-
-  .badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 12px;
-    white-space: nowrap;
-  }
-  .b-pendiente { background: #fef3c7; color: #92400e; }
-  .b-contactado { background: #dbeafe; color: #1e40af; }
-  .b-en-proceso { background: #ede9fe; color: #5b21b6; }
-  .b-cerrado { background: #d1fae5; color: #065f46; }
-  .b-perdido { background: #fee2e2; color: #991b1b; }
-
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; white-space: nowrap; }
+  .b-Pendiente { background: #fef3c7; color: #92400e; }
+  .b-Cotizado { background: #dbeafe; color: #1e40af; }
+  .b-Imposible { background: #f1f5f9; color: #475569; }
+  .b-CerradoVenta { background: #d1fae5; color: #065f46; }
+  .b-CerradoSinVenta { background: #fee2e2; color: #991b1b; }
   .wa-link { color: #25d366; text-decoration: none; font-weight: 600; }
-  .wa-link:hover { text-decoration: underline; }
-
-  /* Ranking */
-  .panels {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 0 16px 16px;
-  }
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 16px 16px; }
   @media(max-width: 700px) { .panels { grid-template-columns: 1fr; } }
-
-  .panel {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    overflow: hidden;
-  }
-  .panel-header {
-    background: #f0f4f8;
-    padding: 12px 16px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #003366;
-    border-bottom: 1px solid #eee;
-  }
+  .panel { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
+  .panel-header { background: #f0f4f8; padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #003366; border-bottom: 1px solid #eee; }
   .rank-list { padding: 8px 0; }
-  .rank-row {
-    display: flex;
-    align-items: center;
-    padding: 9px 16px;
-    gap: 10px;
-    border-bottom: 1px solid #f5f5f5;
-  }
+  .rank-row { display: flex; align-items: center; padding: 9px 16px; gap: 10px; border-bottom: 1px solid #f5f5f5; }
   .rank-row:last-child { border-bottom: none; }
-  .rank-num {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: #003366;
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
+  .rank-num { width: 22px; height: 22px; border-radius: 50%; background: #003366; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .rank-num.gold { background: #f59e0b; }
   .rank-name { flex: 1; font-size: 13px; font-weight: 600; color: #222; }
   .rank-sub { font-size: 11px; color: #888; }
   .rank-val { font-size: 14px; font-weight: 700; color: #003366; }
   .bar-wrap { flex: 1; height: 6px; background: #eee; border-radius: 3px; }
-  .bar-fill { height: 100%; background: #003366; border-radius: 3px; transition: width 0.5s; }
+  .bar-fill { height: 100%; background: #003366; border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -168,18 +66,18 @@
   <div class="kpi"><div class="val" id="kPend">0</div><div class="lbl">Pendientes</div><div class="pct" id="kPendPct">-</div></div>
   <div class="kpi"><div class="val" id="kProc">0</div><div class="lbl">En proceso</div></div>
   <div class="kpi"><div class="val" id="kCerr">0</div><div class="lbl">Cerrados</div><div class="pct" id="kConv">0%</div></div>
-  <div class="kpi"><div class="val" id="kPerd">0</div><div class="lbl">Perdidos</div></div>
+  <div class="kpi"><div class="val" id="kPerd">0</div><div class="lbl">Sin venta</div></div>
 </div>
 
 <div class="toolbar">
   <label>Estado</label>
   <select id="filtroEstado" onchange="aplicarFiltros()">
     <option value="">Todos</option>
-    <option value="pendiente">Pendiente</option>
-    <option value="contactado">Contactado</option>
-    <option value="en-proceso">En proceso</option>
-    <option value="cerrado">Cerrado</option>
-    <option value="perdido">Perdido</option>
+    <option value="Pendiente">Pendiente</option>
+    <option value="Cotizado">Cotizado</option>
+    <option value="Imposible">Imposible contactar</option>
+    <option value="CerradoVenta">Cerrado con venta</option>
+    <option value="CerradoSinVenta">Cerrado sin venta</option>
   </select>
   <label>Asesor prepaga</label>
   <select id="filtroPrepaga" onchange="aplicarFiltros()"><option value="">Todos</option></select>
@@ -192,18 +90,9 @@
 <div class="table-wrap">
   <table>
     <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Cliente</th>
-        <th>Teléfono</th>
-        <th>Producto</th>
-        <th>Observación</th>
-        <th>Asesor Prepaga</th>
-        <th>Asesor VIDA</th>
-        <th>Estado</th>
-      </tr>
+      <tr><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Producto</th><th>Observación</th><th>Asesor Prepaga</th><th>Asesor VIDA</th><th>Estado</th></tr>
     </thead>
-    <tbody id="tablaBody"></tbody>
+    <tbody id="tablaBody"><tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa">Cargando...</td></tr></tbody>
   </table>
 </div>
 
@@ -219,145 +108,148 @@
 </div>
 
 <script>
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
+var TODOS = [], datosFiltrados = [];
 
-  let TODOS = [];
-  let datosFiltrados = [];
+var BL = {Pendiente:'Pendiente', Cotizado:'Cotizado', Imposible:'Imposible contactar', CerradoVenta:'Cerrado con venta', CerradoSinVenta:'Cerrado sin venta'};
+var BC = {Pendiente:'b-Pendiente', Cotizado:'b-Cotizado', Imposible:'b-Imposible', CerradoVenta:'b-CerradoVenta', CerradoSinVenta:'b-CerradoSinVenta'};
 
-  async function cargarDatos() {
-    document.getElementById('tablaBody').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa">Cargando datos...</td></tr>`;
-    try {
-      const res = await fetch(APPS_SCRIPT_URL + '?accion=getDerivaciones');
-      const data = await res.json();
-      if (data.ok && data.derivaciones.length > 0) {
-        TODOS = data.derivaciones.map(d => ({
-          fecha: d['Fecha'] || '',
-          clienteNombre: d['Cliente Nombre'] || '',
-          clienteTel: d['Cliente Teléfono'] || '',
-          productos: d['Producto Prepaga'] || '',
-          observacion: d['Observación'] || '',
-          asesorPrepaga: d['Asesor Prepaga'] || '',
-          asesorVida: d['Asesor VIDA'] || '',
-          estado: (d['Estado'] || 'pendiente').toLowerCase().replace(' ', '-')
-        }));
-      } else {
-        TODOS = [];
-      }
-    } catch(e) {
-      TODOS = [];
-    }
-    datosFiltrados = [...TODOS];
-    poblarFiltros();
-    renderTabla();
-    renderStats();
+function norm(e) {
+  if (!e) return 'Pendiente';
+  var s = e.toLowerCase().trim();
+  if (s === 'cerradoventa' || s.indexOf('cerrado con venta') >= 0) return 'CerradoVenta';
+  if (s === 'cerradosinventa' || s.indexOf('cerrado sin venta') >= 0) return 'CerradoSinVenta';
+  if (s.indexOf('cotizado') >= 0) return 'Cotizado';
+  if (s.indexOf('imposible') >= 0) return 'Imposible';
+  return 'Pendiente';
+}
+
+// JSONP
+window.recibirDatosGerencial = function(data) {
+  TODOS = (data.derivaciones || []).map(function(d) {
+    return {
+      fecha: d['Fecha'] || '',
+      clienteNombre: d['Cliente Nombre'] || '',
+      clienteTel: String(d['Cliente Telefono'] || d['Cliente Teléfono'] || ''),
+      productos: d['Producto Prepaga'] || '',
+      observacion: d['Observacion'] || d['Observación'] || '',
+      asesorPrepaga: d['Asesor Prepaga'] || '',
+      asesorVida: d['Asesor VIDA'] || '',
+      estado: norm(d['Estado'])
+    };
+  });
+  datosFiltrados = TODOS.slice();
+  poblarFiltros();
+  renderTabla();
+  renderStats();
+};
+
+function cargarDatos() {
+  var s = document.createElement('script');
+  s.src = SCRIPT_URL + '?accion=getDerivaciones&callback=recibirDatosGerencial&t=' + Date.now();
+  document.head.appendChild(s);
+}
+
+function poblarFiltros() {
+  var preSet = [], vidSet = [];
+  TODOS.forEach(function(d) { if (preSet.indexOf(d.asesorPrepaga) < 0) preSet.push(d.asesorPrepaga); });
+  TODOS.forEach(function(d) { if (vidSet.indexOf(d.asesorVida) < 0) vidSet.push(d.asesorVida); });
+  var fp = document.getElementById('filtroPrepaga');
+  var fv = document.getElementById('filtroVida');
+  fp.innerHTML = '<option value="">Todos</option>';
+  fv.innerHTML = '<option value="">Todos</option>';
+  preSet.sort().forEach(function(n) { fp.innerHTML += '<option value="'+n+'">'+n+'</option>'; });
+  vidSet.sort().forEach(function(n) { fv.innerHTML += '<option value="'+n+'">'+n+'</option>'; });
+}
+
+function aplicarFiltros() {
+  var est = document.getElementById('filtroEstado').value;
+  var pre = document.getElementById('filtroPrepaga').value;
+  var vid = document.getElementById('filtroVida').value;
+  var txt = document.getElementById('filtroTexto').value.toLowerCase();
+  datosFiltrados = TODOS.filter(function(d) {
+    return (!est || d.estado === est) &&
+           (!pre || d.asesorPrepaga === pre) &&
+           (!vid || d.asesorVida === vid) &&
+           (!txt || d.clienteNombre.toLowerCase().indexOf(txt) >= 0 || d.clienteTel.indexOf(txt) >= 0);
+  });
+  renderTabla();
+  renderStats();
+}
+
+function renderTabla() {
+  var body = document.getElementById('tablaBody');
+  if (!datosFiltrados.length) {
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa">Sin registros</td></tr>';
+    return;
   }
+  body.innerHTML = datosFiltrados.map(function(d) {
+    return '<tr>' +
+      '<td style="white-space:nowrap;font-size:11px">' + d.fecha + '</td>' +
+      '<td><strong>' + d.clienteNombre + '</strong></td>' +
+      '<td><a class="wa-link" href="https://wa.me/549' + d.clienteTel + '" target="_blank">📱 ' + d.clienteTel + '</a></td>' +
+      '<td>' + d.productos + '</td>' +
+      '<td style="max-width:200px;font-size:12px;color:#555">' + d.observacion + '</td>' +
+      '<td>' + d.asesorPrepaga + '</td>' +
+      '<td>' + d.asesorVida + '</td>' +
+      '<td><span class="badge ' + (BC[d.estado]||'b-Pendiente') + '">' + (BL[d.estado]||d.estado) + '</span></td>' +
+      '</tr>';
+  }).join('');
+}
 
-  function poblarFiltros() {
-    const prepagaSet = [...new Set(TODOS.map(d => d.asesorPrepaga))].sort();
-    const vidaSet = [...new Set(TODOS.map(d => d.asesorVida))].sort();
-    const fp = document.getElementById('filtroPrepaga');
-    const fv = document.getElementById('filtroVida');
-    prepagaSet.forEach(n => fp.innerHTML += `<option value="${n}">${n}</option>`);
-    vidaSet.forEach(n => fv.innerHTML += `<option value="${n}">${n}</option>`);
-  }
+function renderStats() {
+  var t = TODOS.length;
+  var pend = TODOS.filter(function(d){return d.estado==='Pendiente';}).length;
+  var proc = TODOS.filter(function(d){return d.estado==='Cotizado';}).length;
+  var cerr = TODOS.filter(function(d){return d.estado==='CerradoVenta';}).length;
+  var perd = TODOS.filter(function(d){return d.estado==='CerradoSinVenta'||d.estado==='Imposible';}).length;
+  document.getElementById('kTot').textContent = t;
+  document.getElementById('kPend').textContent = pend;
+  document.getElementById('kPendPct').textContent = t ? Math.round(pend/t*100)+'%' : '-';
+  document.getElementById('kProc').textContent = proc;
+  document.getElementById('kCerr').textContent = cerr;
+  document.getElementById('kConv').textContent = t ? Math.round(cerr/t*100)+'% conv.' : '0%';
+  document.getElementById('kPerd').textContent = perd;
 
-  function aplicarFiltros() {
-    const est = document.getElementById('filtroEstado').value;
-    const pre = document.getElementById('filtroPrepaga').value;
-    const vid = document.getElementById('filtroVida').value;
-    const txt = document.getElementById('filtroTexto').value.toLowerCase();
-    datosFiltrados = TODOS.filter(d =>
-      (!est || d.estado === est) &&
-      (!pre || d.asesorPrepaga === pre) &&
-      (!vid || d.asesorVida === vid) &&
-      (!txt || d.clienteNombre.toLowerCase().includes(txt) || d.clienteTel.includes(txt))
-    );
-    renderTabla();
-    renderStats();
-  }
+  var byPre = {};
+  TODOS.forEach(function(d) { byPre[d.asesorPrepaga] = (byPre[d.asesorPrepaga]||0)+1; });
+  var rankPre = Object.keys(byPre).map(function(k){return [k,byPre[k]];}).sort(function(a,b){return b[1]-a[1];});
+  var maxPre = rankPre.length ? rankPre[0][1] : 1;
+  document.getElementById('rankPrepaga').innerHTML = rankPre.map(function(r,i) {
+    return '<div class="rank-row"><div class="rank-num '+(i===0?'gold':'')+'">'+( i+1)+'</div>'+
+      '<div style="flex:1"><div class="rank-name">'+r[0]+'</div><div class="bar-wrap"><div class="bar-fill" style="width:'+Math.round(r[1]/maxPre*100)+'%"></div></div></div>'+
+      '<div class="rank-val">'+r[1]+'</div></div>';
+  }).join('');
 
-  function badgeClass(e) {
-    return { pendiente:'b-pendiente', contactado:'b-contactado', 'en-proceso':'b-en-proceso', cerrado:'b-cerrado', perdido:'b-perdido' }[e] || '';
-  }
-  function badgeLabel(e) {
-    return { pendiente:'Pendiente', contactado:'Contactado', 'en-proceso':'En proceso', cerrado:'Cerrado ✓', perdido:'Perdido' }[e] || e;
-  }
+  var byVida = {};
+  TODOS.forEach(function(d) {
+    if (!byVida[d.asesorVida]) byVida[d.asesorVida] = {total:0, cerrado:0};
+    byVida[d.asesorVida].total++;
+    if (d.estado==='CerradoVenta') byVida[d.asesorVida].cerrado++;
+  });
+  var rankVida = Object.keys(byVida).map(function(k){
+    var v=byVida[k]; return [k, v.cerrado, v.total, v.total?Math.round(v.cerrado/v.total*100):0];
+  }).sort(function(a,b){return b[3]-a[3];});
+  document.getElementById('rankVida').innerHTML = rankVida.map(function(r,i) {
+    return '<div class="rank-row"><div class="rank-num '+(i===0?'gold':'')+'">'+( i+1)+'</div>'+
+      '<div style="flex:1"><div class="rank-name">'+r[0]+'</div><div class="rank-sub">'+r[1]+' cerrados de '+r[2]+'</div></div>'+
+      '<div class="rank-val">'+r[3]+'%</div></div>';
+  }).join('');
+}
 
-  function renderTabla() {
-    const body = document.getElementById('tablaBody');
-    if (!datosFiltrados.length) {
-      body.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa;">Sin derivaciones para los filtros seleccionados</td></tr>`;
-      return;
-    }
-    body.innerHTML = datosFiltrados.map(d => `
-      <tr>
-        <td style="white-space:nowrap">${d.fecha}</td>
-        <td><strong>${d.clienteNombre}</strong></td>
-        <td><a class="wa-link" href="https://wa.me/549${d.clienteTel}" target="_blank">📱 ${d.clienteTel}</a></td>
-        <td>${d.productos}</td>
-        <td style="max-width:220px;font-size:12px;color:#555">${d.observacion}</td>
-        <td>${d.asesorPrepaga}</td>
-        <td>${d.asesorVida}</td>
-        <td><span class="badge ${badgeClass(d.estado)}">${badgeLabel(d.estado)}</span></td>
-      </tr>
-    `).join('');
-  }
+function exportarCSV() {
+  var cols = ['Fecha','Cliente','Teléfono','Producto','Observación','Asesor Prepaga','Asesor VIDA','Estado'];
+  var rows = datosFiltrados.map(function(d) {
+    return [d.fecha, d.clienteNombre, d.clienteTel, d.productos, '"'+d.observacion+'"', d.asesorPrepaga, d.asesorVida, BL[d.estado]||d.estado].join(',');
+  });
+  var csv = [cols.join(',')].concat(rows).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = 'derivaciones_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
 
-  function renderStats() {
-    const t = TODOS.length;
-    const pend = TODOS.filter(d => d.estado === 'pendiente').length;
-    const proc = TODOS.filter(d => d.estado === 'en-proceso' || d.estado === 'contactado').length;
-    const cerr = TODOS.filter(d => d.estado === 'cerrado').length;
-    const perd = TODOS.filter(d => d.estado === 'perdido').length;
-    document.getElementById('kTot').textContent = t;
-    document.getElementById('kPend').textContent = pend;
-    document.getElementById('kPendPct').textContent = t ? Math.round(pend/t*100)+'%' : '-';
-    document.getElementById('kProc').textContent = proc;
-    document.getElementById('kCerr').textContent = cerr;
-    document.getElementById('kConv').textContent = t ? Math.round(cerr/t*100)+'% conv.' : '0%';
-    document.getElementById('kPerd').textContent = perd;
-
-    // Ranking prepaga
-    const byPre = {};
-    TODOS.forEach(d => { byPre[d.asesorPrepaga] = (byPre[d.asesorPrepaga]||0)+1; });
-    const rankPre = Object.entries(byPre).sort((a,b) => b[1]-a[1]);
-    const maxPre = rankPre[0]?.[1] || 1;
-    document.getElementById('rankPrepaga').innerHTML = rankPre.map(([n,v],i) => `
-      <div class="rank-row">
-        <div class="rank-num ${i===0?'gold':''}">${i+1}</div>
-        <div style="flex:1"><div class="rank-name">${n}</div><div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(v/maxPre*100)}%"></div></div></div>
-        <div class="rank-val">${v}</div>
-      </div>
-    `).join('');
-
-    // Efectividad VIDA
-    const byVida = {};
-    TODOS.forEach(d => {
-      if (!byVida[d.asesorVida]) byVida[d.asesorVida] = {total:0, cerrado:0};
-      byVida[d.asesorVida].total++;
-      if (d.estado === 'cerrado') byVida[d.asesorVida].cerrado++;
-    });
-    const rankVida = Object.entries(byVida).map(([n,v]) => [n, v.cerrado, v.total, v.total ? Math.round(v.cerrado/v.total*100) : 0]).sort((a,b) => b[3]-a[3]);
-    document.getElementById('rankVida').innerHTML = rankVida.map(([n,cerr,tot,pct],i) => `
-      <div class="rank-row">
-        <div class="rank-num ${i===0?'gold':''}">${i+1}</div>
-        <div style="flex:1"><div class="rank-name">${n}</div><div class="rank-sub">${cerr} cerrados de ${tot}</div></div>
-        <div class="rank-val">${pct}%</div>
-      </div>
-    `).join('');
-  }
-
-  function exportarCSV() {
-    const cols = ['Fecha','Cliente','Teléfono','Producto','Observación','Asesor Prepaga','Asesor VIDA','Estado'];
-    const rows = datosFiltrados.map(d => [d.fecha, d.clienteNombre, d.clienteTel, d.productos, `"${d.observacion}"`, d.asesorPrepaga, d.asesorVida, d.estado].join(','));
-    const csv = [cols.join(','), ...rows].join('\n');
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
-    a.download = `derivaciones_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-  }
-
-  cargarDatos();
+cargarDatos();
 </script>
 </body>
 </html>
