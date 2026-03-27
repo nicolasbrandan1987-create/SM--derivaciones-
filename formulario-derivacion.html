@@ -12,6 +12,8 @@
   .header .logo { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
   .header h1 { font-size: 22px; font-weight: 700; line-height: 1.2; }
   .header p { font-size: 13px; opacity: 0.75; margin-top: 6px; }
+  .asesor-badge { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 14px; margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.9); display: none; }
+  .asesor-badge span { font-weight: 700; color: #fff; }
   .form-body { padding: 24px; }
   .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #003366; margin-bottom: 14px; margin-top: 8px; }
   .field { margin-bottom: 18px; }
@@ -21,8 +23,6 @@
   input:focus, select:focus, textarea:focus { border-color: #003366; background: #fff; }
   textarea { resize: vertical; min-height: 80px; }
   .divider { border: none; border-top: 1px solid #eef0f4; margin: 20px 0; }
-  .asesor-row { display: flex; gap: 12px; }
-  .asesor-row .field { flex: 1; }
   .criteria-box { background: #eef4ff; border: 1px solid #c3d6f5; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; }
   .criteria-box .criteria-title { font-size: 12px; font-weight: 700; color: #003366; margin-bottom: 6px; }
   .criteria-list { list-style: none; }
@@ -42,8 +42,7 @@
   .btn-nueva { background: #003366; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; }
   .loading { display: none; text-align: center; padding: 20px; color: #555; font-size: 14px; }
   .error-msg { color: #c00; font-size: 12px; margin-top: 4px; display: none; }
-  .cargando-asesores { font-size: 13px; color: #888; padding: 8px 0; }
-  select option:disabled { color: #aaa; }
+  .fallback-note { font-size: 11px; color: #888; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -52,6 +51,7 @@
     <div class="logo">Swiss Medical Grupo · VIDA</div>
     <h1>Derivar cliente a<br>Seguros de Vida</h1>
     <p>Completá el formulario — el especialista VIDA lo recibe al instante</p>
+    <div class="asesor-badge" id="asesorBadge">Enviando como: <span id="asesorBadgeNombre"></span></div>
   </div>
 
   <div class="form-body" id="formBody">
@@ -104,41 +104,23 @@
 
     <hr class="divider">
 
-    <div class="section-label">Tus datos</div>
-
-    <div class="asesor-row">
+    <!-- SECCIÓN TUS DATOS: solo se muestra si NO viene asesor en la URL -->
+    <div id="seccionTusDatos" style="display:none;">
+      <div class="section-label">Tus datos</div>
       <div class="field">
         <label>Tu nombre <span class="req">*</span></label>
-        <select id="asesorNombre">
-          <option value="" disabled selected>Cargando asesores...</option>
-        </select>
-        <div class="error-msg" id="err-asesor">Seleccioná tu nombre</div>
-      </div>
-      <div class="field">
-        <label>Tu zona</label>
-        <input type="text" id="asesorZona" placeholder="Ej: Interior" readonly style="background:#f0f4f8;color:#888;">
+        <input type="text" id="asesorNombreFallback" placeholder="Ej: Juan García" autocomplete="off">
+        <div class="fallback-note">Escribí tu nombre completo tal como aparece en el sistema</div>
+        <div class="error-msg" id="err-asesor">Ingresá tu nombre</div>
       </div>
     </div>
 
+    <div class="section-label">Asesor de Vida</div>
+
     <div class="field">
-      <label>Asesor de Vida <span class="req">*</span></label>
+      <label>Seleccioná el especialista <span class="req">*</span></label>
       <select id="asesorVida">
         <option value="" disabled selected>Seleccioná el asesor de Vida...</option>
-        <option>Ricardo Blanco</option>
-        <option>Ana Laura Dominguez</option>
-        <option>Agustina Aguirre</option>
-        <option>Rina Beltran</option>
-        <option>Karina Bagnasco</option>
-        <option>Florencia Berlocq</option>
-        <option>Jose Passeri</option>
-        <option>Martin Lopez</option>
-        <option>Julia Pierlucca</option>
-        <option>Lucas Armand</option>
-        <option>Gaston Flores</option>
-        <option>Marina Quevedo</option>
-        <option>Silvina Bruno</option>
-        <option>Nadia Rivero</option>
-        <option>Miguel Nuñez</option>
       </select>
       <div class="error-msg" id="err-vida">Seleccioná el asesor de Vida</div>
     </div>
@@ -164,123 +146,121 @@
 <script>
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
 
-// Cargar lista de asesores prepaga via JSONP
-window.recibirAsesores = function(data) {
-  var select = document.getElementById('asesorNombre');
-  select.innerHTML = '<option value="" disabled selected>Seleccioná tu nombre...</option>';
-  
-  var asesores = [];
-  (data.derivaciones || []).forEach(function(d) {
-    var nombre = d['Asesor Prepaga'] || '';
-    var zona = d['Zona'] || '';
-    if (nombre && asesores.indexOf(nombre) < 0) {
-      asesores.push(nombre);
-    }
-  });
+// ── Leer asesor desde URL ──────────────────────────────────────────────────
+var asesorDesdeURL = '';
 
-  // Si no hay datos aún, cargar desde asignaciones
-  if (asesores.length === 0 && data.asesores) {
-    data.asesores.forEach(function(a) {
-      select.innerHTML += '<option value="' + a.nombre + '" data-zona="' + (a.zona||'') + '">' + a.nombre + '</option>';
-    });
-  } else if (asesores.length > 0) {
-    asesores.sort().forEach(function(n) {
+function getParam(name) {
+  var url = new URLSearchParams(window.location.search);
+  return url.get(name) || '';
+}
+
+function iniciarAsesorPrepaga() {
+  var raw = getParam('asesor');
+  if (raw) {
+    asesorDesdeURL = decodeURIComponent(raw.replace(/_/g, ' '));
+    // Mostrar badge en el header
+    document.getElementById('asesorBadgeNombre').textContent = asesorDesdeURL;
+    document.getElementById('asesorBadge').style.display = 'block';
+    // Ocultar sección "Tus datos"
+    document.getElementById('seccionTusDatos').style.display = 'none';
+  } else {
+    // Sin parámetro: mostrar campo de texto como fallback
+    document.getElementById('seccionTusDatos').style.display = 'block';
+  }
+}
+
+// ── Cargar asesores de Vida desde Google Sheets ───────────────────────────
+window.recibirAsesoresVida = function(data) {
+  var select = document.getElementById('asesorVida');
+  select.innerHTML = '<option value="" disabled selected>Seleccioná el asesor de Vida...</option>';
+  var asesores = data.asesoresVida || [];
+  if (asesores.length === 0) {
+    // Fallback hardcodeado si el Sheet no responde
+    var fallback = ['Ricardo Blanco','Ana Laura Dominguez','Agustina Aguirre','Rina Beltran',
+      'Karina Bagnasco','Florencia Berlocq','Jose Passeri','Martin Lopez',
+      'Julia Pierlucca','Lucas Armand','Gaston Flores','Marina Quevedo',
+      'Silvina Bruno','Nadia Rivero','Miguel Nuñez'];
+    fallback.forEach(function(n) {
       select.innerHTML += '<option value="' + n + '">' + n + '</option>';
     });
-  } else {
-    select.innerHTML = '<option value="" disabled selected>Sin asesores cargados aún</option>';
-  }
-};
-
-window.recibirAsignaciones = function(data) {
-  var select = document.getElementById('asesorNombre');
-  select.innerHTML = '<option value="" disabled selected>Seleccioná tu nombre...</option>';
-  var asesores = data.asesores || [];
-  if (asesores.length === 0) {
-    select.innerHTML = '<option value="" disabled selected>Sin asesores cargados aún</option>';
     return;
   }
-  asesores.sort(function(a,b){return a.nombre.localeCompare(b.nombre);}).forEach(function(a) {
-    select.innerHTML += '<option value="' + a.nombre + '" data-zona="' + (a.zona||'Interior') + '">' + a.nombre + '</option>';
-  });
-  // Autocompletar zona al seleccionar
-  select.addEventListener('change', function() {
-    var opt = select.options[select.selectedIndex];
-    document.getElementById('asesorZona').value = opt.getAttribute('data-zona') || '';
+  asesores.forEach(function(a) {
+    select.innerHTML += '<option value="' + a.nombre + '">' + a.nombre + '</option>';
   });
 };
 
-function cargarAsesores() {
+function cargarAsesoresVida() {
   var s = document.createElement('script');
-  s.src = SCRIPT_URL + '?accion=getAsesoresPrepaga&callback=recibirAsignaciones&t=' + Date.now();
+  s.src = SCRIPT_URL + '?accion=getAsesoresVida&callback=recibirAsesoresVida&t=' + Date.now();
   s.onerror = function() {
-    document.getElementById('asesorNombre').innerHTML = '<option value="" disabled selected>Error al cargar — escribí tu nombre</option>';
-    // Fallback: mostrar input de texto
-    var sel = document.getElementById('asesorNombre');
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'asesorNombreInput';
-    input.placeholder = 'Tu nombre completo';
-    input.style.cssText = sel.style.cssText;
-    sel.parentNode.replaceChild(input, sel);
+    // Usar fallback hardcodeado
+    recibirAsesoresVida({ asesoresVida: [] });
   };
   document.head.appendChild(s);
 }
 
+// ── Utilidades ────────────────────────────────────────────────────────────
 function getProductosSeleccionados() {
   var checks = document.querySelectorAll('#productosGrid input[type=checkbox]:checked');
-  return Array.from(checks).map(function(c){return c.value;}).join(', ');
+  return Array.from(checks).map(function(c){ return c.value; }).join(', ');
 }
 
 function showError(id, show) {
-  document.getElementById(id).style.display = show ? 'block' : 'none';
+  var el = document.getElementById(id);
+  if (el) el.style.display = show ? 'block' : 'none';
 }
 
 function validar() {
   var ok = true;
-  var nombre = document.getElementById('clienteNombre').value.trim();
-  var tel = document.getElementById('clienteTel').value.trim();
+  var nombre   = document.getElementById('clienteNombre').value.trim();
+  var tel      = document.getElementById('clienteTel').value.trim();
   var productos = getProductosSeleccionados();
-  var obs = document.getElementById('observacion').value.trim();
-  var asesorEl = document.getElementById('asesorNombre') || document.getElementById('asesorNombreInput');
-  var asesor = asesorEl ? asesorEl.value.trim() : '';
+  var obs      = document.getElementById('observacion').value.trim();
+  var vida     = document.getElementById('asesorVida').value.trim();
 
-  showError('err-nombre', !nombre); if (!nombre) ok = false;
-  showError('err-tel', !tel || tel.length < 8); if (!tel || tel.length < 8) ok = false;
-  showError('err-producto', !productos); if (!productos) ok = false;
-  showError('err-obs', !obs); if (!obs) ok = false;
-  showError('err-asesor', !asesor); if (!asesor) ok = false;
-  var vida = document.getElementById('asesorVida').value.trim();
-  showError('err-vida', !vida); if (!vida) ok = false;
+  showError('err-nombre',  !nombre);            if (!nombre) ok = false;
+  showError('err-tel',     !tel || tel.length < 8); if (!tel || tel.length < 8) ok = false;
+  showError('err-producto', !productos);        if (!productos) ok = false;
+  showError('err-obs',     !obs);               if (!obs) ok = false;
+  showError('err-vida',    !vida);              if (!vida) ok = false;
+
+  // Validar nombre asesor solo si no viene de URL
+  if (!asesorDesdeURL) {
+    var fb = document.getElementById('asesorNombreFallback').value.trim();
+    showError('err-asesor', !fb);
+    if (!fb) ok = false;
+  }
+
   return ok;
 }
 
 function enviarDerivacion() {
   if (!validar()) return;
-  var btn = document.getElementById('btnEnviar');
+  var btn     = document.getElementById('btnEnviar');
   var loading = document.getElementById('loadingMsg');
   btn.disabled = true;
   loading.style.display = 'block';
 
-  var asesorEl = document.getElementById('asesorNombre') || document.getElementById('asesorNombreInput');
-  var zona = document.getElementById('asesorZona').value.trim();
+  var nombreAsesor = asesorDesdeURL 
+    || document.getElementById('asesorNombreFallback').value.trim();
 
   var payload = {
-    accion: 'nuevaDerivacion',
+    accion:        'nuevaDerivacion',
     clienteNombre: document.getElementById('clienteNombre').value.trim(),
-    clienteTel: document.getElementById('clienteTel').value.trim(),
-    productos: getProductosSeleccionados(),
-    observacion: document.getElementById('observacion').value.trim(),
-    asesorPrepaga: asesorEl ? asesorEl.value.trim() : '',
-    asesorZona: zona,
-    asesorVida: document.getElementById('asesorVida').value.trim()
+    clienteTel:    document.getElementById('clienteTel').value.trim(),
+    productos:     getProductosSeleccionados(),
+    observacion:   document.getElementById('observacion').value.trim(),
+    asesorPrepaga: nombreAsesor,
+    asesorZona:    '',
+    asesorVida:    document.getElementById('asesorVida').value.trim()
   };
 
   fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
+    method:  'POST',
+    mode:    'no-cors',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body:    JSON.stringify(payload)
   }).then(function() {
     mostrarExito();
   }).catch(function() {
@@ -301,16 +281,18 @@ function nuevaDerivacion() {
   document.getElementById('clienteNombre').value = '';
   document.getElementById('clienteTel').value = '';
   document.getElementById('observacion').value = '';
-  document.querySelectorAll('#productosGrid input').forEach(function(c){c.checked=false;});
+  document.querySelectorAll('#productosGrid input').forEach(function(c){ c.checked = false; });
   document.getElementById('loadingMsg').style.display = 'none';
   var sv = document.getElementById('asesorVida');
   if (sv) sv.selectedIndex = 0;
   document.getElementById('btnEnviar').disabled = false;
-  var sel = document.getElementById('asesorNombre');
-  if (sel) sel.selectedIndex = 0;
+  var fb = document.getElementById('asesorNombreFallback');
+  if (fb) fb.value = '';
 }
 
-cargarAsesores();
+// ── Init ──────────────────────────────────────────────────────────────────
+iniciarAsesorPrepaga();
+cargarAsesoresVida();
 </script>
 </body>
 </html>
