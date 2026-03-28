@@ -16,6 +16,16 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .stat:last-child{border-right:none}
 .stat .val{font-size:20px;font-weight:700;color:white}
 .stat .lbl{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.section{padding:12px 14px}
+.section-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#003366;margin-bottom:10px}
+.ranking{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;margin-bottom:4px}
+.rank-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0;gap:10px}
+.rank-row:last-child{border-bottom:none}
+.rank-num{font-size:13px;font-weight:800;color:#003366;width:20px;flex-shrink:0}
+.rank-name{font-size:13px;font-weight:600;color:#1a1a1a;flex:1}
+.rank-bar-wrap{width:80px;background:#f0f4f8;border-radius:20px;height:6px;flex-shrink:0}
+.rank-bar{height:6px;border-radius:20px;background:#003366}
+.rank-count{font-size:12px;font-weight:700;color:#003366;width:24px;text-align:right;flex-shrink:0}
 .filters{display:flex;gap:7px;padding:12px 14px;overflow-x:auto;background:white;border-bottom:1px solid #eee}
 .fbtn{padding:5px 12px;border-radius:20px;border:1.5px solid #dde3ec;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;background:white;color:#555}
 .fbtn.active{background:#003366;border-color:#003366;color:white}
@@ -36,6 +46,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .bCerradoVenta{background:#d1fae5;color:#065f46}
 .bCerradoSinVenta{background:#fee2e2;color:#991b1b}
 .cmeta{padding:0 12px 8px;font-size:11px;color:#888;display:flex;gap:10px;flex-wrap:wrap}
+.cfecha{font-size:10px;color:#aaa;padding:0 12px 6px}
 .cobs{padding:6px 12px 8px;background:#fafbfd;border-top:1px solid #f0f0f0;font-size:12px;color:#444;font-style:italic}
 .vinfo{padding:6px 12px 8px;background:#f0fdf4;border-top:1px solid #bbf7d0;font-size:11px;color:#065f46;display:flex;gap:12px;flex-wrap:wrap}
 .cinfo{padding:6px 12px 8px;background:#eff6ff;border-top:1px solid #bfdbfe;font-size:11px;color:#1e40af;display:flex;gap:12px;flex-wrap:wrap}
@@ -44,7 +55,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .abtn:last-child{border-right:none}
 .abtn.wa{color:#25d366}
 .empty{text-align:center;padding:48px 24px;color:#888}
-.loading{text-align:center;padding:48px 24px;color:#888;font-size:14px}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
 .modal{background:white;border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:22px 18px 30px;max-height:88vh;overflow-y:auto}
@@ -56,13 +66,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .field{margin-bottom:12px}
 .field label{display:block;font-size:11px;font-weight:700;color:#333;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
 .field input,.field select{width:100%;border:1.5px solid #dde3ec;border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none}
-.field input:focus,.field select:focus{border-color:#003366}
 .btn-ok{width:100%;background:#003366;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
 .btn-cancel{margin-top:10px;width:100%;padding:11px;border:none;background:#f0f4f8;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:#555}
 </style>
 </head>
 <body>
-
 <div class="hdr">
   <div class="logo">Swiss Medical · VIDA</div>
   <h1>Mis Derivaciones</h1>
@@ -74,6 +82,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
   <div class="stat"><div class="val" id="sC">-</div><div class="lbl">Cotizados</div></div>
   <div class="stat"><div class="val" id="sV">-</div><div class="lbl">Ventas</div></div>
 </div>
+<div class="section">
+  <div class="section-title">🏆 Ranking — quién más te deriva</div>
+  <div class="ranking" id="ranking"></div>
+</div>
 <div class="filters">
   <button class="fbtn active" onclick="filtrar('todos',this)">Todos</button>
   <button class="fbtn" onclick="filtrar('Pendiente',this)">⏳ Pendientes</button>
@@ -82,8 +94,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
   <button class="fbtn" onclick="filtrar('CerradoSinVenta',this)">❌ Sin venta</button>
   <button class="fbtn" onclick="filtrar('Imposible',this)">🚫 Imposible</button>
 </div>
-<div class="list" id="lista"><div class="loading">⏳ Cargando derivaciones...</div></div>
-
+<div class="list" id="lista"><div class="empty">⏳ Cargando...</div></div>
 <div class="overlay" id="overlay">
   <div class="modal">
     <h3>Actualizar estado</h3>
@@ -108,150 +119,56 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
     <button class="btn-cancel" onclick="cerrar()">Cancelar</button>
   </div>
 </div>
-
 <script>
 var URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
-var ASESOR = decodeURIComponent((new URLSearchParams(window.location.search).get('asesor') || '').replace(/\+/g,' '));
-var derivaciones = [];
-var filtroActual = 'todos';
-var cardActiva = null;
-var estadoActual = null;
-
-document.getElementById('subtitulo').textContent = ASESOR ? 'Asesor: ' + ASESOR : 'Sin asesor';
-
-var norm = function(e) {
-  if (!e) return 'Pendiente';
-  var s = e.toLowerCase();
-  if (s.indexOf('cotizado') >= 0) return 'Cotizado';
-  if (s.indexOf('imposible') >= 0) return 'Imposible';
-  if (s.indexOf('cerrado con venta') >= 0) return 'CerradoVenta';
-  if (s.indexOf('cerrado sin venta') >= 0) return 'CerradoSinVenta';
-  return 'Pendiente';
+var ASESOR = decodeURIComponent((new URLSearchParams(window.location.search).get('asesor')||'').replace(/\+/g,' '));
+var derivaciones=[], filtroActual='todos', cardActiva=null, estadoActual=null;
+document.getElementById('subtitulo').textContent = ASESOR ? 'Asesor: '+ASESOR : 'Sin asesor';
+var norm=function(e){if(!e)return'Pendiente';var s=e.toLowerCase();if(s.indexOf('cotizado')>=0)return'Cotizado';if(s.indexOf('imposible')>=0)return'Imposible';if(s.indexOf('cerrado con venta')>=0)return'CerradoVenta';if(s.indexOf('cerrado sin venta')>=0)return'CerradoSinVenta';return'Pendiente';};
+var BL={Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta ✓',CerradoSinVenta:'Cerrado s/ venta'};
+var BC={Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
+window.recibirDerivaciones=function(data){
+  derivaciones=(data.derivaciones||[]).map(function(d){return{id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',producto:d['Producto Prepaga']||'',obs:d['Observación']||'',prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||''};});
+  stats(); renderRanking(); render();
 };
-
-var BL = {Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta ✓',CerradoSinVenta:'Cerrado s/ venta'};
-var BC = {Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
-
-window.recibirDerivaciones = function(data) {
-  var raw = data.derivaciones || [];
-  derivaciones = raw.map(function(d) {
-    return {
-      id: d['ID']||'',
-      nombre: d['Cliente Nombre']||'',
-      tel: d['Cliente Teléfono']||'',
-      producto: d['Producto Prepaga']||'',
-      obs: d['Observación']||'',
-      prepaga: d['Asesor Prepaga']||'',
-      fecha: d['Fecha']||'',
-      estado: norm(d['Estado']),
-      prodVida: d['Producto VIDA']||'',
-      prima: d['Prima Vendida']||'',
-      fechaVenta: d['Fecha Venta']||'',
-      prodCotiz: d['Producto Cotizado']||'',
-      primaCotiz: d['Prima Cotizada']||''
-    };
-  });
-  stats();
-  render();
-};
-
-function cargarDatos() {
-  var s = document.createElement('script');
-  s.src = URL_SCRIPT + '?accion=getDerivaciones&asesorVida=' + encodeURIComponent(ASESOR) + '&callback=recibirDerivaciones&t=' + Date.now();
-  s.onerror = function() {
-    document.getElementById('lista').innerHTML = '<div class="empty">❌ Error al cargar. Revisá tu conexión.</div>';
-  };
-  document.head.appendChild(s);
+function cargarDatos(){var s=document.createElement('script');s.src=URL_SCRIPT+'?accion=getDerivaciones&asesorVida='+encodeURIComponent(ASESOR)+'&callback=recibirDerivaciones&t='+Date.now();s.onerror=function(){document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar.</div>';};document.head.appendChild(s);}
+function stats(){document.getElementById('sT').textContent=derivaciones.length;document.getElementById('sP').textContent=derivaciones.filter(function(d){return d.estado==='Pendiente';}).length;document.getElementById('sC').textContent=derivaciones.filter(function(d){return d.estado==='Cotizado';}).length;document.getElementById('sV').textContent=derivaciones.filter(function(d){return d.estado==='CerradoVenta';}).length;}
+function renderRanking(){
+  var conteo={};
+  derivaciones.forEach(function(d){if(d.prepaga)conteo[d.prepaga]=(conteo[d.prepaga]||0)+1;});
+  var sorted=Object.keys(conteo).sort(function(a,b){return conteo[b]-conteo[a];}).slice(0,5);
+  var max=sorted.length?conteo[sorted[0]]:1;
+  document.getElementById('ranking').innerHTML=sorted.length?sorted.map(function(n,i){var pct=Math.round(conteo[n]/max*100);return'<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:'+pct+'%"></div></div><div class="rank-count">'+conteo[n]+'</div></div>';}).join(''):'<div style="padding:12px 14px;font-size:13px;color:#888">Sin datos aún</div>';
 }
-
-function stats() {
-  document.getElementById('sT').textContent = derivaciones.length;
-  document.getElementById('sP').textContent = derivaciones.filter(function(d){return d.estado==='Pendiente';}).length;
-  document.getElementById('sC').textContent = derivaciones.filter(function(d){return d.estado==='Cotizado';}).length;
-  document.getElementById('sV').textContent = derivaciones.filter(function(d){return d.estado==='CerradoVenta';}).length;
-}
-
-function render() {
-  var items = filtroActual === 'todos' ? derivaciones : derivaciones.filter(function(d){return d.estado===filtroActual;});
-  var lista = document.getElementById('lista');
-  if (!items.length) {
-    lista.innerHTML = '<div class="empty">📭 No hay derivaciones en este estado</div>';
-    return;
-  }
-  lista.innerHTML = items.map(function(d) {
-    return '<div class="card ' + d.estado + '">' +
-      '<div class="card-head"><div><div class="cnombre">' + d.nombre + '</div><div class="ctel">📱 ' + d.tel + '</div></div>' +
-      '<span class="badge ' + BC[d.estado] + '">' + (BL[d.estado]||d.estado) + '</span></div>' +
-      '<div class="cmeta"><span>📦 ' + d.producto + '</span><span>👤 ' + d.prepaga + '</span></div>' +
-      (d.obs ? '<div class="cobs">"' + d.obs + '"</div>' : '') +
-      (d.estado==='Cotizado'&&d.prodCotiz ? '<div class="cinfo"><span>💬 ' + d.prodCotiz + '</span>' + (d.primaCotiz?'<span>💰 $'+d.primaCotiz+'</span>':'') + '</div>' : '') +
-      (d.estado==='CerradoVenta'&&d.prodVida ? '<div class="vinfo"><span>🛡️ ' + d.prodVida + '</span>' + (d.prima?'<span>💰 $'+d.prima+'</span>':'') + '</div>' : '') +
-      '<div class="cactions">' +
-      '<button class="abtn wa" onclick="wa(\'' + d.tel + '\',\'' + d.nombre.replace(/'/g,"\\'") + '\')">💬 WhatsApp</button>' +
-      '<button class="abtn" onclick="window.location.href=\'tel:+549' + d.tel + '\'">📞 Llamar</button>' +
-      '<button class="abtn" onclick="abrirModal(\'' + d.id + '\')">✏️ Estado</button>' +
+function render(){
+  var items=filtroActual==='todos'?derivaciones:derivaciones.filter(function(d){return d.estado===filtroActual;});
+  var lista=document.getElementById('lista');
+  if(!items.length){lista.innerHTML='<div class="empty">📭 No hay derivaciones en este estado</div>';return;}
+  lista.innerHTML=items.map(function(d){
+    var fechaCorta=d.fecha?d.fecha.split(',')[0]:'';
+    return'<div class="card '+d.estado+'">'+
+      '<div class="card-head"><div><div class="cnombre">'+d.nombre+'</div><div class="ctel">📱 '+d.tel+'</div></div>'+
+      '<span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></div>'+
+      '<div class="cmeta"><span>📦 '+d.producto+'</span><span>👤 '+d.prepaga+'</span></div>'+
+      (fechaCorta?'<div class="cfecha">📅 '+fechaCorta+'</div>':'')+
+      (d.obs?'<div class="cobs">"'+d.obs+'"</div>':'')+
+      (d.estado==='Cotizado'&&d.prodCotiz?'<div class="cinfo"><span>💬 '+d.prodCotiz+'</span>'+(d.primaCotiz?'<span>💰 $'+d.primaCotiz+'</span>':'')+'</div>':'')+
+      (d.estado==='CerradoVenta'&&d.prodVida?'<div class="vinfo"><span>🛡️ '+d.prodVida+'</span>'+(d.prima?'<span>💰 $'+d.prima+'</span>':'')+'</div>':'')+
+      '<div class="cactions">'+
+      '<button class="abtn wa" onclick="wa(\''+d.tel+'\',\''+d.nombre.replace(/'/g,"\\'")+'\')">💬 WhatsApp</button>'+
+      '<button class="abtn" onclick="window.location.href=\'tel:+549'+d.tel+'\'">📞 Llamar</button>'+
+      '<button class="abtn" onclick="abrirModal(\''+d.id+'\')">✏️ Estado</button>'+
       '</div></div>';
   }).join('');
 }
-
-function filtrar(f, btn) {
-  filtroActual = f;
-  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  render();
-}
-
-function wa(tel, nombre) {
-  window.open('https://wa.me/549' + tel + '?text=' + encodeURIComponent('Hola ' + nombre + ', te contacto de Swiss Medical Seguros de Vida.'), '_blank');
-}
-
-function abrirModal(id) {
-  cardActiva = id; estadoActual = null;
-  document.getElementById('fCotiz').classList.remove('show');
-  document.getElementById('fVenta').classList.remove('show');
-  document.getElementById('fecVenta').value = new Date().toISOString().split('T')[0];
-  document.getElementById('overlay').classList.add('open');
-}
-function cerrar() { document.getElementById('overlay').classList.remove('open'); }
-
-function sel(estado) {
-  estadoActual = estado;
-  document.getElementById('fCotiz').classList.remove('show');
-  document.getElementById('fVenta').classList.remove('show');
-  if (estado === 'Cotizado') { document.getElementById('fCotiz').classList.add('show'); return; }
-  if (estado === 'CerradoVenta') { document.getElementById('fVenta').classList.add('show'); return; }
-  guardar(estado, {});
-}
-
-function confirmar() {
-  if (estadoActual === 'Cotizado') {
-    var p = document.getElementById('pCotiz').value;
-    if (!p) { alert('Seleccioná el producto'); return; }
-    guardar('Cotizado', { productoCotizado: p, primaCotizada: document.getElementById('priCotiz').value });
-  } else {
-    var p = document.getElementById('pVenta').value;
-    if (!p) { alert('Seleccioná el producto'); return; }
-    guardar('CerradoVenta', { productoVida: p, prima: document.getElementById('priVenta').value, fechaVenta: document.getElementById('fecVenta').value });
-  }
-}
-
-function guardar(estado, extras) {
-  var idx = derivaciones.findIndex(function(d){return d.id===cardActiva;});
-  if (idx !== -1) {
-    derivaciones[idx].estado = estado;
-    if (extras.productoVida) { derivaciones[idx].prodVida = extras.productoVida; derivaciones[idx].prima = extras.prima; }
-    if (extras.productoCotizado) { derivaciones[idx].prodCotiz = extras.productoCotizado; derivaciones[idx].primaCotiz = extras.primaCotizada; }
-  }
-  cerrar(); stats(); render();
-  var params = new URLSearchParams({ accion:'actualizarEstado', id:cardActiva, estado });
-  Object.keys(extras).forEach(function(k){ params.set(k, extras[k]); });
-  fetch(URL_SCRIPT + '?' + params.toString()).catch(function(){});
-}
-
-document.getElementById('overlay').addEventListener('click', function(e) {
-  if (e.target === document.getElementById('overlay')) cerrar();
-});
-
+function filtrar(f,btn){filtroActual=f;document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');render();}
+function wa(tel,nombre){window.open('https://wa.me/549'+tel+'?text='+encodeURIComponent('Hola '+nombre+', te contacto de Swiss Medical Seguros de Vida.'),'_blank');}
+function abrirModal(id){cardActiva=id;estadoActual=null;document.getElementById('fCotiz').classList.remove('show');document.getElementById('fVenta').classList.remove('show');document.getElementById('fecVenta').value=new Date().toISOString().split('T')[0];document.getElementById('overlay').classList.add('open');}
+function cerrar(){document.getElementById('overlay').classList.remove('open');}
+function sel(estado){estadoActual=estado;document.getElementById('fCotiz').classList.remove('show');document.getElementById('fVenta').classList.remove('show');if(estado==='Cotizado'){document.getElementById('fCotiz').classList.add('show');return;}if(estado==='CerradoVenta'){document.getElementById('fVenta').classList.add('show');return;}guardar(estado,{});}
+function confirmar(){if(estadoActual==='Cotizado'){var p=document.getElementById('pCotiz').value;if(!p){alert('Seleccioná el producto');return;}guardar('Cotizado',{productoCotizado:p,primaCotizada:document.getElementById('priCotiz').value});}else{var p=document.getElementById('pVenta').value;if(!p){alert('Seleccioná el producto');return;}guardar('CerradoVenta',{productoVida:p,prima:document.getElementById('priVenta').value,fechaVenta:document.getElementById('fecVenta').value});}}
+function guardar(estado,extras){var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});if(idx!==-1){derivaciones[idx].estado=estado;if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}}cerrar();stats();render();var params=new URLSearchParams({accion:'actualizarEstado',id:cardActiva,estado});Object.keys(extras).forEach(function(k){params.set(k,extras[k]);});fetch(URL_SCRIPT+'?'+params.toString()).catch(function(){});}
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===document.getElementById('overlay'))cerrar();});
 cargarDatos();
 </script>
 </body>
