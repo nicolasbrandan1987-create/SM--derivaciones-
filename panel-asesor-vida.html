@@ -44,6 +44,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .abtn:last-child{border-right:none}
 .abtn.wa{color:#25d366}
 .empty{text-align:center;padding:48px 24px;color:#888}
+.loading{text-align:center;padding:48px 24px;color:#888;font-size:14px}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
 .modal{background:white;border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:22px 18px 30px;max-height:88vh;overflow-y:auto}
@@ -55,102 +56,111 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .field{margin-bottom:12px}
 .field label{display:block;font-size:11px;font-weight:700;color:#333;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
 .field input,.field select{width:100%;border:1.5px solid #dde3ec;border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none}
+.field input:focus,.field select:focus{border-color:#003366}
 .btn-ok{width:100%;background:#003366;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
 .btn-cancel{margin-top:10px;width:100%;padding:11px;border:none;background:#f0f4f8;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:#555}
 </style>
 </head>
 <body>
+
 <div class="hdr">
   <div class="logo">Swiss Medical · VIDA</div>
   <h1>Mis Derivaciones</h1>
-  <div class="sub" id="subHeader">Cargando...</div>
+  <div class="sub" id="subtitulo">Cargando...</div>
 </div>
 <div class="stats">
-  <div class="stat"><div class="val" id="sT">0</div><div class="lbl">Total</div></div>
-  <div class="stat"><div class="val" id="sP">0</div><div class="lbl">Pendientes</div></div>
-  <div class="stat"><div class="val" id="sC">0</div><div class="lbl">Cotizados</div></div>
-  <div class="stat"><div class="val" id="sV">0</div><div class="lbl">Ventas</div></div>
+  <div class="stat"><div class="val" id="sT">-</div><div class="lbl">Total</div></div>
+  <div class="stat"><div class="val" id="sP">-</div><div class="lbl">Pendientes</div></div>
+  <div class="stat"><div class="val" id="sC">-</div><div class="lbl">Cotizados</div></div>
+  <div class="stat"><div class="val" id="sV">-</div><div class="lbl">Ventas</div></div>
 </div>
 <div class="filters">
   <button class="fbtn active" onclick="filtrar('todos',this)">Todos</button>
-  <button class="fbtn" onclick="filtrar('Pendiente',this)">Pendientes</button>
-  <button class="fbtn" onclick="filtrar('Cotizado',this)">Cotizados</button>
-  <button class="fbtn" onclick="filtrar('CerradoVenta',this)">Con venta</button>
-  <button class="fbtn" onclick="filtrar('CerradoSinVenta',this)">Sin venta</button>
-  <button class="fbtn" onclick="filtrar('Imposible',this)">Imposible</button>
+  <button class="fbtn" onclick="filtrar('Pendiente',this)">⏳ Pendientes</button>
+  <button class="fbtn" onclick="filtrar('Cotizado',this)">💬 Cotizados</button>
+  <button class="fbtn" onclick="filtrar('CerradoVenta',this)">✅ Con venta</button>
+  <button class="fbtn" onclick="filtrar('CerradoSinVenta',this)">❌ Sin venta</button>
+  <button class="fbtn" onclick="filtrar('Imposible',this)">🚫 Imposible</button>
 </div>
-<div class="list" id="lista"><div class="empty">Cargando...</div></div>
+<div class="list" id="lista"><div class="loading">⏳ Cargando derivaciones...</div></div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
     <h3>Actualizar estado</h3>
-    <div class="eopt" onclick="sel('Pendiente')">Pendiente</div>
-    <div class="eopt" onclick="sel('Cotizado')">Cotizado</div>
-    <div class="eopt" onclick="sel('Imposible')">Imposible contactar</div>
-    <div class="eopt" onclick="sel('CerradoVenta')">Cerrado con venta</div>
-    <div class="eopt" onclick="sel('CerradoSinVenta')">Cerrado sin venta</div>
+    <div class="eopt" onclick="sel('Pendiente')">⏳ Pendiente</div>
+    <div class="eopt" onclick="sel('Cotizado')">💬 Cotizado</div>
+    <div class="eopt" onclick="sel('Imposible')">🚫 Imposible contactar</div>
+    <div class="eopt" onclick="sel('CerradoVenta')">✅ Cerrado con venta</div>
+    <div class="eopt" onclick="sel('CerradoSinVenta')">❌ Cerrado sin venta</div>
     <div class="xform" id="fCotiz">
-      <div class="field"><label>Producto</label>
-        <select id="pCotiz"><option value="">Selecciona...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option></select></div>
-      <div class="field"><label>Prima cotizada</label><input type="number" id="priCotiz" placeholder="15000"></div>
-      <button class="btn-ok" onclick="confirmar()">Confirmar</button>
+      <div class="field"><label>Producto cotizado</label>
+        <select id="pCotiz"><option value="">Seleccioná...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option></select></div>
+      <div class="field"><label>Prima cotizada ($)</label><input type="number" id="priCotiz" placeholder="Ej: 15000"></div>
+      <button class="btn-ok" onclick="confirmar()">Confirmar cotización</button>
     </div>
     <div class="xform" id="fVenta">
-      <div class="field"><label>Producto</label>
-        <select id="pVenta"><option value="">Selecciona...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option></select></div>
-      <div class="field"><label>Prima vendida</label><input type="number" id="priVenta" placeholder="15000"></div>
+      <div class="field"><label>Producto vendido</label>
+        <select id="pVenta"><option value="">Seleccioná...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option></select></div>
+      <div class="field"><label>Prima vendida ($)</label><input type="number" id="priVenta" placeholder="Ej: 15000"></div>
       <div class="field"><label>Fecha de venta</label><input type="date" id="fecVenta"></div>
-      <button class="btn-ok" onclick="confirmar()">Confirmar</button>
+      <button class="btn-ok" onclick="confirmar()">Confirmar venta</button>
     </div>
     <button class="btn-cancel" onclick="cerrar()">Cancelar</button>
   </div>
 </div>
 
 <script>
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
-var params = new URLSearchParams(window.location.search);
-var ASESOR = params.get('asesor') || '';
-document.getElementById('subHeader').textContent = 'Asesor: ' + ASESOR;
+var URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
+var ASESOR = decodeURIComponent((new URLSearchParams(window.location.search).get('asesor') || '').replace(/\+/g,' '));
+var derivaciones = [];
+var filtroActual = 'todos';
+var cardActiva = null;
+var estadoActual = null;
 
-var derivaciones = [], filtroActual = 'todos', cardActiva = null, estadoActual = null;
+document.getElementById('subtitulo').textContent = ASESOR ? 'Asesor: ' + ASESOR : 'Sin asesor';
 
-var BL = {Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta',CerradoSinVenta:'Cerrado s/ venta'};
-var BC = {Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
-
-function norm(e) {
+var norm = function(e) {
   if (!e) return 'Pendiente';
-  var s = e.toLowerCase().trim();
-  if (s === 'cerradoventa' || s.indexOf('cerrado con venta') >= 0) return 'CerradoVenta';
-  if (s === 'cerradosinventa' || s.indexOf('cerrado sin venta') >= 0) return 'CerradoSinVenta';
+  var s = e.toLowerCase();
   if (s.indexOf('cotizado') >= 0) return 'Cotizado';
   if (s.indexOf('imposible') >= 0) return 'Imposible';
+  if (s.indexOf('cerrado con venta') >= 0) return 'CerradoVenta';
+  if (s.indexOf('cerrado sin venta') >= 0) return 'CerradoSinVenta';
   return 'Pendiente';
-}
+};
 
-// JSONP callback - Apps Script llama a esta funcion
-window.recibirDatos = function(data) {
-  derivaciones = (data.derivaciones || []).map(function(d) {
+var BL = {Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta ✓',CerradoSinVenta:'Cerrado s/ venta'};
+var BC = {Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
+
+window.recibirDerivaciones = function(data) {
+  var raw = data.derivaciones || [];
+  derivaciones = raw.map(function(d) {
     return {
-      id: d['ID'] || '',
-      nombre: d['Cliente Nombre'] || '',
-      tel: String(d['Cliente Telefono'] || d['Cliente Teléfono'] || ''),
-      producto: d['Producto Prepaga'] || '',
-      obs: d['Observacion'] || d['Observación'] || '',
-      prepaga: d['Asesor Prepaga'] || '',
+      id: d['ID']||'',
+      nombre: d['Cliente Nombre']||'',
+      tel: d['Cliente Teléfono']||'',
+      producto: d['Producto Prepaga']||'',
+      obs: d['Observación']||'',
+      prepaga: d['Asesor Prepaga']||'',
+      fecha: d['Fecha']||'',
       estado: norm(d['Estado']),
-      prodVida: d['Producto VIDA'] || '',
-      prima: d['Prima Vendida'] || '',
-      prodCotiz: d['Producto Cotizado'] || '',
-      primaCotiz: d['Prima Cotizada'] || ''
+      prodVida: d['Producto VIDA']||'',
+      prima: d['Prima Vendida']||'',
+      fechaVenta: d['Fecha Venta']||'',
+      prodCotiz: d['Producto Cotizado']||'',
+      primaCotiz: d['Prima Cotizada']||''
     };
   });
   stats();
   render();
 };
 
-function cargar() {
+function cargarDatos() {
   var s = document.createElement('script');
-  s.src = SCRIPT_URL + '?accion=getDerivaciones&callback=recibirDatos&t=' + Date.now();
+  s.src = URL_SCRIPT + '?accion=getDerivaciones&asesorVida=' + encodeURIComponent(ASESOR) + '&callback=recibirDerivaciones&t=' + Date.now();
+  s.onerror = function() {
+    document.getElementById('lista').innerHTML = '<div class="empty">❌ Error al cargar. Revisá tu conexión.</div>';
+  };
   document.head.appendChild(s);
 }
 
@@ -164,21 +174,22 @@ function stats() {
 function render() {
   var items = filtroActual === 'todos' ? derivaciones : derivaciones.filter(function(d){return d.estado===filtroActual;});
   var lista = document.getElementById('lista');
-  if (!items.length) { lista.innerHTML = '<div class="empty">No hay derivaciones</div>'; return; }
+  if (!items.length) {
+    lista.innerHTML = '<div class="empty">📭 No hay derivaciones en este estado</div>';
+    return;
+  }
   lista.innerHTML = items.map(function(d) {
     return '<div class="card ' + d.estado + '">' +
-      '<div class="card-head">' +
-        '<div><div class="cnombre">' + d.nombre + '</div><div class="ctel">' + d.tel + '</div></div>' +
-        '<span class="badge ' + BC[d.estado] + '">' + (BL[d.estado]||d.estado) + '</span>' +
-      '</div>' +
-      '<div class="cmeta"><span>' + d.producto + '</span><span>' + d.prepaga + '</span></div>' +
-      (d.obs ? '<div class="cobs">' + d.obs + '</div>' : '') +
-      (d.estado==='Cotizado'&&d.prodCotiz ? '<div class="cinfo"><span>' + d.prodCotiz + '</span>' + (d.primaCotiz?'<span>$'+d.primaCotiz+'</span>':'') + '</div>' : '') +
-      (d.estado==='CerradoVenta'&&d.prodVida ? '<div class="vinfo"><span>' + d.prodVida + '</span>' + (d.prima?'<span>$'+d.prima+'</span>':'') + '</div>' : '') +
+      '<div class="card-head"><div><div class="cnombre">' + d.nombre + '</div><div class="ctel">📱 ' + d.tel + '</div></div>' +
+      '<span class="badge ' + BC[d.estado] + '">' + (BL[d.estado]||d.estado) + '</span></div>' +
+      '<div class="cmeta"><span>📦 ' + d.producto + '</span><span>👤 ' + d.prepaga + '</span></div>' +
+      (d.obs ? '<div class="cobs">"' + d.obs + '"</div>' : '') +
+      (d.estado==='Cotizado'&&d.prodCotiz ? '<div class="cinfo"><span>💬 ' + d.prodCotiz + '</span>' + (d.primaCotiz?'<span>💰 $'+d.primaCotiz+'</span>':'') + '</div>' : '') +
+      (d.estado==='CerradoVenta'&&d.prodVida ? '<div class="vinfo"><span>🛡️ ' + d.prodVida + '</span>' + (d.prima?'<span>💰 $'+d.prima+'</span>':'') + '</div>' : '') +
       '<div class="cactions">' +
-        '<button class="abtn wa" onclick="wa(\'' + d.tel + '\',\'' + d.nombre.replace(/'/g,"\\'") + '\')">WhatsApp</button>' +
-        '<button class="abtn" onclick="location.href=\'tel:+549' + d.tel + '\'">Llamar</button>' +
-        '<button class="abtn" onclick="abrirModal(\'' + d.id + '\')">Estado</button>' +
+      '<button class="abtn wa" onclick="wa(\'' + d.tel + '\',\'' + d.nombre.replace(/'/g,"\\'") + '\')">💬 WhatsApp</button>' +
+      '<button class="abtn" onclick="window.location.href=\'tel:+549' + d.tel + '\'">📞 Llamar</button>' +
+      '<button class="abtn" onclick="abrirModal(\'' + d.id + '\')">✏️ Estado</button>' +
       '</div></div>';
   }).join('');
 }
@@ -201,7 +212,6 @@ function abrirModal(id) {
   document.getElementById('fecVenta').value = new Date().toISOString().split('T')[0];
   document.getElementById('overlay').classList.add('open');
 }
-
 function cerrar() { document.getElementById('overlay').classList.remove('open'); }
 
 function sel(estado) {
@@ -210,22 +220,22 @@ function sel(estado) {
   document.getElementById('fVenta').classList.remove('show');
   if (estado === 'Cotizado') { document.getElementById('fCotiz').classList.add('show'); return; }
   if (estado === 'CerradoVenta') { document.getElementById('fVenta').classList.add('show'); return; }
-  guardarLocal(estado, {});
+  guardar(estado, {});
 }
 
 function confirmar() {
   if (estadoActual === 'Cotizado') {
     var p = document.getElementById('pCotiz').value;
-    if (!p) { alert('Selecciona el producto'); return; }
-    guardarLocal('Cotizado', { productoCotizado: p, primaCotizada: document.getElementById('priCotiz').value });
+    if (!p) { alert('Seleccioná el producto'); return; }
+    guardar('Cotizado', { productoCotizado: p, primaCotizada: document.getElementById('priCotiz').value });
   } else {
     var p = document.getElementById('pVenta').value;
-    if (!p) { alert('Selecciona el producto'); return; }
-    guardarLocal('CerradoVenta', { productoVida: p, prima: document.getElementById('priVenta').value, fechaVenta: document.getElementById('fecVenta').value });
+    if (!p) { alert('Seleccioná el producto'); return; }
+    guardar('CerradoVenta', { productoVida: p, prima: document.getElementById('priVenta').value, fechaVenta: document.getElementById('fecVenta').value });
   }
 }
 
-function guardarLocal(estado, extras) {
+function guardar(estado, extras) {
   var idx = derivaciones.findIndex(function(d){return d.id===cardActiva;});
   if (idx !== -1) {
     derivaciones[idx].estado = estado;
@@ -233,21 +243,16 @@ function guardarLocal(estado, extras) {
     if (extras.productoCotizado) { derivaciones[idx].prodCotiz = extras.productoCotizado; derivaciones[idx].primaCotiz = extras.primaCotizada; }
   }
   cerrar(); stats(); render();
-  // Guardar en Sheet via JSONP
-  var cbName = 'cb' + Date.now();
-  window[cbName] = function(){};
-  var p = Object.assign({ accion:'actualizarEstado', id:cardActiva, estado:estado, callback:cbName }, extras);
-  var qs = Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k]);}).join('&');
-  var s = document.createElement('script');
-  s.src = SCRIPT_URL + '?' + qs;
-  document.head.appendChild(s);
+  var params = new URLSearchParams({ accion:'actualizarEstado', id:cardActiva, estado });
+  Object.keys(extras).forEach(function(k){ params.set(k, extras[k]); });
+  fetch(URL_SCRIPT + '?' + params.toString()).catch(function(){});
 }
 
 document.getElementById('overlay').addEventListener('click', function(e) {
   if (e.target === document.getElementById('overlay')) cerrar();
 });
 
-cargar();
+cargarDatos();
 </script>
 </body>
 </html>
