@@ -4,65 +4,122 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Panel Gerencial — Swiss Medical VIDA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
+:root{--azul:#003366;--azul2:#004488;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--bg:#f0f4f8;--white:#fff;--text:#1a1a2e;--text2:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;padding-bottom:40px}
-.hdr{background:#003366;padding:20px;color:white}
-.hdr .logo{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;margin-bottom:4px}
-.hdr h1{font-size:20px;font-weight:700}
-.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:60px;color:var(--text)}
+.hdr{background:linear-gradient(135deg,var(--azul) 0%,#001f4d 100%);padding:20px;color:white}
+.logo{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:4px}
+.hdr h1{font-size:20px;font-weight:800}
+.hdr-sub{font-size:11px;opacity:.5;margin-top:2px}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
 @media(min-width:600px){.kpis{grid-template-columns:repeat(4,1fr)}}
-.kpi{background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.kpi .val{font-size:28px;font-weight:800;color:#003366}
-.kpi .lbl{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
-.tabs{display:flex;gap:0;padding:0 16px;margin-bottom:0}
-.tab{padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:#888}
-.tab.active{color:#003366;border-bottom-color:#003366}
+.kpi{background:white;border-radius:12px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.kpi .val{font-size:26px;font-weight:800;color:var(--azul);font-family:'DM Mono',monospace}
+.kpi .lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+
+/* Filtros globales */
+.filtros-globales{display:flex;gap:8px;padding:0 14px 14px;flex-wrap:wrap}
+.filtro-group{display:flex;flex-direction:column;gap:3px}
+.filtro-group label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)}
+.filtro-group select{padding:7px 10px;border:1.5px solid #dde3ec;border-radius:8px;font-size:12px;font-family:inherit;background:white;outline:none;color:var(--text)}
+
+/* Tabs */
+.tabs{display:flex;background:white;margin:0 14px 14px;border-radius:10px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tab{flex:1;padding:8px 4px;font-size:10px;font-weight:700;cursor:pointer;border-radius:8px;text-align:center;color:var(--text2);transition:all .2s;white-space:nowrap}
+.tab.active{background:var(--azul);color:white}
 .tab-content{display:none}
 .tab-content.active{display:block}
-.sec{padding:12px 16px}
-.section-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#003366;margin-bottom:10px}
-table{width:100%;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);border-collapse:collapse;font-size:12px}
-th{background:#003366;color:white;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-td{padding:9px 12px;border-bottom:1px solid #f0f0f0}
+
+/* Secciones */
+.sec{padding:0 14px 14px}
+.sec-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--azul);margin:12px 0 8px}
+
+/* Tabla */
+table{width:100%;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);border-collapse:collapse;font-size:12px}
+th{background:var(--azul);color:white;padding:9px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f8fafc}
-.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
 .bPendiente{background:#fef3c7;color:#92400e}
 .bCotizado{background:#dbeafe;color:#1e40af}
 .bImposible{background:#f1f5f9;color:#475569}
 .bCerradoVenta{background:#d1fae5;color:#065f46}
 .bCerradoSinVenta{background:#fee2e2;color:#991b1b}
-.filters{display:flex;gap:8px;padding:12px 16px;overflow-x:auto}
-.fbtn{padding:5px 12px;border-radius:20px;border:1.5px solid #dde3ec;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;background:white;color:#555}
-.fbtn.active{background:#003366;border-color:#003366;color:white}
-.ranking-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px}
-@media(max-width:600px){.ranking-grid{grid-template-columns:1fr}}
-.rank-card{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
-.rank-card-title{background:#003366;color:white;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
-.rank-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid #f0f0f0;gap:8px}
-.rank-row:last-child{border-bottom:none}
-.rank-num{font-size:12px;font-weight:800;color:#003366;width:18px;flex-shrink:0}
-.rank-name{font-size:12px;font-weight:600;color:#1a1a1a;flex:1}
-.rank-bar-wrap{width:60px;background:#f0f4f8;border-radius:20px;height:5px;flex-shrink:0}
-.rank-bar{height:5px;border-radius:20px;background:#003366}
-.rank-count{font-size:11px;font-weight:700;color:#003366;width:20px;text-align:right;flex-shrink:0}
-.asesor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:12px 16px}
-.asesor-card{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.07);cursor:pointer;transition:box-shadow .2s}
-.asesor-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12)}
-.asesor-name{font-size:14px;font-weight:700;color:#003366;margin-bottom:8px}
-.asesor-stats{display:flex;gap:8px;flex-wrap:wrap}
-.asesor-stat{font-size:11px;color:#555}
-.asesor-stat span{font-weight:700;color:#003366}
-.conv-bar{height:4px;background:#f0f4f8;border-radius:4px;margin-top:8px}
-.conv-fill{height:4px;border-radius:4px;background:#10b981}
+.filters{display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{padding:5px 12px;border-radius:20px;border:1.5px solid #dde3ec;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;background:white;color:var(--text2)}
+.fbtn.active{background:var(--azul);border-color:var(--azul);color:white}
+
+/* Cards zonas */
+.zonas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:0 14px 14px}
+.zona-card{background:white;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:4px solid var(--azul);cursor:pointer;transition:all .2s}
+.zona-card:hover{box-shadow:0 4px 16px rgba(0,51,102,.15)}
+.zona-name{font-size:13px;font-weight:800;color:var(--azul);margin-bottom:8px}
+.zona-asesores{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.zona-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.zona-kpi{background:#f8fafc;border-radius:6px;padding:6px;text-align:center}
+.zona-kpi .zv{font-size:16px;font-weight:800;color:var(--azul);font-family:'DM Mono',monospace}
+.zona-kpi .zl{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.zona-conv{margin-top:8px}
+.zona-conv-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:3px}
+.zona-conv-label span{font-weight:700;color:var(--verde)}
+.zona-conv-bar{height:5px;background:#f0f4f8;border-radius:5px}
+.zona-conv-fill{height:5px;border-radius:5px;background:var(--verde)}
+
+/* Gráficos de barras */
+.bar-chart{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px}
+.bar-chart-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--azul);margin-bottom:12px}
+.bar-group{margin-bottom:10px}
+.bar-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.bar-name{font-weight:600;color:var(--text)}
+.bar-val{font-weight:700;color:var(--azul);font-family:'DM Mono',monospace}
+.bar-track{height:8px;background:#f0f4f8;border-radius:8px}
+.bar-fill{height:8px;border-radius:8px;transition:width .5s}
+
+/* Semanas chart */
+.weeks-chart{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px;overflow-x:auto}
+.weeks-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--azul);margin-bottom:14px}
+.weeks-grid{display:flex;gap:8px;min-width:max-content}
+.week-col{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px}
+.week-bars{display:flex;align-items:flex-end;gap:2px;height:80px}
+.week-bar{width:12px;border-radius:4px 4px 0 0;transition:height .5s}
+.week-label{font-size:9px;color:var(--text2);font-weight:600;text-align:center}
+.week-vals{display:flex;gap:2px}
+.week-val{font-size:9px;font-family:'DM Mono',monospace;font-weight:700;width:12px;text-align:center}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.legend-dot{width:8px;height:8px;border-radius:2px}
+
+/* Modal asesor */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-detail{background:white;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
+.modal-hdr{background:var(--azul);padding:18px 20px;color:white;position:relative}
+.modal-hdr h2{font-size:17px;font-weight:800}
+.modal-sub{font-size:11px;opacity:.6;margin-top:2px}
+.modal-stats{display:grid;grid-template-columns:repeat(4,1fr);background:#002244}
+.modal-stat{padding:10px 4px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
+.modal-stat:last-child{border-right:none}
+.modal-stat .mv{font-size:18px;font-weight:800;color:white;font-family:'DM Mono',monospace}
+.modal-stat .ml{font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px}
+.modal-body{padding:14px}
+.modal-table{width:100%;border-collapse:collapse;font-size:12px}
+.modal-table th{background:#f8fafc;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);border-bottom:1px solid #f0f0f0}
+.modal-table td{padding:8px 10px;border-bottom:1px solid #f8fafc}
+.close-btn{position:absolute;right:14px;top:14px;background:rgba(255,255,255,.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer}
 </style>
 </head>
 <body>
+
 <div class="hdr">
   <div class="logo">Swiss Medical · VIDA</div>
-  <h1>Panel Gerencial — Derivaciones</h1>
+  <h1>Panel Gerencial</h1>
+  <div class="hdr-sub">Interior — Derivaciones Prepaga→VIDA</div>
 </div>
+
 <div class="kpis">
   <div class="kpi"><div class="val" id="kT">-</div><div class="lbl">Total</div></div>
   <div class="kpi"><div class="val" id="kP">-</div><div class="lbl">Pendientes</div></div>
@@ -70,54 +127,149 @@ tr:hover td{background:#f8fafc}
   <div class="kpi"><div class="val" id="kC">-</div><div class="lbl">Conversión</div></div>
 </div>
 
+<div class="filtros-globales">
+  <div class="filtro-group">
+    <label>Mes</label>
+    <select id="filtroMes" onchange="aplicarFiltros()">
+      <option value="">Todos</option>
+    </select>
+  </div>
+  <div class="filtro-group">
+    <label>Semana</label>
+    <select id="filtroSemana" onchange="aplicarFiltros()">
+      <option value="">Todas</option>
+    </select>
+  </div>
+  <div class="filtro-group">
+    <label>Zona</label>
+    <select id="filtroZona" onchange="aplicarFiltros()">
+      <option value="">Todas</option>
+      <option>Mendoza</option>
+      <option>Neuquén</option>
+      <option>Córdoba</option>
+      <option>Salta</option>
+      <option>Chaco</option>
+      <option>Bs As Sur</option>
+      <option>Rosario</option>
+    </select>
+  </div>
+</div>
+
 <div class="tabs">
   <div class="tab active" onclick="showTab('derivaciones',this)">📋 Derivaciones</div>
-  <div class="tab" onclick="showTab('rankings',this)">🏆 Rankings</div>
-  <div class="tab" onclick="showTab('asesores',this)">👤 Por Asesor VIDA</div>
+  <div class="tab" onclick="showTab('zonas',this)">🗺️ Zonas</div>
+  <div class="tab" onclick="showTab('semanal',this)">📊 Semanal</div>
+  <div class="tab" onclick="showTab('mensual',this)">📅 Mensual</div>
 </div>
 
 <!-- TAB DERIVACIONES -->
 <div class="tab-content active" id="tab-derivaciones">
   <div class="filters">
-    <button class="fbtn active" onclick="filtrar('todos',this)">Todos</button>
-    <button class="fbtn" onclick="filtrar('Pendiente',this)">⏳ Pendientes</button>
-    <button class="fbtn" onclick="filtrar('Cotizado',this)">💬 Cotizados</button>
-    <button class="fbtn" onclick="filtrar('CerradoVenta',this)">✅ Con venta</button>
-    <button class="fbtn" onclick="filtrar('CerradoSinVenta',this)">❌ Sin venta</button>
+    <button class="fbtn active" onclick="filtrarEstado('todos',this)">Todos</button>
+    <button class="fbtn" onclick="filtrarEstado('Pendiente',this)">⏳ Pendientes</button>
+    <button class="fbtn" onclick="filtrarEstado('Cotizado',this)">💬 Cotizados</button>
+    <button class="fbtn" onclick="filtrarEstado('CerradoVenta',this)">✅ Con venta</button>
+    <button class="fbtn" onclick="filtrarEstado('CerradoSinVenta',this)">❌ Sin venta</button>
   </div>
   <div class="sec">
     <table>
-      <thead><tr>
-        <th>ID</th><th>Fecha</th><th>Cliente</th><th>Producto</th>
-        <th>Asesor Prepaga</th><th>Asesor VIDA</th><th>Estado</th><th>Prima</th>
-      </tr></thead>
+      <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Prepaga</th><th>VIDA</th><th>Zona</th><th>Estado</th><th>Prima</th></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
 </div>
 
-<!-- TAB RANKINGS -->
-<div class="tab-content" id="tab-rankings">
-  <div class="ranking-grid">
-    <div class="rank-card">
-      <div class="rank-card-title">🏆 Asesores Prepaga que más derivan</div>
-      <div id="rank-prepaga"></div>
+<!-- TAB ZONAS -->
+<div class="tab-content" id="tab-zonas">
+  <div class="zonas-grid" id="zonas-grid"></div>
+</div>
+
+<!-- TAB SEMANAL -->
+<div class="tab-content" id="tab-semanal">
+  <div class="sec">
+    <div class="weeks-chart">
+      <div class="weeks-title">Evolución semanal</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#003366"></div>Derivaciones</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Ventas</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Prima ($k)</div>
+      </div>
+      <div class="weeks-grid" id="weeks-grid"></div>
     </div>
-    <div class="rank-card">
-      <div class="rank-card-title">⭐ Asesores VIDA con más ventas</div>
-      <div id="rank-vida"></div>
+
+    <div class="bar-chart">
+      <div class="bar-chart-title">Derivaciones por asesor — semana actual vs anterior</div>
+      <div id="comp-asesores"></div>
     </div>
   </div>
 </div>
 
-<!-- TAB POR ASESOR VIDA -->
-<div class="tab-content" id="tab-asesores">
-  <div class="asesor-grid" id="asesor-grid"></div>
+<!-- TAB MENSUAL -->
+<div class="tab-content" id="tab-mensual">
+  <div class="sec">
+    <div class="bar-chart">
+      <div class="bar-chart-title">Derivaciones por mes</div>
+      <div id="chart-meses-der"></div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-title">Ventas por mes</div>
+      <div id="chart-meses-ven"></div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-title">Zona vs Zona — mes en curso</div>
+      <div id="chart-zonas-mes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ZONA -->
+<div class="modal-overlay" id="modal-zona">
+  <div class="modal-detail">
+    <div class="modal-hdr">
+      <button class="close-btn" onclick="cerrarModal()">✕</button>
+      <h2 id="modal-zona-nombre">Zona</h2>
+      <div class="modal-sub" id="modal-zona-sub"></div>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="mv" id="mz-total">0</div><div class="ml">Total</div></div>
+      <div class="modal-stat"><div class="mv" id="mz-pend">0</div><div class="ml">Pendientes</div></div>
+      <div class="modal-stat"><div class="mv" id="mz-ventas">0</div><div class="ml">Ventas</div></div>
+      <div class="modal-stat"><div class="mv" id="mz-conv">0%</div><div class="ml">Conversión</div></div>
+    </div>
+    <div class="modal-body">
+      <div class="sec-title">Derivaciones</div>
+      <table class="modal-table">
+        <thead><tr><th>Fecha</th><th>Cliente</th><th>Prepaga</th><th>VIDA</th><th>Estado</th><th>Prima</th></tr></thead>
+        <tbody id="modal-zona-tbody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
 var URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
-var todos = [], filtroActual = 'todos';
+
+var ZONAS = {
+  'Mendoza':   ['Gaston Flores','Marina Quevedo'],
+  'Neuquén':   ['Ana Laura Dominguez','Ricardo Blanco'],
+  'Córdoba':   ['Nadia Rivero','Miguel Nuñez'],
+  'Salta':     ['Agustina Aguirre','Karina Bagnasco','Rina Beltran'],
+  'Chaco':     ['Martin Lopez','Lucas Armand','Julia Pierlucca'],
+  'Bs As Sur': ['Florencia Berlocq','Jose Passeri'],
+  'Rosario':   ['Silvina Bruno']
+};
+
+var ZONA_COLORS = {
+  'Mendoza':'#003366','Neuquén':'#0066cc','Córdoba':'#10b981',
+  'Salta':'#f59e0b','Chaco':'#ef4444','Bs As Sur':'#8b5cf6','Rosario':'#ec4899'
+};
+
+var BL = {Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'✅ Venta',CerradoSinVenta:'❌ Sin venta'};
+var BC = {Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
+
+var todosRaw = [];
+var filtrados = [];
+var filtroEstado = 'todos';
 
 var norm = function(e) {
   if (!e) return 'Pendiente';
@@ -129,104 +281,254 @@ var norm = function(e) {
   return 'Pendiente';
 };
 
-var BL = {Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta',CerradoSinVenta:'Cerrado s/ venta'};
-var BC = {Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
+function getZona(asesorVida) {
+  for (var z in ZONAS) {
+    if (ZONAS[z].some(function(a) { return a.toLowerCase() === (asesorVida||'').toLowerCase(); })) return z;
+  }
+  return 'Otros';
+}
+
+function getSemana(fechaStr) {
+  if (!fechaStr) return null;
+  var d = new Date(fechaStr.split(',')[0].split('/').reverse().join('-'));
+  if (isNaN(d)) return null;
+  var start = new Date(d);
+  start.setDate(d.getDate() - d.getDay() + 1);
+  return start.toISOString().split('T')[0];
+}
+
+function getMes(fechaStr) {
+  if (!fechaStr) return null;
+  var parts = fechaStr.split(',')[0].split('/');
+  if (parts.length < 2) return null;
+  return parts[2] + '-' + parts[1].padStart(2,'0');
+}
 
 window.recibirDerivaciones = function(data) {
-  todos = (data.derivaciones || []).map(function(d) {
+  todosRaw = (data.derivaciones || []).map(function(d) {
+    var av = d['Asesor VIDA'] || '';
     return {
-      id: d['ID']||'', fecha: d['Fecha']||'', nombre: d['Cliente Nombre']||'',
-      tel: d['Cliente Teléfono']||'', producto: d['Producto Prepaga']||'',
-      prepaga: d['Asesor Prepaga']||'', asesorVida: d['Asesor VIDA']||'',
-      estado: norm(d['Estado']), prima: d['Prima Vendida']||d['Prima Cotizada']||''
+      id: d['ID']||'', fecha: d['Fecha']||'',
+      nombre: d['Cliente Nombre']||'', tel: d['Cliente Teléfono']||'',
+      producto: d['Producto Prepaga']||'', prepaga: d['Asesor Prepaga']||'',
+      asesorVida: av, zona: getZona(av),
+      estado: norm(d['Estado']),
+      prima: parseFloat(d['Prima Vendida'])||parseFloat(d['Prima Cotizada'])||0,
+      semana: getSemana(d['Fecha']||''), mes: getMes(d['Fecha']||'')
     };
   });
-  kpis(); render(); renderRankings(); renderAsesores();
+  poblarFiltros();
+  aplicarFiltros();
 };
 
-function cargarDatos() {
-  var s = document.createElement('script');
-  s.src = URL_SCRIPT + '?accion=getDerivaciones&asesorVida=&callback=recibirDerivaciones&t=' + Date.now();
-  document.head.appendChild(s);
+function poblarFiltros() {
+  var meses = {}, semanas = {};
+  todosRaw.forEach(function(d) {
+    if (d.mes) meses[d.mes] = true;
+    if (d.semana) semanas[d.semana] = true;
+  });
+  var selMes = document.getElementById('filtroMes');
+  Object.keys(meses).sort().reverse().forEach(function(m) {
+    var opt = document.createElement('option');
+    var parts = m.split('-');
+    var names = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    opt.value = m;
+    opt.textContent = names[parseInt(parts[1])] + ' ' + parts[0];
+    selMes.appendChild(opt);
+  });
+  var selSem = document.getElementById('filtroSemana');
+  Object.keys(semanas).sort().reverse().forEach(function(s) {
+    var opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = 'Semana ' + s;
+    selSem.appendChild(opt);
+  });
+}
+
+function aplicarFiltros() {
+  var mes = document.getElementById('filtroMes').value;
+  var sem = document.getElementById('filtroSemana').value;
+  var zona = document.getElementById('filtroZona').value;
+  filtrados = todosRaw.filter(function(d) {
+    if (mes && d.mes !== mes) return false;
+    if (sem && d.semana !== sem) return false;
+    if (zona && d.zona !== zona) return false;
+    return true;
+  });
+  kpis();
+  renderTabla();
+  renderZonas();
+  renderSemanal();
+  renderMensual();
 }
 
 function kpis() {
-  var ventas = todos.filter(function(d){return d.estado==='CerradoVenta';}).length;
-  document.getElementById('kT').textContent = todos.length;
-  document.getElementById('kP').textContent = todos.filter(function(d){return d.estado==='Pendiente';}).length;
+  var ventas = filtrados.filter(function(d){return d.estado==='CerradoVenta';}).length;
+  document.getElementById('kT').textContent = filtrados.length;
+  document.getElementById('kP').textContent = filtrados.filter(function(d){return d.estado==='Pendiente';}).length;
   document.getElementById('kV').textContent = ventas;
-  document.getElementById('kC').textContent = todos.length ? Math.round(ventas/todos.length*100)+'%' : '0%';
+  document.getElementById('kC').textContent = filtrados.length ? Math.round(ventas/filtrados.length*100)+'%' : '0%';
 }
 
-function render() {
-  var items = filtroActual === 'todos' ? todos : todos.filter(function(d){return d.estado===filtroActual;});
+function renderTabla() {
+  var items = filtroEstado === 'todos' ? filtrados : filtrados.filter(function(d){return d.estado===filtroEstado;});
   var tbody = document.getElementById('tbody');
-  if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#888">No hay registros</td></tr>'; return; }
+  if (!items.length) { tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#888">No hay registros</td></tr>'; return; }
   tbody.innerHTML = items.map(function(d) {
-    var fechaCorta = d.fecha ? d.fecha.split(',')[0] : '';
-    return '<tr><td>' + d.id + '</td><td>' + fechaCorta + '</td><td>' + d.nombre + '</td><td>' + d.producto + '</td>' +
-      '<td>' + d.prepaga + '</td><td>' + d.asesorVida + '</td>' +
-      '<td><span class="badge ' + BC[d.estado] + '">' + (BL[d.estado]||d.estado) + '</span></td>' +
-      '<td>' + (d.prima ? '$'+d.prima : '') + '</td></tr>';
+    var f = d.fecha ? d.fecha.split(',')[0] : '';
+    return '<tr><td>'+d.id+'</td><td>'+f+'</td><td>'+d.nombre+'</td><td>'+d.producto+'</td><td>'+d.prepaga+'</td><td>'+d.asesorVida+'</td><td>'+d.zona+'</td><td><span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></td><td>'+(d.prima?'$'+d.prima.toLocaleString('es-AR'):'')+'</td></tr>';
   }).join('');
 }
 
-function renderRankBar(conteo, elId) {
-  var sorted = Object.keys(conteo).sort(function(a,b){return conteo[b]-conteo[a];}).slice(0,8);
-  var max = sorted.length ? conteo[sorted[0]] : 1;
-  document.getElementById(elId).innerHTML = sorted.length ? sorted.map(function(n,i){
-    var pct = Math.round(conteo[n]/max*100);
-    return '<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div>' +
-      '<div class="rank-bar-wrap"><div class="rank-bar" style="width:'+pct+'%"></div></div>' +
-      '<div class="rank-count">'+conteo[n]+'</div></div>';
-  }).join('') : '<div style="padding:12px;color:#888;font-size:12px">Sin datos</div>';
-}
-
-function renderRankings() {
-  var conteoPrep = {}, conteoVida = {};
-  todos.forEach(function(d) {
-    if (d.prepaga) conteoPrep[d.prepaga] = (conteoPrep[d.prepaga]||0)+1;
-    if (d.asesorVida && d.estado==='CerradoVenta') conteoVida[d.asesorVida] = (conteoVida[d.asesorVida]||0)+1;
+function renderZonas() {
+  var zonaData = {};
+  Object.keys(ZONAS).forEach(function(z) {
+    zonaData[z] = {total:0,pendientes:0,ventas:0,prima:0,asesores:ZONAS[z]};
   });
-  renderRankBar(conteoPrep, 'rank-prepaga');
-  renderRankBar(conteoVida, 'rank-vida');
-}
-
-function renderAsesores() {
-  var asesores = {};
-  todos.forEach(function(d) {
-    if (!d.asesorVida) return;
-    if (!asesores[d.asesorVida]) asesores[d.asesorVida] = {total:0,pendientes:0,ventas:0,prima:0};
-    asesores[d.asesorVida].total++;
-    if (d.estado==='Pendiente') asesores[d.asesorVida].pendientes++;
-    if (d.estado==='CerradoVenta') {
-      asesores[d.asesorVida].ventas++;
-      asesores[d.asesorVida].prima += parseFloat(d.prima)||0;
+  filtrados.forEach(function(d) {
+    if (zonaData[d.zona]) {
+      zonaData[d.zona].total++;
+      if (d.estado==='Pendiente') zonaData[d.zona].pendientes++;
+      if (d.estado==='CerradoVenta') { zonaData[d.zona].ventas++; zonaData[d.zona].prima+=d.prima; }
     }
   });
-  var html = Object.keys(asesores).sort().map(function(n) {
-    var a = asesores[n];
-    var conv = a.total ? Math.round(a.ventas/a.total*100) : 0;
-    return '<div class="asesor-card">' +
-      '<div class="asesor-name">'+n+'</div>' +
-      '<div class="asesor-stats">' +
-        '<div class="asesor-stat">Total: <span>'+a.total+'</span></div>' +
-        '<div class="asesor-stat">Pendientes: <span>'+a.pendientes+'</span></div>' +
-        '<div class="asesor-stat">Ventas: <span>'+a.ventas+'</span></div>' +
-        (a.prima ? '<div class="asesor-stat">Prima: <span>$'+a.prima.toLocaleString('es-AR')+'</span></div>' : '') +
-        '<div class="asesor-stat">Conversión: <span>'+conv+'%</span></div>' +
-      '</div>' +
-      '<div class="conv-bar"><div class="conv-fill" style="width:'+conv+'%"></div></div>' +
+  document.getElementById('zonas-grid').innerHTML = Object.keys(zonaData).map(function(z) {
+    var zd = zonaData[z];
+    var conv = zd.total ? Math.round(zd.ventas/zd.total*100) : 0;
+    return '<div class="zona-card" style="border-top-color:'+ZONA_COLORS[z]+'" onclick="abrirModalZona(\''+z+'\')">'+
+      '<div class="zona-name">'+z+'</div>'+
+      '<div class="zona-asesores">'+zd.asesores.join(' · ')+'</div>'+
+      '<div class="zona-kpis">'+
+        '<div class="zona-kpi"><div class="zv">'+zd.total+'</div><div class="zl">Total</div></div>'+
+        '<div class="zona-kpi"><div class="zv">'+zd.ventas+'</div><div class="zl">Ventas</div></div>'+
+        '<div class="zona-kpi"><div class="zv">'+conv+'%</div><div class="zl">Conv.</div></div>'+
+      '</div>'+
+      '<div class="zona-conv">'+
+        '<div class="zona-conv-label"><span>Conversión</span><span>'+conv+'%</span></div>'+
+        '<div class="zona-conv-bar"><div class="zona-conv-fill" style="width:'+conv+'%;background:'+ZONA_COLORS[z]+'"></div></div>'+
+      '</div>'+
       '</div>';
   }).join('');
-  document.getElementById('asesor-grid').innerHTML = html || '<div style="padding:20px;color:#888">Sin datos</div>';
 }
 
-function filtrar(f, btn) {
-  filtroActual = f;
+function renderBarChart(elId, data, color) {
+  var sorted = Object.keys(data).sort(function(a,b){return data[b]-data[a];});
+  var max = sorted.length ? data[sorted[0]] : 1;
+  document.getElementById(elId).innerHTML = sorted.map(function(n) {
+    var pct = Math.round(data[n]/max*100);
+    return '<div class="bar-group">'+
+      '<div class="bar-label"><span class="bar-name">'+n+'</span><span class="bar-val">'+data[n]+'</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '</div>';
+  }).join('') || '<div style="color:#aaa;font-size:12px;padding:8px">Sin datos</div>';
+}
+
+function renderSemanal() {
+  // Agrupar por semana
+  var semanas = {};
+  filtrados.forEach(function(d) {
+    if (!d.semana) return;
+    if (!semanas[d.semana]) semanas[d.semana] = {der:0,ven:0,prima:0};
+    semanas[d.semana].der++;
+    if (d.estado==='CerradoVenta') { semanas[d.semana].ven++; semanas[d.semana].prima+=d.prima; }
+  });
+  var semsOrdenadas = Object.keys(semanas).sort();
+  var maxDer = Math.max.apply(null, semsOrdenadas.map(function(s){return semanas[s].der;})) || 1;
+  var maxVen = Math.max.apply(null, semsOrdenadas.map(function(s){return semanas[s].ven;})) || 1;
+  var maxPrima = Math.max.apply(null, semsOrdenadas.map(function(s){return semanas[s].prima;})) || 1;
+
+  document.getElementById('weeks-grid').innerHTML = semsOrdenadas.map(function(s) {
+    var sd = semanas[s];
+    var hDer = Math.round(sd.der/maxDer*70)+10;
+    var hVen = Math.round(sd.ven/maxVen*70)+2;
+    var hPri = Math.round(sd.prima/maxPrima*70)+2;
+    var label = 'S'+s.slice(8,10)+'/'+s.slice(5,7);
+    return '<div class="week-col">'+
+      '<div class="week-bars">'+
+        '<div class="week-bar" style="height:'+hDer+'px;background:#003366" title="Derivaciones: '+sd.der+'"></div>'+
+        '<div class="week-bar" style="height:'+hVen+'px;background:#10b981" title="Ventas: '+sd.ven+'"></div>'+
+        '<div class="week-bar" style="height:'+hPri+'px;background:#f59e0b" title="Prima: $'+sd.prima+'"></div>'+
+      '</div>'+
+      '<div class="week-label">'+label+'</div>'+
+      '<div class="week-vals">'+
+        '<div class="week-val" style="color:#003366">'+sd.der+'</div>'+
+        '<div class="week-val" style="color:#10b981">'+sd.ven+'</div>'+
+      '</div>'+
+      '</div>';
+  }).join('') || '<div style="color:#aaa;font-size:12px;padding:8px">Sin datos semanales</div>';
+
+  // Comparación asesor semana actual vs anterior
+  var semsDesc = Object.keys(semanas).sort().reverse();
+  var semActual = semsDesc[0] || '';
+  var semAnterior = semsDesc[1] || '';
+  var asesorActual = {}, asesorAnterior = {};
+  filtrados.forEach(function(d) {
+    if (d.semana === semActual) asesorActual[d.asesorVida] = (asesorActual[d.asesorVida]||0)+1;
+    if (d.semana === semAnterior) asesorAnterior[d.asesorVida] = (asesorAnterior[d.asesorVida]||0)+1;
+  });
+  var todosAsesores = {};
+  Object.keys(asesorActual).forEach(function(a){todosAsesores[a]=true;});
+  Object.keys(asesorAnterior).forEach(function(a){todosAsesores[a]=true;});
+  var maxA = Math.max.apply(null, Object.keys(todosAsesores).map(function(a){return Math.max(asesorActual[a]||0,asesorAnterior[a]||0);})) || 1;
+
+  document.getElementById('comp-asesores').innerHTML = Object.keys(todosAsesores).sort(function(a,b){
+    return ((asesorActual[b]||0)+(asesorAnterior[b]||0)) - ((asesorActual[a]||0)+(asesorAnterior[a]||0));
+  }).map(function(a) {
+    var vA = asesorActual[a]||0, vAnt = asesorAnterior[a]||0;
+    var pA = Math.round(vA/maxA*100), pAnt = Math.round(vAnt/maxA*100);
+    return '<div class="bar-group">'+
+      '<div class="bar-label"><span class="bar-name">'+a+'</span><span class="bar-val">'+vA+' vs '+vAnt+'</span></div>'+
+      '<div style="display:flex;flex-direction:column;gap:2px">'+
+        '<div class="bar-track"><div class="bar-fill" style="width:'+pA+'%;background:#003366"></div></div>'+
+        '<div class="bar-track"><div class="bar-fill" style="width:'+pAnt+'%;background:#94a3b8"></div></div>'+
+      '</div>'+
+      '</div>';
+  }).join('') || '<div style="color:#aaa;font-size:12px;padding:8px">Sin datos</div>';
+}
+
+function renderMensual() {
+  var meses = {};
+  filtrados.forEach(function(d) {
+    if (!d.mes) return;
+    if (!meses[d.mes]) meses[d.mes] = {der:0,ven:0,prima:0};
+    meses[d.mes].der++;
+    if (d.estado==='CerradoVenta') { meses[d.mes].ven++; meses[d.mes].prima+=d.prima; }
+  });
+  var mesesOrdenados = Object.keys(meses).sort();
+  var names = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  function mesLabel(m) { var p=m.split('-'); return names[parseInt(p[1])]+' '+p[0].slice(2); }
+
+  var derData={}, venData={};
+  mesesOrdenados.forEach(function(m){ derData[mesLabel(m)]=meses[m].der; venData[mesLabel(m)]=meses[m].ven; });
+  renderBarChart('chart-meses-der', derData, '#003366');
+  renderBarChart('chart-meses-ven', venData, '#10b981');
+
+  // Zona vs zona mes actual
+  var mesActual = mesesOrdenados[mesesOrdenados.length-1] || '';
+  var zonasMes = {};
+  filtrados.filter(function(d){return d.mes===mesActual;}).forEach(function(d) {
+    if (!d.zona) return;
+    zonasMes[d.zona] = (zonasMes[d.zona]||0)+1;
+  });
+  var zonasMesStyled = {};
+  Object.keys(zonasMes).forEach(function(z){ zonasMesStyled[z]=zonasMes[z]; });
+
+  var sorted = Object.keys(zonasMesStyled).sort(function(a,b){return zonasMesStyled[b]-zonasMesStyled[a];});
+  var max = sorted.length ? zonasMesStyled[sorted[0]] : 1;
+  document.getElementById('chart-zonas-mes').innerHTML = sorted.map(function(z) {
+    var pct = Math.round(zonasMesStyled[z]/max*100);
+    return '<div class="bar-group">'+
+      '<div class="bar-label"><span class="bar-name">'+z+'</span><span class="bar-val">'+zonasMesStyled[z]+'</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+(ZONA_COLORS[z]||'#003366')+'"></div></div>'+
+      '</div>';
+  }).join('') || '<div style="color:#aaa;font-size:12px;padding:8px">Sin datos</div>';
+}
+
+function filtrarEstado(f, btn) {
+  filtroEstado = f;
   document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  render();
+  renderTabla();
 }
 
 function showTab(name, el) {
@@ -234,6 +536,34 @@ function showTab(name, el) {
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('tab-'+name).classList.add('active');
   el.classList.add('active');
+}
+
+function abrirModalZona(zona) {
+  var derivs = filtrados.filter(function(d){return d.zona===zona;});
+  var ventas = derivs.filter(function(d){return d.estado==='CerradoVenta';}).length;
+  var pend = derivs.filter(function(d){return d.estado==='Pendiente';}).length;
+  var conv = derivs.length ? Math.round(ventas/derivs.length*100) : 0;
+  var prima = derivs.reduce(function(s,d){return s+d.prima;},0);
+  document.getElementById('modal-zona-nombre').textContent = zona;
+  document.getElementById('modal-zona-sub').textContent = ZONAS[zona] ? ZONAS[zona].join(' · ') : '';
+  document.getElementById('mz-total').textContent = derivs.length;
+  document.getElementById('mz-pend').textContent = pend;
+  document.getElementById('mz-ventas').textContent = ventas;
+  document.getElementById('mz-conv').textContent = conv+'%';
+  document.getElementById('modal-zona-tbody').innerHTML = derivs.map(function(d) {
+    var f = d.fecha ? d.fecha.split(',')[0] : '';
+    return '<tr><td>'+f+'</td><td><strong>'+d.nombre+'</strong></td><td>'+d.prepaga+'</td><td>'+d.asesorVida+'</td><td><span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></td><td>'+(d.prima?'$'+d.prima.toLocaleString('es-AR'):'—')+'</td></tr>';
+  }).join('');
+  document.getElementById('modal-zona').classList.add('open');
+}
+
+function cerrarModal() { document.getElementById('modal-zona').classList.remove('open'); }
+document.getElementById('modal-zona').addEventListener('click', function(e){if(e.target===this)cerrarModal();});
+
+function cargarDatos() {
+  var s = document.createElement('script');
+  s.src = URL_SCRIPT + '?accion=getDerivaciones&asesorVida=&callback=recibirDerivaciones&t=' + Date.now();
+  document.head.appendChild(s);
 }
 
 cargarDatos();
