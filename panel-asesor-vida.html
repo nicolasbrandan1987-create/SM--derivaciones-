@@ -4,70 +4,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mis Derivaciones — Swiss Medical VIDA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
+:root{--azul:#003366;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--bg:#f0f4f8;--text:#1a1a2e;--text2:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;padding-bottom:40px}
-.hdr{background:#003366;padding:16px;color:white;position:sticky;top:0;z-index:10}
-.hdr .logo{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;margin-bottom:3px}
-.hdr h1{font-size:17px;font-weight:700}
-.hdr .sub{font-size:12px;opacity:.7;margin-top:2px}
-.stats{display:flex;background:#002244}
-.stat{flex:1;padding:10px 6px;text-align:center;border-right:1px solid rgba(255,255,255,.1)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px;color:var(--text)}
+.hdr{background:linear-gradient(135deg,var(--azul) 0%,#001f4d 100%);padding:20px 16px 16px;color:white}
+.logo{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:4px}
+.hdr h1{font-size:20px;font-weight:700}
+.hdr .sub{font-size:12px;opacity:.6;margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:#002244}
+.stat{padding:12px 6px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
 .stat:last-child{border-right:none}
-.stat .val{font-size:20px;font-weight:700;color:white}
-.stat .lbl{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
-.section{padding:12px 14px}
-.section-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#003366;margin-bottom:10px}
-.ranking{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;margin-bottom:4px}
-.rank-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0;gap:10px}
-.rank-row:last-child{border-bottom:none}
-.rank-num{font-size:13px;font-weight:800;color:#003366;width:20px;flex-shrink:0}
-.rank-name{font-size:13px;font-weight:600;color:#1a1a1a;flex:1}
-.rank-bar-wrap{width:80px;background:#f0f4f8;border-radius:20px;height:6px;flex-shrink:0}
-.rank-bar{height:6px;border-radius:20px;background:#003366}
-.rank-count{font-size:12px;font-weight:700;color:#003366;width:24px;text-align:right;flex-shrink:0}
-.filters{display:flex;gap:7px;padding:12px 14px;overflow-x:auto;background:white;border-bottom:1px solid #eee}
-.fbtn{padding:5px 12px;border-radius:20px;border:1.5px solid #dde3ec;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;background:white;color:#555}
-.fbtn.active{background:#003366;border-color:#003366;color:white}
-.list{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
-.card{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;border-left:4px solid #ccc}
-.card.Pendiente{border-left-color:#f59e0b}
-.card.Cotizado{border-left-color:#3b82f6}
-.card.Imposible{border-left-color:#94a3b8}
-.card.CerradoVenta{border-left-color:#10b981}
-.card.CerradoSinVenta{border-left-color:#ef4444}
-.card-head{padding:12px 12px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
-.cnombre{font-size:15px;font-weight:700;color:#1a1a1a}
-.ctel{font-size:12px;color:#555;margin-top:2px}
-.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.stat .val{font-size:22px;font-weight:700;color:white;font-family:'DM Mono',monospace}
+.stat .lbl{font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.section{padding:12px 14px 0}
+.section-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--azul);margin-bottom:10px}
+.donut-wrap{background:white;border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);display:flex;align-items:center;gap:16px}
+.donut-legend{flex:1}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-label{flex:1;color:var(--text2)}
+.legend-val{font-weight:700;font-family:'DM Mono',monospace}
+.ranking-wrap{background:white;border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-top:10px}
+.rank-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rank-row:last-child{margin-bottom:0}
+.rank-num{font-size:13px;font-weight:800;color:var(--azul);width:16px;font-family:'DM Mono',monospace}
+.rank-name{font-size:12px;font-weight:600;flex:1}
+.rank-bar-bg{height:5px;background:#f0f4f8;border-radius:10px;flex:1;max-width:80px}
+.rank-bar-fg{height:5px;border-radius:10px;background:var(--azul)}
+.rank-n{font-size:11px;font-weight:700;color:var(--azul);font-family:'DM Mono',monospace}
+.filters{display:flex;gap:6px;padding:14px 14px 0;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{padding:6px 13px;border-radius:20px;border:1.5px solid #dde3ec;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;background:white;color:var(--text2);transition:all .15s}
+.fbtn.active{background:var(--azul);border-color:var(--azul);color:white}
+.list{padding:10px 14px;display:flex;flex-direction:column;gap:10px}
+.card{background:white;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden;border-left:4px solid #e2e8f0}
+.card.Pendiente{border-left-color:var(--naranja)}
+.card.Cotizado{border-left-color:var(--celeste)}
+.card.Imposible{border-left-color:var(--gris)}
+.card.CerradoVenta{border-left-color:var(--verde)}
+.card.CerradoSinVenta{border-left-color:var(--rojo)}
+.card-head{padding:12px 12px 6px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.cnombre{font-size:15px;font-weight:700}
+.ctel{font-size:12px;color:var(--text2);margin-top:1px}
+.badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .bPendiente{background:#fef3c7;color:#92400e}
 .bCotizado{background:#dbeafe;color:#1e40af}
 .bImposible{background:#f1f5f9;color:#475569}
 .bCerradoVenta{background:#d1fae5;color:#065f46}
 .bCerradoSinVenta{background:#fee2e2;color:#991b1b}
-.cmeta{padding:0 12px 8px;font-size:11px;color:#888;display:flex;gap:10px;flex-wrap:wrap}
+.cmeta{padding:0 12px 6px;font-size:11px;color:var(--text2);display:flex;gap:10px;flex-wrap:wrap}
 .cfecha{font-size:10px;color:#aaa;padding:0 12px 6px}
-.cobs{padding:6px 12px 8px;background:#fafbfd;border-top:1px solid #f0f0f0;font-size:12px;color:#444;font-style:italic}
-.vinfo{padding:6px 12px 8px;background:#f0fdf4;border-top:1px solid #bbf7d0;font-size:11px;color:#065f46;display:flex;gap:12px;flex-wrap:wrap}
-.cinfo{padding:6px 12px 8px;background:#eff6ff;border-top:1px solid #bfdbfe;font-size:11px;color:#1e40af;display:flex;gap:12px;flex-wrap:wrap}
+.cobs{padding:6px 12px 8px;background:#fafbfd;border-top:1px solid #f0f0f0;font-size:12px;color:#555;font-style:italic}
+.vinfo{padding:6px 12px 8px;background:#f0fdf4;border-top:1px solid #bbf7d0;font-size:11px;color:#065f46;display:flex;gap:12px}
+.cinfo{padding:6px 12px 8px;background:#eff6ff;border-top:1px solid #bfdbfe;font-size:11px;color:#1e40af;display:flex;gap:12px}
+.cnota-wrap{padding:6px 12px 10px;border-top:1px solid #f0f0f0}
+.cnota{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;resize:none;outline:none;color:var(--text);background:#fafbfd}
+.cnota:focus{border-color:var(--azul);background:white}
+.cnota-btn{margin-top:5px;padding:5px 14px;background:var(--azul);color:white;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
 .cactions{display:flex;border-top:1px solid #f0f0f0}
-.abtn{flex:1;padding:10px 6px;font-size:11px;font-weight:700;border:none;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;color:#444;border-right:1px solid #f0f0f0}
+.abtn{flex:1;padding:10px 6px;font-size:11px;font-weight:600;border:none;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;color:var(--text2);border-right:1px solid #f0f0f0}
 .abtn:last-child{border-right:none}
 .abtn.wa{color:#25d366}
-.empty{text-align:center;padding:48px 24px;color:#888}
+.empty{text-align:center;padding:48px 24px;color:var(--text2)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
-.modal{background:white;border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:22px 18px 30px;max-height:88vh;overflow-y:auto}
-.modal h3{font-size:15px;font-weight:700;margin-bottom:14px}
-.eopt{padding:12px 14px;border-radius:10px;border:1.5px solid #eee;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px}
-.eopt:hover{border-color:#003366;background:#eef4ff}
-.xform{display:none;margin-top:14px;border-top:1px solid #eee;padding-top:14px}
+.modal{background:white;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:24px 18px 32px;max-height:88vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:16px}
+.eopt{padding:13px 14px;border-radius:12px;border:1.5px solid #e2e8f0;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px}
+.eopt:hover{border-color:var(--azul);background:#eef4ff;color:var(--azul)}
+.xform{display:none;margin-top:14px;border-top:1px solid #f0f0f0;padding-top:14px}
 .xform.show{display:block}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:11px;font-weight:700;color:#333;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-.field input,.field select{width:100%;border:1.5px solid #dde3ec;border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none}
-.btn-ok{width:100%;background:#003366;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
-.btn-cancel{margin-top:10px;width:100%;padding:11px;border:none;background:#f0f4f8;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:#555}
+.field input,.field select{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none}
+.field input:focus,.field select:focus{border-color:var(--azul)}
+.btn-ok{width:100%;background:var(--azul);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
+.btn-cancel{margin-top:10px;width:100%;padding:12px;border:none;background:#f0f4f8;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2)}
 </style>
 </head>
 <body>
@@ -83,8 +97,17 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
   <div class="stat"><div class="val" id="sV">-</div><div class="lbl">Ventas</div></div>
 </div>
 <div class="section">
-  <div class="section-title">🏆 Ranking — quién más te deriva</div>
-  <div class="ranking" id="ranking"></div>
+  <div class="section-title">Estado de cartera</div>
+  <div class="donut-wrap">
+    <svg width="90" height="90" viewBox="0 0 90 90" id="donut-svg">
+      <circle cx="45" cy="45" r="35" fill="none" stroke="#f0f4f8" stroke-width="14"/>
+    </svg>
+    <div class="donut-legend" id="donut-legend"></div>
+  </div>
+</div>
+<div class="section" style="margin-top:10px">
+  <div class="section-title">Top derivadores</div>
+  <div class="ranking-wrap" id="ranking-wrap"></div>
 </div>
 <div class="filters">
   <button class="fbtn active" onclick="filtrar('todos',this)">Todos</button>
@@ -120,33 +143,101 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
   </div>
 </div>
 <script>
-var URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
-var ASESOR = decodeURIComponent((new URLSearchParams(window.location.search).get('asesor')||'').replace(/\+/g,' '));
-var derivaciones=[], filtroActual='todos', cardActiva=null, estadoActual=null;
-document.getElementById('subtitulo').textContent = ASESOR ? 'Asesor: '+ASESOR : 'Sin asesor';
-var norm=function(e){if(!e)return'Pendiente';var s=e.toLowerCase();if(s.indexOf('cotizado')>=0)return'Cotizado';if(s.indexOf('imposible')>=0)return'Imposible';if(s.indexOf('cerrado con venta')>=0)return'CerradoVenta';if(s.indexOf('cerrado sin venta')>=0)return'CerradoSinVenta';return'Pendiente';};
-var BL={Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta ✓',CerradoSinVenta:'Cerrado s/ venta'};
+var URL_SCRIPT='https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
+var ASESOR=decodeURIComponent((new URLSearchParams(window.location.search).get('asesor')||'').replace(/\+/g,' '));
+var derivaciones=[],filtroActual='todos',cardActiva=null,estadoActual=null;
+document.getElementById('subtitulo').textContent=ASESOR?'Asesor: '+ASESOR:'Sin asesor';
+
+var COLORS={Pendiente:'#f59e0b',Cotizado:'#3b82f6',Imposible:'#94a3b8',CerradoVenta:'#10b981',CerradoSinVenta:'#ef4444'};
+var BL={Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta',CerradoSinVenta:'Cerrado s/ venta'};
 var BC={Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
+
+function norm(e){
+  if(!e)return'Pendiente';
+  var s=e.toLowerCase();
+  if(s.indexOf('cotizado')>=0)return'Cotizado';
+  if(s.indexOf('imposible')>=0)return'Imposible';
+  if(s.indexOf('cerrado con venta')>=0)return'CerradoVenta';
+  if(s.indexOf('cerrado sin venta')>=0)return'CerradoSinVenta';
+  return'Pendiente';
+}
+
 window.recibirDerivaciones=function(data){
-  derivaciones=(data.derivaciones||[]).map(function(d){return{id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',producto:d['Producto Prepaga']||'',obs:d['Observación']||'',prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||''};});
-  stats(); renderRanking(); render();
+  var raw=data.derivaciones||[];
+  derivaciones=raw.map(function(d){
+    return{
+      id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
+      producto:d['Producto Prepaga']||'',obs:d['Observación']||'',
+      prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',
+      estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',
+      prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',
+      prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||'',
+      notas:d['Notas VIDA']||''
+    };
+  });
+  stats();renderDonut();renderRanking();render();
 };
-function cargarDatos(){var s=document.createElement('script');s.src=URL_SCRIPT+'?accion=getDerivaciones&asesorVida='+encodeURIComponent(ASESOR)+'&callback=recibirDerivaciones&t='+Date.now();s.onerror=function(){document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar.</div>';};document.head.appendChild(s);}
-function stats(){document.getElementById('sT').textContent=derivaciones.length;document.getElementById('sP').textContent=derivaciones.filter(function(d){return d.estado==='Pendiente';}).length;document.getElementById('sC').textContent=derivaciones.filter(function(d){return d.estado==='Cotizado';}).length;document.getElementById('sV').textContent=derivaciones.filter(function(d){return d.estado==='CerradoVenta';}).length;}
+
+function cargarDatos(){
+  var s=document.createElement('script');
+  s.src=URL_SCRIPT+'?accion=getDerivaciones&asesorVida='+encodeURIComponent(ASESOR)+'&callback=recibirDerivaciones&t='+Date.now();
+  s.onerror=function(){document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar. Revisá tu conexión.</div>';};
+  document.head.appendChild(s);
+}
+
+function stats(){
+  document.getElementById('sT').textContent=derivaciones.length;
+  document.getElementById('sP').textContent=derivaciones.filter(function(d){return d.estado==='Pendiente';}).length;
+  document.getElementById('sC').textContent=derivaciones.filter(function(d){return d.estado==='Cotizado';}).length;
+  document.getElementById('sV').textContent=derivaciones.filter(function(d){return d.estado==='CerradoVenta';}).length;
+}
+
+function renderDonut(){
+  var conteo={Pendiente:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
+  derivaciones.forEach(function(d){if(conteo[d.estado]!==undefined)conteo[d.estado]++;});
+  var total=derivaciones.length||1;
+  var r=35,cx=45,cy=45,circ=2*Math.PI*r;
+  var offset=0;
+  var svg=document.getElementById('donut-svg');
+  while(svg.children.length>1)svg.removeChild(svg.lastChild);
+  var orden=['CerradoVenta','Cotizado','Pendiente','CerradoSinVenta','Imposible'];
+  var legendHtml='';
+  orden.forEach(function(k){
+    if(!conteo[k])return;
+    var pct=conteo[k]/total;
+    var dash=circ*pct,gap=circ-dash;
+    var arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',r);
+    arc.setAttribute('fill','none');arc.setAttribute('stroke',COLORS[k]);arc.setAttribute('stroke-width','14');
+    arc.setAttribute('stroke-dasharray',dash+' '+gap);
+    arc.setAttribute('stroke-dashoffset',-offset*circ);
+    arc.setAttribute('transform','rotate(-90 45 45)');
+    svg.appendChild(arc);
+    offset+=pct;
+    legendHtml+='<div class="legend-item"><div class="legend-dot" style="background:'+COLORS[k]+'"></div><div class="legend-label">'+BL[k]+'</div><div class="legend-val">'+conteo[k]+'</div></div>';
+  });
+  document.getElementById('donut-legend').innerHTML=legendHtml||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
+}
+
 function renderRanking(){
   var conteo={};
   derivaciones.forEach(function(d){if(d.prepaga)conteo[d.prepaga]=(conteo[d.prepaga]||0)+1;});
   var sorted=Object.keys(conteo).sort(function(a,b){return conteo[b]-conteo[a];}).slice(0,5);
   var max=sorted.length?conteo[sorted[0]]:1;
-  document.getElementById('ranking').innerHTML=sorted.length?sorted.map(function(n,i){var pct=Math.round(conteo[n]/max*100);return'<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:'+pct+'%"></div></div><div class="rank-count">'+conteo[n]+'</div></div>';}).join(''):'<div style="padding:12px 14px;font-size:13px;color:#888">Sin datos aún</div>';
+  document.getElementById('ranking-wrap').innerHTML=sorted.length?sorted.map(function(n,i){
+    var pct=Math.round(conteo[n]/max*100);
+    return'<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div><div class="rank-bar-bg"><div class="rank-bar-fg" style="width:'+pct+'%"></div></div><div class="rank-n">'+conteo[n]+'</div></div>';
+  }).join(''):'<div style="padding:8px;color:#aaa;font-size:12px">Sin datos aún</div>';
 }
+
 function render(){
   var items=filtroActual==='todos'?derivaciones:derivaciones.filter(function(d){return d.estado===filtroActual;});
   var lista=document.getElementById('lista');
   if(!items.length){lista.innerHTML='<div class="empty">📭 No hay derivaciones en este estado</div>';return;}
   lista.innerHTML=items.map(function(d){
     var fechaCorta=d.fecha?d.fecha.split(',')[0]:'';
-    return'<div class="card '+d.estado+'">'+
+    var nombre_safe=d.nombre.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+    return'<div class="card '+d.estado+'" id="card-'+d.id+'">'+
       '<div class="card-head"><div><div class="cnombre">'+d.nombre+'</div><div class="ctel">📱 '+d.tel+'</div></div>'+
       '<span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></div>'+
       '<div class="cmeta"><span>📦 '+d.producto+'</span><span>👤 '+d.prepaga+'</span></div>'+
@@ -154,21 +245,83 @@ function render(){
       (d.obs?'<div class="cobs">"'+d.obs+'"</div>':'')+
       (d.estado==='Cotizado'&&d.prodCotiz?'<div class="cinfo"><span>💬 '+d.prodCotiz+'</span>'+(d.primaCotiz?'<span>💰 $'+d.primaCotiz+'</span>':'')+'</div>':'')+
       (d.estado==='CerradoVenta'&&d.prodVida?'<div class="vinfo"><span>🛡️ '+d.prodVida+'</span>'+(d.prima?'<span>💰 $'+d.prima+'</span>':'')+'</div>':'')+
+      '<div class="cnota-wrap">'+
+        '<textarea class="cnota" rows="2" placeholder="Agregar comentario..." id="nota-'+d.id+'">'+d.notas+'</textarea>'+
+        '<button class="cnota-btn" onclick="guardarNota(\''+d.id+'\')">Guardar nota</button>'+
+      '</div>'+
       '<div class="cactions">'+
-      '<button class="abtn wa" onclick="wa(\''+d.tel+'\',\''+d.nombre.replace(/'/g,"\\'")+'\')">💬 WhatsApp</button>'+
-      '<button class="abtn" onclick="window.location.href=\'tel:+549'+d.tel+'\'">📞 Llamar</button>'+
-      '<button class="abtn" onclick="abrirModal(\''+d.id+'\')">✏️ Estado</button>'+
+        '<button class="abtn wa" onclick="wa(\''+d.tel+'\',\''+nombre_safe+'\')">💬 WhatsApp</button>'+
+        '<button class="abtn" onclick="window.location.href=\'tel:+549'+d.tel+'\'">📞 Llamar</button>'+
+        '<button class="abtn" onclick="abrirModal(\''+d.id+'\')">✏️ Estado</button>'+
       '</div></div>';
   }).join('');
 }
-function filtrar(f,btn){filtroActual=f;document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');render();}
-function wa(tel,nombre){window.open('https://wa.me/549'+tel+'?text='+encodeURIComponent('Hola '+nombre+', te contacto de Swiss Medical Seguros de Vida.'),'_blank');}
-function abrirModal(id){cardActiva=id;estadoActual=null;document.getElementById('fCotiz').classList.remove('show');document.getElementById('fVenta').classList.remove('show');document.getElementById('fecVenta').value=new Date().toISOString().split('T')[0];document.getElementById('overlay').classList.add('open');}
+
+function guardarNota(id){
+  var nota=document.getElementById('nota-'+id).value;
+  var idx=derivaciones.findIndex(function(d){return d.id===id;});
+  if(idx!==-1)derivaciones[idx].notas=nota;
+  var params=new URLSearchParams({accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,notasVida:nota});
+  fetch(URL_SCRIPT+'?'+params.toString()).catch(function(){});
+  var btn=document.querySelector('#card-'+id+' .cnota-btn');
+  if(btn){btn.textContent='✓ Guardado';setTimeout(function(){btn.textContent='Guardar nota';},2000);}
+}
+
+function filtrar(f,btn){
+  filtroActual=f;
+  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');render();
+}
+
+function wa(tel,nombre){
+  window.open('https://wa.me/549'+tel+'?text='+encodeURIComponent('Hola '+nombre+', te contacto de Swiss Medical Seguros de Vida.'),'_blank');
+}
+
+function abrirModal(id){
+  cardActiva=id;estadoActual=null;
+  document.getElementById('fCotiz').classList.remove('show');
+  document.getElementById('fVenta').classList.remove('show');
+  document.getElementById('fecVenta').value=new Date().toISOString().split('T')[0];
+  document.getElementById('overlay').classList.add('open');
+}
+
 function cerrar(){document.getElementById('overlay').classList.remove('open');}
-function sel(estado){estadoActual=estado;document.getElementById('fCotiz').classList.remove('show');document.getElementById('fVenta').classList.remove('show');if(estado==='Cotizado'){document.getElementById('fCotiz').classList.add('show');return;}if(estado==='CerradoVenta'){document.getElementById('fVenta').classList.add('show');return;}guardar(estado,{});}
-function confirmar(){if(estadoActual==='Cotizado'){var p=document.getElementById('pCotiz').value;if(!p){alert('Seleccioná el producto');return;}guardar('Cotizado',{productoCotizado:p,primaCotizada:document.getElementById('priCotiz').value});}else{var p=document.getElementById('pVenta').value;if(!p){alert('Seleccioná el producto');return;}guardar('CerradoVenta',{productoVida:p,prima:document.getElementById('priVenta').value,fechaVenta:document.getElementById('fecVenta').value});}}
-function guardar(estado,extras){var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});if(idx!==-1){derivaciones[idx].estado=estado;if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}}cerrar();stats();render();var params=new URLSearchParams({accion:'actualizarEstado',id:cardActiva,estado});Object.keys(extras).forEach(function(k){params.set(k,extras[k]);});fetch(URL_SCRIPT+'?'+params.toString()).catch(function(){});}
-document.getElementById('overlay').addEventListener('click',function(e){if(e.target===document.getElementById('overlay'))cerrar();});
+
+function sel(estado){
+  estadoActual=estado;
+  document.getElementById('fCotiz').classList.remove('show');
+  document.getElementById('fVenta').classList.remove('show');
+  if(estado==='Cotizado'){document.getElementById('fCotiz').classList.add('show');return;}
+  if(estado==='CerradoVenta'){document.getElementById('fVenta').classList.add('show');return;}
+  guardar(estado,{});
+}
+
+function confirmar(){
+  if(estadoActual==='Cotizado'){
+    var p=document.getElementById('pCotiz').value;
+    if(!p){alert('Seleccioná el producto');return;}
+    guardar('Cotizado',{productoCotizado:p,primaCotizada:document.getElementById('priCotiz').value});
+  }else{
+    var p=document.getElementById('pVenta').value;
+    if(!p){alert('Seleccioná el producto');return;}
+    guardar('CerradoVenta',{productoVida:p,prima:document.getElementById('priVenta').value,fechaVenta:document.getElementById('fecVenta').value});
+  }
+}
+
+function guardar(estado,extras){
+  var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});
+  if(idx!==-1){
+    derivaciones[idx].estado=estado;
+    if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}
+    if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}
+  }
+  cerrar();stats();renderDonut();render();
+  var params=new URLSearchParams({accion:'actualizarEstado',id:cardActiva,estado});
+  Object.keys(extras).forEach(function(k){params.set(k,extras[k]);});
+  fetch(URL_SCRIPT+'?'+params.toString()).catch(function(){});
+}
+
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)cerrar();});
 cargarDatos();
 </script>
 </body>
