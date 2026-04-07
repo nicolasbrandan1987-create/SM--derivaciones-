@@ -6,7 +6,7 @@
 <title>Mis Derivaciones — Swiss Medical VIDA</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
-:root{--azul:#003366;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--bg:#f0f4f8;--text:#1a1a2e;--text2:#64748b}
+:root{--azul:#003366;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--violeta:#8b5cf6;--bg:#f0f4f8;--text:#1a1a2e;--text2:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px;color:var(--text)}
 .hdr{background:linear-gradient(135deg,var(--azul) 0%,#001f4d 100%);padding:20px 16px 16px;color:white}
@@ -41,6 +41,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .list{padding:10px 14px;display:flex;flex-direction:column;gap:10px}
 .card{background:white;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden;border-left:4px solid #e2e8f0}
 .card.Pendiente{border-left-color:var(--naranja)}
+.card.Contactado{border-left-color:var(--violeta)}
 .card.Cotizado{border-left-color:var(--celeste)}
 .card.Imposible{border-left-color:var(--gris)}
 .card.CerradoVenta{border-left-color:var(--verde)}
@@ -50,6 +51,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .ctel{font-size:12px;color:var(--text2);margin-top:1px}
 .badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .bPendiente{background:#fef3c7;color:#92400e}
+.bContactado{background:#ede9fe;color:#5b21b6}
 .bCotizado{background:#dbeafe;color:#1e40af}
 .bImposible{background:#f1f5f9;color:#475569}
 .bCerradoVenta{background:#d1fae5;color:#065f46}
@@ -111,8 +113,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 </div>
 <div class="filters">
   <button class="fbtn active" onclick="filtrar('todos',this)">Todos</button>
-  <button class="fbtn" onclick="filtrar('Pendiente',this)">⏳ Pendientes</button>
-  <button class="fbtn" onclick="filtrar('Cotizado',this)">💬 Cotizados</button>
+  <button class="fbtn" onclick="filtrar('Pendiente',this)">⏳ Pendiente</button>
+  <button class="fbtn" onclick="filtrar('Contactado',this)">📞 Contactado</button>
+  <button class="fbtn" onclick="filtrar('Cotizado',this)">💬 Cotizado</button>
   <button class="fbtn" onclick="filtrar('CerradoVenta',this)">✅ Con venta</button>
   <button class="fbtn" onclick="filtrar('CerradoSinVenta',this)">❌ Sin venta</button>
   <button class="fbtn" onclick="filtrar('Imposible',this)">🚫 Imposible</button>
@@ -122,19 +125,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
   <div class="modal">
     <h3>Actualizar estado</h3>
     <div class="eopt" onclick="sel('Pendiente')">⏳ Pendiente</div>
+    <div class="eopt" onclick="sel('Contactado')">📞 Contactado</div>
     <div class="eopt" onclick="sel('Cotizado')">💬 Cotizado</div>
     <div class="eopt" onclick="sel('Imposible')">🚫 Imposible contactar</div>
     <div class="eopt" onclick="sel('CerradoVenta')">✅ Cerrado con venta</div>
     <div class="eopt" onclick="sel('CerradoSinVenta')">❌ Cerrado sin venta</div>
     <div class="xform" id="fCotiz">
       <div class="field"><label>Producto cotizado</label>
-        <select id="pCotiz"><option value="">Seleccioná...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option></select></div>
+        <select id="pCotiz"><option value="">Seleccioná...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option><option>Excellent Savings</option></select></div>
       <div class="field"><label>Prima cotizada ($)</label><input type="number" id="priCotiz" placeholder="Ej: 15000"></div>
       <button class="btn-ok" onclick="confirmar()">Confirmar cotización</button>
     </div>
     <div class="xform" id="fVenta">
       <div class="field"><label>Producto vendido</label>
-        <select id="pVenta"><option value="">Seleccioná...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option></select></div>
+        <select id="pVenta"><option value="">Seleccioná...</option><option>APP</option><option>Zafiro Amatista</option><option>Life Planning</option><option>Excellent Savings</option></select></div>
       <div class="field"><label>Prima vendida ($)</label><input type="number" id="priVenta" placeholder="Ej: 15000"></div>
       <div class="field"><label>Fecha de venta</label><input type="date" id="fecVenta"></div>
       <button class="btn-ok" onclick="confirmar()">Confirmar venta</button>
@@ -148,13 +152,14 @@ var ASESOR=decodeURIComponent((new URLSearchParams(window.location.search).get('
 var derivaciones=[],filtroActual='todos',cardActiva=null,estadoActual=null;
 document.getElementById('subtitulo').textContent=ASESOR?'Asesor: '+ASESOR:'Sin asesor';
 
-var COLORS={Pendiente:'#f59e0b',Cotizado:'#3b82f6',Imposible:'#94a3b8',CerradoVenta:'#10b981',CerradoSinVenta:'#ef4444'};
-var BL={Pendiente:'Pendiente',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta',CerradoSinVenta:'Cerrado s/ venta'};
-var BC={Pendiente:'bPendiente',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
+var COLORS={Pendiente:'#f59e0b',Contactado:'#8b5cf6',Cotizado:'#3b82f6',Imposible:'#94a3b8',CerradoVenta:'#10b981',CerradoSinVenta:'#ef4444'};
+var BL={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta',CerradoSinVenta:'Cerrado s/ venta'};
+var BC={Pendiente:'bPendiente',Contactado:'bContactado',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
 
 function norm(e){
   if(!e)return'Pendiente';
   var s=e.toLowerCase();
+  if(s==='contactado'||s.indexOf('contactado')>=0)return'Contactado';
   if(s.indexOf('cotizado')>=0)return'Cotizado';
   if(s.indexOf('imposible')>=0)return'Imposible';
   if(s.indexOf('cerrado con venta')>=0)return'CerradoVenta';
@@ -165,15 +170,13 @@ function norm(e){
 window.recibirDerivaciones=function(data){
   var raw=data.derivaciones||[];
   derivaciones=raw.map(function(d){
-    return{
-      id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
+    return{id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
       producto:d['Producto Prepaga']||'',obs:d['Observación']||'',
       prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',
       estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',
       prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',
       prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||'',
-      notas:d['Notas VIDA']||''
-    };
+      notas:d['Notas VIDA']||''};
   });
   stats();renderDonut();renderRanking();render();
 };
@@ -193,19 +196,17 @@ function stats(){
 }
 
 function renderDonut(){
-  var conteo={Pendiente:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
+  var conteo={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
   derivaciones.forEach(function(d){if(conteo[d.estado]!==undefined)conteo[d.estado]++;});
   var total=derivaciones.length||1;
-  var r=35,cx=45,cy=45,circ=2*Math.PI*r;
-  var offset=0;
+  var r=35,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
   var svg=document.getElementById('donut-svg');
   while(svg.children.length>1)svg.removeChild(svg.lastChild);
-  var orden=['CerradoVenta','Cotizado','Pendiente','CerradoSinVenta','Imposible'];
+  var orden=['CerradoVenta','Cotizado','Contactado','Pendiente','CerradoSinVenta','Imposible'];
   var legendHtml='';
   orden.forEach(function(k){
     if(!conteo[k])return;
-    var pct=conteo[k]/total;
-    var dash=circ*pct,gap=circ-dash;
+    var pct=conteo[k]/total,dash=circ*pct,gap=circ-dash;
     var arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
     arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',r);
     arc.setAttribute('fill','none');arc.setAttribute('stroke',COLORS[k]);arc.setAttribute('stroke-width','14');
