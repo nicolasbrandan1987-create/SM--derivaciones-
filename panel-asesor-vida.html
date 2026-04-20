@@ -70,7 +70,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .abtn:last-child{border-right:none}
 .abtn.wa{color:#25d366}
 .empty{text-align:center;padding:48px 24px;color:var(--text2)}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;display:none}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;display:none;min-width:200px;text-align:center}
 .toast.show{display:block}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
@@ -86,6 +86,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .field input:focus,.field select:focus{border-color:var(--azul)}
 .btn-ok{width:100%;background:var(--azul);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
 .btn-cancel{margin-top:10px;width:100%;padding:12px;border:none;background:#f0f4f8;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2)}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,51,102,.3);z-index:200;align-items:center;justify-content:center}
+.loading-overlay.show{display:flex}
+.loading-box{background:white;border-radius:16px;padding:24px 32px;text-align:center;font-size:14px;font-weight:600;color:var(--azul)}
 </style>
 </head>
 <body>
@@ -124,6 +127,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 </div>
 <div class="list" id="lista"><div class="empty">⏳ Cargando...</div></div>
 <div class="toast" id="toast"></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">⏳ Guardando...</div>
+</div>
 <div class="overlay" id="overlay">
   <div class="modal">
     <h3>Actualizar estado</h3>
@@ -175,45 +181,65 @@ function toast(msg,ok){
   t.textContent=msg;
   t.style.background=ok?'#065f46':'#991b1b';
   t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},2500);
+  setTimeout(function(){t.classList.remove('show');},3000);
 }
 
-// JSONP para guardar estado — confiable
+function showLoading(show){
+  document.getElementById('loadingOverlay').classList[show?'add':'remove']('show');
+}
+
 var cbCounter=0;
-function jsonpGuardar(params,onOk,onError){
-  var cbName='cb_'+Date.now()+'_'+(cbCounter++);
+function jsonpCall(params,onOk,onError){
+  var cbName='smcb_'+Date.now()+'_'+(cbCounter++);
   params.callback=cbName;
-  var url=URL_SCRIPT+'?'+Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
-  window[cbName]=function(data){
+  var url=URL_SCRIPT+'?'+Object.keys(params).map(function(k){
+    return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);
+  }).join('&');
+  var s=document.createElement('script');
+  var timer=setTimeout(function(){
     delete window[cbName];
     if(s.parentNode)s.parentNode.removeChild(s);
-    if(data&&data.ok)onOk();else onError();
+    onError('timeout');
+  },15000);
+  window[cbName]=function(data){
+    clearTimeout(timer);
+    delete window[cbName];
+    if(s.parentNode)s.parentNode.removeChild(s);
+    if(data&&data.ok)onOk(data);
+    else onError(data);
   };
-  var s=document.createElement('script');
+  s.onerror=function(){
+    clearTimeout(timer);
+    delete window[cbName];
+    onError('script error');
+  };
   s.src=url;
-  s.onerror=function(){delete window[cbName];onError();};
   document.head.appendChild(s);
 }
 
-window.recibirDerivaciones=function(data){
-  var raw=data.derivaciones||[];
-  derivaciones=raw.map(function(d){
-    return{id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
-      producto:d['Producto Prepaga']||'',obs:d['Observación']||'',
-      prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',
-      estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',
-      prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',
-      prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||'',
-      notas:d['Notas VIDA']||''};
-  });
-  stats();renderDonut();renderRanking();render();
-};
-
+// Cargar datos frescos del servidor
 function cargarDatos(){
-  var s=document.createElement('script');
-  s.src=URL_SCRIPT+'?accion=getDerivaciones&asesorVida='+encodeURIComponent(ASESOR)+'&callback=recibirDerivaciones&t='+Date.now();
-  s.onerror=function(){document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar.</div>';};
-  document.head.appendChild(s);
+  jsonpCall(
+    {accion:'getDerivaciones',asesorVida:ASESOR},
+    function(data){
+      var raw=data.derivaciones||[];
+      derivaciones=raw.map(function(d){
+        return{
+          id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
+          producto:d['Producto Prepaga']||'',obs:d['Observación']||'',
+          prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',
+          estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',
+          prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',
+          prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||'',
+          notas:d['Notas VIDA']||''
+        };
+      });
+      stats();renderDonut();renderRanking();render();
+    },
+    function(){
+      document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar. Recargá la página.</div>';
+    }
+  );
 }
 
 function stats(){
@@ -290,12 +316,21 @@ function guardarNota(id){
   var nota=document.getElementById('nota-'+id).value;
   var idx=derivaciones.findIndex(function(d){return d.id===id;});
   if(idx===-1)return;
-  derivaciones[idx].notas=nota;
   var btn=document.querySelector('#card-'+id+' .cnota-btn');
-  if(btn)btn.textContent='⏳ Guardando...';
-  jsonpGuardar({accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,notasVida:nota},
-    function(){if(btn)btn.textContent='✓ Guardado';setTimeout(function(){if(btn)btn.textContent='Guardar nota';},2000);toast('✓ Nota guardada',true);},
-    function(){if(btn)btn.textContent='❌ Error';toast('Error al guardar nota',false);}
+  if(btn)btn.textContent='⏳';
+  jsonpCall(
+    {accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,notasVida:nota},
+    function(){
+      derivaciones[idx].notas=nota;
+      if(btn)btn.textContent='✓ Guardado';
+      setTimeout(function(){if(btn)btn.textContent='Guardar nota';},2000);
+      toast('✓ Nota guardada',true);
+    },
+    function(){
+      if(btn)btn.textContent='❌ Error';
+      setTimeout(function(){if(btn)btn.textContent='Guardar nota';},2000);
+      toast('Error al guardar nota',false);
+    }
   );
 }
 
@@ -341,18 +376,37 @@ function confirmar(){
 }
 
 function guardar(estado,extras){
-  var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});
-  if(idx!==-1){
-    derivaciones[idx].estado=estado;
-    if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}
-    if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}
-  }
-  cerrar();stats();renderDonut();render();
+  cerrar();
+  showLoading(true);
   var params={accion:'actualizarEstado',id:cardActiva,estado:estado};
   Object.keys(extras).forEach(function(k){params[k]=extras[k];});
-  jsonpGuardar(params,
-    function(){toast('✓ Estado guardado',true);},
-    function(){toast('⚠️ Error al guardar — reintentando...',false);setTimeout(function(){jsonpGuardar(params,function(){toast('✓ Guardado',true);},function(){toast('❌ No se pudo guardar',false);});},3000);}
+  jsonpCall(
+    params,
+    function(){
+      showLoading(false);
+      toast('✓ Estado guardado',true);
+      // Recargar datos frescos del servidor
+      cargarDatos();
+    },
+    function(){
+      showLoading(false);
+      toast('❌ Error al guardar — reintentando...',false);
+      // Reintentar una vez
+      setTimeout(function(){
+        showLoading(true);
+        jsonpCall(params,
+          function(){
+            showLoading(false);
+            toast('✓ Guardado en segundo intento',true);
+            cargarDatos();
+          },
+          function(){
+            showLoading(false);
+            toast('❌ No se pudo guardar. Intentá de nuevo.',false);
+          }
+        );
+      },3000);
+    }
   );
 }
 
