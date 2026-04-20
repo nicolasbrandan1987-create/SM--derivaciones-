@@ -72,6 +72,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .empty{text-align:center;padding:48px 24px;color:var(--text2)}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;display:none;min-width:200px;text-align:center}
 .toast.show{display:block}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,51,102,.4);z-index:200;align-items:center;justify-content:center}
+.loading-overlay.show{display:flex}
+.loading-box{background:white;border-radius:16px;padding:24px 32px;text-align:center;font-size:14px;font-weight:600;color:var(--azul)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
 .modal{background:white;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:24px 18px 32px;max-height:88vh;overflow-y:auto}
@@ -86,9 +89,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .field input:focus,.field select:focus{border-color:var(--azul)}
 .btn-ok{width:100%;background:var(--azul);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
 .btn-cancel{margin-top:10px;width:100%;padding:12px;border:none;background:#f0f4f8;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2)}
-.loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,51,102,.3);z-index:200;align-items:center;justify-content:center}
-.loading-overlay.show{display:flex}
-.loading-box{background:white;border-radius:16px;padding:24px 32px;text-align:center;font-size:14px;font-weight:600;color:var(--azul)}
 </style>
 </head>
 <body>
@@ -188,8 +188,9 @@ function showLoading(show){
   document.getElementById('loadingOverlay').classList[show?'add':'remove']('show');
 }
 
+// GET con JSONP para leer datos
 var cbCounter=0;
-function jsonpCall(params,onOk,onError){
+function jsonpGet(params,onOk,onError){
   var cbName='smcb_'+Date.now()+'_'+(cbCounter++);
   params.callback=cbName;
   var url=URL_SCRIPT+'?'+Object.keys(params).map(function(k){
@@ -205,21 +206,29 @@ function jsonpCall(params,onOk,onError){
     clearTimeout(timer);
     delete window[cbName];
     if(s.parentNode)s.parentNode.removeChild(s);
-    if(data&&data.ok)onOk(data);
-    else onError(data);
+    onOk(data);
   };
-  s.onerror=function(){
-    clearTimeout(timer);
-    delete window[cbName];
-    onError('script error');
-  };
+  s.onerror=function(){clearTimeout(timer);delete window[cbName];onError('error');};
   s.src=url;
   document.head.appendChild(s);
 }
 
-// Cargar datos frescos del servidor
+// POST para guardar — confiable
+function postGuardar(data,onOk,onError){
+  fetch(URL_SCRIPT,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(){
+    onOk();
+  }).catch(function(e){
+    onError(e);
+  });
+}
+
 function cargarDatos(){
-  jsonpCall(
+  jsonpGet(
     {accion:'getDerivaciones',asesorVida:ASESOR},
     function(data){
       var raw=data.derivaciones||[];
@@ -318,7 +327,7 @@ function guardarNota(id){
   if(idx===-1)return;
   var btn=document.querySelector('#card-'+id+' .cnota-btn');
   if(btn)btn.textContent='⏳';
-  jsonpCall(
+  postGuardar(
     {accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,notasVida:nota},
     function(){
       derivaciones[idx].notas=nota;
@@ -329,7 +338,7 @@ function guardarNota(id){
     function(){
       if(btn)btn.textContent='❌ Error';
       setTimeout(function(){if(btn)btn.textContent='Guardar nota';},2000);
-      toast('Error al guardar nota',false);
+      toast('Error al guardar',false);
     }
   );
 }
@@ -378,34 +387,26 @@ function confirmar(){
 function guardar(estado,extras){
   cerrar();
   showLoading(true);
-  var params={accion:'actualizarEstado',id:cardActiva,estado:estado};
-  Object.keys(extras).forEach(function(k){params[k]=extras[k];});
-  jsonpCall(
-    params,
+  var payload={accion:'actualizarEstado',id:cardActiva,estado:estado};
+  Object.keys(extras).forEach(function(k){payload[k]=extras[k];});
+  // Actualizar UI inmediatamente
+  var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});
+  if(idx!==-1){
+    derivaciones[idx].estado=estado;
+    if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}
+    if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}
+  }
+  stats();renderDonut();render();
+  // Guardar en servidor
+  postGuardar(
+    payload,
     function(){
       showLoading(false);
       toast('✓ Estado guardado',true);
-      // Recargar datos frescos del servidor
-      cargarDatos();
     },
     function(){
       showLoading(false);
-      toast('❌ Error al guardar — reintentando...',false);
-      // Reintentar una vez
-      setTimeout(function(){
-        showLoading(true);
-        jsonpCall(params,
-          function(){
-            showLoading(false);
-            toast('✓ Guardado en segundo intento',true);
-            cargarDatos();
-          },
-          function(){
-            showLoading(false);
-            toast('❌ No se pudo guardar. Intentá de nuevo.',false);
-          }
-        );
-      },3000);
+      toast('❌ Error al guardar',false);
     }
   );
 }
