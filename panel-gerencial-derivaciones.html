@@ -125,7 +125,6 @@ tr:hover td{background:#f8fafc}
   <div class="tab" onclick="showTab('semanal',this)">📊 Semanal</div>
   <div class="tab" onclick="showTab('mensual',this)">📅 Mensual</div>
 </div>
-
 <div class="tab-content active" id="tab-derivaciones">
   <div class="filters">
     <button class="fbtn active" onclick="filtrarEstado('todos',this)">Todos</button>
@@ -142,11 +141,9 @@ tr:hover td{background:#f8fafc}
     </table>
   </div>
 </div>
-
 <div class="tab-content" id="tab-zonas">
   <div class="zonas-grid" id="zonas-grid"></div>
 </div>
-
 <div class="tab-content" id="tab-semanal">
   <div class="sec">
     <div class="weeks-chart">
@@ -163,7 +160,6 @@ tr:hover td{background:#f8fafc}
     </div>
   </div>
 </div>
-
 <div class="tab-content" id="tab-mensual">
   <div class="sec">
     <div class="bar-chart"><div class="bar-chart-title">Derivaciones por mes</div><div id="chart-meses-der"></div></div>
@@ -171,7 +167,6 @@ tr:hover td{background:#f8fafc}
     <div class="bar-chart"><div class="bar-chart-title">Zona vs Zona — mes en curso</div><div id="chart-zonas-mes"></div></div>
   </div>
 </div>
-
 <div class="modal-overlay" id="modal-zona">
   <div class="modal-detail">
     <div class="modal-hdr">
@@ -194,7 +189,6 @@ tr:hover td{background:#f8fafc}
     </div>
   </div>
 </div>
-
 <script>
 var URL_SCRIPT='https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
 var ZONAS={
@@ -213,12 +207,19 @@ var todosRaw=[],filtrados=[],filtroEstado='todos';
 
 function norm(e){
   if(!e)return'Pendiente';
-  var s=e.toLowerCase();
-  if(s==='contactado'||s.indexOf('contactado')>=0)return'Contactado';
-  if(s.indexOf('cotizado')>=0)return'Cotizado';
-  if(s.indexOf('imposible')>=0)return'Imposible';
-  if(s.indexOf('cerrado con venta')>=0)return'CerradoVenta';
-  if(s.indexOf('cerrado sin venta')>=0)return'CerradoSinVenta';
+  var s=String(e).toLowerCase().replace(/\s/g,'');
+  if(s==='cerradoconventa'||s==='cerradoventa')return'CerradoVenta';
+  if(s==='cerradosinventa')return'CerradoSinVenta';
+  if(s==='contactado')return'Contactado';
+  if(s==='cotizado')return'Cotizado';
+  if(s==='imposible'||s==='imposiblecontactar')return'Imposible';
+  if(s==='pendiente')return'Pendiente';
+  var r=String(e).toLowerCase();
+  if(r.indexOf('sin venta')>=0)return'CerradoSinVenta';
+  if(r.indexOf('con venta')>=0||r.indexOf('cerrado con')>=0)return'CerradoVenta';
+  if(r.indexOf('cotizado')>=0)return'Cotizado';
+  if(r.indexOf('contactado')>=0)return'Contactado';
+  if(r.indexOf('imposible')>=0)return'Imposible';
   return'Pendiente';
 }
 
@@ -244,19 +245,37 @@ function getMes(f){
   return p[2]+'-'+p[1].padStart(2,'0');
 }
 
-window.recibirDerivaciones=function(data){
-  todosRaw=(data.derivaciones||[]).map(function(d){
-    var av=d['Asesor VIDA']||'';
-    var fecha=d['Fecha']||'';
-    var fechaCorta=fecha.split(',')[0];
-    return{id:d['ID']||'',fecha:fechaCorta,nombre:d['Cliente Nombre']||'',
-      tel:d['Cliente Teléfono']||'',producto:d['Producto Prepaga']||'',
-      prepaga:d['Asesor Prepaga']||'',asesorVida:av,zona:getZona(av),
-      estado:norm(d['Estado']),prima:parseFloat(d['Prima Vendida'])||parseFloat(d['Prima Cotizada'])||0,
-      semana:getSemana(fechaCorta),mes:getMes(fechaCorta)};
-  });
-  poblarFiltros();aplicarFiltros();
-};
+var cbN=0;
+function jsonp(params,onOk,onErr){
+  var name='_gm'+(cbN++);
+  var url=URL_SCRIPT+'?callback='+name+'&t='+Date.now();
+  Object.keys(params).forEach(function(k){url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(params[k]);});
+  var s=document.createElement('script');
+  var timer=setTimeout(function(){delete window[name];if(s.parentNode)s.parentNode.removeChild(s);if(onErr)onErr('timeout');},20000);
+  window[name]=function(d){clearTimeout(timer);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);onOk(d);};
+  s.onerror=function(){clearTimeout(timer);delete window[name];if(onErr)onErr('error');};
+  s.src=url;
+  document.head.appendChild(s);
+}
+
+function cargarDatos(){
+  jsonp(
+    {accion:'getDerivaciones',asesorVida:''},
+    function(data){
+      todosRaw=(data.derivaciones||[]).map(function(d){
+        var av=d['Asesor VIDA']||'';
+        var fecha=(d['Fecha']||'').split(',')[0];
+        return{id:d['ID']||'',fecha:fecha,nombre:d['Cliente Nombre']||'',
+          tel:d['Cliente Teléfono']||'',producto:d['Producto Prepaga']||'',
+          prepaga:d['Asesor Prepaga']||'',asesorVida:av,zona:getZona(av),
+          estado:norm(d['Estado']),prima:parseFloat(d['Prima Vendida'])||parseFloat(d['Prima Cotizada'])||0,
+          semana:getSemana(fecha),mes:getMes(fecha)};
+      });
+      poblarFiltros();aplicarFiltros();
+    },
+    function(){}
+  );
+}
 
 function poblarFiltros(){
   var meses={},semanas={};
@@ -265,8 +284,7 @@ function poblarFiltros(){
   var names=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   Object.keys(meses).sort().reverse().forEach(function(m){
     var opt=document.createElement('option');
-    var p=m.split('-');
-    opt.value=m;opt.textContent=names[parseInt(p[1])]+' '+p[0];selMes.appendChild(opt);
+    var p=m.split('-');opt.value=m;opt.textContent=names[parseInt(p[1])]+' '+p[0];selMes.appendChild(opt);
   });
   var selSem=document.getElementById('filtroSemana');
   Object.keys(semanas).sort().reverse().forEach(function(s){
@@ -352,8 +370,7 @@ function renderSemanal(){
   var maxDer=Math.max.apply(null,sems.map(function(s){return semanas[s].der;}))||1;
   document.getElementById('weeks-grid').innerHTML=sems.map(function(s){
     var sd=semanas[s];
-    var hDer=Math.round(sd.der/maxDer*70)+10;
-    var hVen=Math.round(sd.ven/maxDer*70)+2;
+    var hDer=Math.round(sd.der/maxDer*70)+10,hVen=Math.round(sd.ven/maxDer*70)+2;
     var label=s.slice(8,10)+'/'+s.slice(5,7);
     return'<div class="week-col">'+
       '<div class="week-bars">'+
@@ -449,13 +466,6 @@ function abrirModalZona(zona){
 
 function cerrarModal(){document.getElementById('modal-zona').classList.remove('open');}
 document.getElementById('modal-zona').addEventListener('click',function(e){if(e.target===this)cerrarModal();});
-
-function cargarDatos(){
-  var s=document.createElement('script');
-  s.src=URL_SCRIPT+'?accion=getDerivaciones&asesorVida=&callback=recibirDerivaciones&t='+Date.now();
-  document.head.appendChild(s);
-}
-
 cargarDatos();
 </script>
 </body>
