@@ -165,14 +165,23 @@ var COLORS={Pendiente:'#f59e0b',Contactado:'#8b5cf6',Cotizado:'#3b82f6',Imposibl
 var BL={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible contactar',CerradoVenta:'Cerrado c/ venta',CerradoSinVenta:'Cerrado s/ venta'};
 var BC={Pendiente:'bPendiente',Contactado:'bContactado',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
 
+// Normaliza cualquier variante de estado que pueda venir del Sheet
 function norm(e){
   if(!e)return'Pendiente';
-  var s=e.toLowerCase();
-  if(s==='contactado'||s.indexOf('contactado')>=0)return'Contactado';
-  if(s.indexOf('cotizado')>=0)return'Cotizado';
-  if(s.indexOf('imposible')>=0)return'Imposible';
-  if(s.indexOf('cerrado con venta')>=0)return'CerradoVenta';
-  if(s.indexOf('cerrado sin venta')>=0)return'CerradoSinVenta';
+  var s=String(e).toLowerCase().replace(/\s/g,'');
+  if(s==='cerradoconventa'||s==='cerradoventa')return'CerradoVenta';
+  if(s==='cerradosinventa')return'CerradoSinVenta';
+  if(s==='contactado')return'Contactado';
+  if(s==='cotizado')return'Cotizado';
+  if(s==='imposible'||s==='imposiblecontactar')return'Imposible';
+  if(s==='pendiente')return'Pendiente';
+  // fallback con espacios por si acaso
+  var r=String(e).toLowerCase();
+  if(r.indexOf('sin venta')>=0)return'CerradoSinVenta';
+  if(r.indexOf('con venta')>=0||r.indexOf('cerrado con')>=0)return'CerradoVenta';
+  if(r.indexOf('cotizado')>=0)return'Cotizado';
+  if(r.indexOf('contactado')>=0)return'Contactado';
+  if(r.indexOf('imposible')>=0)return'Imposible';
   return'Pendiente';
 }
 
@@ -195,10 +204,10 @@ function jsonp(params,onOk,onErr){
   var url=URL_SCRIPT+'?callback='+name+'&t='+Date.now();
   Object.keys(params).forEach(function(k){url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(params[k]);});
   var s=document.createElement('script');
-  var t=setTimeout(function(){cleanup();onErr('timeout');},20000);
-  function cleanup(){clearTimeout(t);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);}
-  window[name]=function(d){cleanup();if(d&&d.ok!==false)onOk(d);else onErr(d);};
-  s.onerror=function(){cleanup();onErr('load error');};
+  var timer=setTimeout(function(){cleanup();onErr('timeout');},20000);
+  function cleanup(){clearTimeout(timer);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);}
+  window[name]=function(d){cleanup();onOk(d);};
+  s.onerror=function(){cleanup();onErr('error');};
   s.src=url;
   document.head.appendChild(s);
 }
@@ -235,7 +244,7 @@ function renderDonut(){
   var total=derivaciones.length||1,r=35,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
   var svg=document.getElementById('donut-svg');
   while(svg.children.length>1)svg.removeChild(svg.lastChild);
-  var orden=['CerradoVenta','Cotizado','Contactado','Pendiente','CerradoSinVenta','Imposible'],legendHtml='';
+  var orden=['CerradoVenta','Cotizado','Contactado','Pendiente','CerradoSinVenta','Imposible'],lh='';
   orden.forEach(function(k){
     if(!conteo[k])return;
     var pct=conteo[k]/total,dash=circ*pct,gap=circ-dash;
@@ -244,9 +253,9 @@ function renderDonut(){
     arc.setAttribute('fill','none');arc.setAttribute('stroke',COLORS[k]);arc.setAttribute('stroke-width','14');
     arc.setAttribute('stroke-dasharray',dash+' '+gap);arc.setAttribute('stroke-dashoffset',-offset*circ);
     arc.setAttribute('transform','rotate(-90 45 45)');svg.appendChild(arc);offset+=pct;
-    legendHtml+='<div class="legend-item"><div class="legend-dot" style="background:'+COLORS[k]+'"></div><div class="legend-label">'+BL[k]+'</div><div class="legend-val">'+conteo[k]+'</div></div>';
+    lh+='<div class="legend-item"><div class="legend-dot" style="background:'+COLORS[k]+'"></div><div class="legend-label">'+BL[k]+'</div><div class="legend-val">'+conteo[k]+'</div></div>';
   });
-  document.getElementById('donut-legend').innerHTML=legendHtml||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
+  document.getElementById('donut-legend').innerHTML=lh||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
 }
 
 function renderRanking(){
@@ -348,36 +357,23 @@ function guardar(estado,extras){
   showLoading(true,'⏳ Guardando...');
   var params={accion:'actualizarEstado',id:cardActiva,estado:estado};
   Object.keys(extras).forEach(function(k){params[k]=extras[k];});
+  // Actualizar UI inmediatamente
+  var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});
+  if(idx!==-1){
+    derivaciones[idx].estado=estado;
+    if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}
+    if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}
+  }
+  stats();renderDonut();render();
   jsonp(
     params,
-    function(data){
+    function(){
       showLoading(false);
       toast('✓ Estado guardado',true);
-      // Recargar datos frescos para confirmar
-      showLoading(true,'🔄 Actualizando...');
-      setTimeout(function(){
-        jsonp(
-          {accion:'getDerivaciones',asesorVida:ASESOR},
-          function(d){
-            showLoading(false);
-            derivaciones=(d.derivaciones||[]).map(function(r){
-              return{id:r['ID']||'',nombre:r['Cliente Nombre']||'',tel:r['Cliente Teléfono']||'',
-                producto:r['Producto Prepaga']||'',obs:r['Observación']||'',
-                prepaga:r['Asesor Prepaga']||'',fecha:r['Fecha']||'',
-                estado:norm(r['Estado']),prodVida:r['Producto VIDA']||'',
-                prima:r['Prima Vendida']||'',fechaVenta:r['Fecha Venta']||'',
-                prodCotiz:r['Producto Cotizado']||'',primaCotiz:r['Prima Cotizada']||'',
-                notas:r['Notas VIDA']||''};
-            });
-            stats();renderDonut();renderRanking();render();
-          },
-          function(){showLoading(false);}
-        );
-      },1500);
     },
     function(){
       showLoading(false);
-      toast('❌ Error al guardar — intentá de nuevo',false);
+      toast('❌ Error al guardar',false);
     }
   );
 }
