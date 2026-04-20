@@ -128,7 +128,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 <div class="list" id="lista"><div class="empty">⏳ Cargando...</div></div>
 <div class="toast" id="toast"></div>
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-box">⏳ Guardando...</div>
+  <div class="loading-box" id="loadingMsg">⏳ Guardando...</div>
 </div>
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -184,70 +184,41 @@ function toast(msg,ok){
   setTimeout(function(){t.classList.remove('show');},3000);
 }
 
-function showLoading(show){
+function showLoading(show,msg){
   document.getElementById('loadingOverlay').classList[show?'add':'remove']('show');
+  if(msg)document.getElementById('loadingMsg').textContent=msg;
 }
 
-// GET con JSONP para leer datos
-var cbCounter=0;
-function jsonpGet(params,onOk,onError){
-  var cbName='smcb_'+Date.now()+'_'+(cbCounter++);
-  params.callback=cbName;
-  var url=URL_SCRIPT+'?'+Object.keys(params).map(function(k){
-    return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);
-  }).join('&');
+var cbN=0;
+function jsonp(params,onOk,onErr){
+  var name='_sm'+(cbN++);
+  var url=URL_SCRIPT+'?callback='+name+'&t='+Date.now();
+  Object.keys(params).forEach(function(k){url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(params[k]);});
   var s=document.createElement('script');
-  var timer=setTimeout(function(){
-    delete window[cbName];
-    if(s.parentNode)s.parentNode.removeChild(s);
-    onError('timeout');
-  },15000);
-  window[cbName]=function(data){
-    clearTimeout(timer);
-    delete window[cbName];
-    if(s.parentNode)s.parentNode.removeChild(s);
-    onOk(data);
-  };
-  s.onerror=function(){clearTimeout(timer);delete window[cbName];onError('error');};
+  var t=setTimeout(function(){cleanup();onErr('timeout');},20000);
+  function cleanup(){clearTimeout(t);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);}
+  window[name]=function(d){cleanup();if(d&&d.ok!==false)onOk(d);else onErr(d);};
+  s.onerror=function(){cleanup();onErr('load error');};
   s.src=url;
   document.head.appendChild(s);
 }
 
-// POST para guardar — confiable
-function postGuardar(data,onOk,onError){
-  fetch(URL_SCRIPT,{
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)
-  }).then(function(){
-    onOk();
-  }).catch(function(e){
-    onError(e);
-  });
-}
-
 function cargarDatos(){
-  jsonpGet(
+  jsonp(
     {accion:'getDerivaciones',asesorVida:ASESOR},
     function(data){
-      var raw=data.derivaciones||[];
-      derivaciones=raw.map(function(d){
-        return{
-          id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
+      derivaciones=(data.derivaciones||[]).map(function(d){
+        return{id:d['ID']||'',nombre:d['Cliente Nombre']||'',tel:d['Cliente Teléfono']||'',
           producto:d['Producto Prepaga']||'',obs:d['Observación']||'',
           prepaga:d['Asesor Prepaga']||'',fecha:d['Fecha']||'',
           estado:norm(d['Estado']),prodVida:d['Producto VIDA']||'',
           prima:d['Prima Vendida']||'',fechaVenta:d['Fecha Venta']||'',
           prodCotiz:d['Producto Cotizado']||'',primaCotiz:d['Prima Cotizada']||'',
-          notas:d['Notas VIDA']||''
-        };
+          notas:d['Notas VIDA']||''};
       });
       stats();renderDonut();renderRanking();render();
     },
-    function(){
-      document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar. Recargá la página.</div>';
-    }
+    function(){document.getElementById('lista').innerHTML='<div class="empty">❌ Error al cargar. Recargá la página.</div>';}
   );
 }
 
@@ -261,36 +232,29 @@ function stats(){
 function renderDonut(){
   var conteo={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
   derivaciones.forEach(function(d){if(conteo[d.estado]!==undefined)conteo[d.estado]++;});
-  var total=derivaciones.length||1;
-  var r=35,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
+  var total=derivaciones.length||1,r=35,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
   var svg=document.getElementById('donut-svg');
   while(svg.children.length>1)svg.removeChild(svg.lastChild);
-  var orden=['CerradoVenta','Cotizado','Contactado','Pendiente','CerradoSinVenta','Imposible'];
-  var legendHtml='';
+  var orden=['CerradoVenta','Cotizado','Contactado','Pendiente','CerradoSinVenta','Imposible'],legendHtml='';
   orden.forEach(function(k){
     if(!conteo[k])return;
     var pct=conteo[k]/total,dash=circ*pct,gap=circ-dash;
     var arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
     arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',r);
     arc.setAttribute('fill','none');arc.setAttribute('stroke',COLORS[k]);arc.setAttribute('stroke-width','14');
-    arc.setAttribute('stroke-dasharray',dash+' '+gap);
-    arc.setAttribute('stroke-dashoffset',-offset*circ);
-    arc.setAttribute('transform','rotate(-90 45 45)');
-    svg.appendChild(arc);
-    offset+=pct;
+    arc.setAttribute('stroke-dasharray',dash+' '+gap);arc.setAttribute('stroke-dashoffset',-offset*circ);
+    arc.setAttribute('transform','rotate(-90 45 45)');svg.appendChild(arc);offset+=pct;
     legendHtml+='<div class="legend-item"><div class="legend-dot" style="background:'+COLORS[k]+'"></div><div class="legend-label">'+BL[k]+'</div><div class="legend-val">'+conteo[k]+'</div></div>';
   });
   document.getElementById('donut-legend').innerHTML=legendHtml||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
 }
 
 function renderRanking(){
-  var conteo={};
-  derivaciones.forEach(function(d){if(d.prepaga)conteo[d.prepaga]=(conteo[d.prepaga]||0)+1;});
-  var sorted=Object.keys(conteo).sort(function(a,b){return conteo[b]-conteo[a];}).slice(0,5);
-  var max=sorted.length?conteo[sorted[0]]:1;
-  document.getElementById('ranking-wrap').innerHTML=sorted.length?sorted.map(function(n,i){
-    var pct=Math.round(conteo[n]/max*100);
-    return'<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div><div class="rank-bar-bg"><div class="rank-bar-fg" style="width:'+pct+'%"></div></div><div class="rank-n">'+conteo[n]+'</div></div>';
+  var c={};
+  derivaciones.forEach(function(d){if(d.prepaga)c[d.prepaga]=(c[d.prepaga]||0)+1;});
+  var s=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,5),max=s.length?c[s[0]]:1;
+  document.getElementById('ranking-wrap').innerHTML=s.length?s.map(function(n,i){
+    return'<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div><div class="rank-bar-bg"><div class="rank-bar-fg" style="width:'+Math.round(c[n]/max*100)+'%"></div></div><div class="rank-n">'+c[n]+'</div></div>';
   }).join(''):'<div style="padding:8px;color:#aaa;font-size:12px">Sin datos aún</div>';
 }
 
@@ -299,13 +263,12 @@ function render(){
   var lista=document.getElementById('lista');
   if(!items.length){lista.innerHTML='<div class="empty">📭 No hay derivaciones en este estado</div>';return;}
   lista.innerHTML=items.map(function(d){
-    var fechaCorta=d.fecha?d.fecha.split(',')[0]:'';
-    var nombre_safe=d.nombre.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+    var fc=d.fecha?d.fecha.split(',')[0]:'',ns=d.nombre.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
     return'<div class="card '+d.estado+'" id="card-'+d.id+'">'+
       '<div class="card-head"><div><div class="cnombre">'+d.nombre+'</div><div class="ctel">📱 '+d.tel+'</div></div>'+
       '<span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></div>'+
       '<div class="cmeta"><span>📦 '+d.producto+'</span><span>👤 '+d.prepaga+'</span></div>'+
-      (fechaCorta?'<div class="cfecha">📅 '+fechaCorta+'</div>':'')+
+      (fc?'<div class="cfecha">📅 '+fc+'</div>':'')+
       (d.obs?'<div class="cobs">"'+d.obs+'"</div>':'')+
       (d.estado==='Cotizado'&&d.prodCotiz?'<div class="cinfo"><span>💬 '+d.prodCotiz+'</span>'+(d.primaCotiz?'<span>💰 $'+d.primaCotiz+'</span>':'')+'</div>':'')+
       (d.estado==='CerradoVenta'&&d.prodVida?'<div class="vinfo"><span>🛡️ '+d.prodVida+'</span>'+(d.prima?'<span>💰 $'+d.prima+'</span>':'')+'</div>':'')+
@@ -314,7 +277,7 @@ function render(){
         '<button class="cnota-btn" onclick="guardarNota(\''+d.id+'\')">Guardar nota</button>'+
       '</div>'+
       '<div class="cactions">'+
-        '<button class="abtn wa" onclick="wa(\''+d.tel+'\',\''+nombre_safe+'\')">💬 WhatsApp</button>'+
+        '<button class="abtn wa" onclick="wa(\''+d.tel+'\',\''+ns+'\')">💬 WhatsApp</button>'+
         '<button class="abtn" onclick="window.location.href=\'tel:+549'+d.tel+'\'">📞 Llamar</button>'+
         '<button class="abtn" onclick="abrirModal(\''+d.id+'\')">✏️ Estado</button>'+
       '</div></div>';
@@ -327,17 +290,15 @@ function guardarNota(id){
   if(idx===-1)return;
   var btn=document.querySelector('#card-'+id+' .cnota-btn');
   if(btn)btn.textContent='⏳';
-  postGuardar(
+  jsonp(
     {accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,notasVida:nota},
     function(){
       derivaciones[idx].notas=nota;
-      if(btn)btn.textContent='✓ Guardado';
-      setTimeout(function(){if(btn)btn.textContent='Guardar nota';},2000);
+      if(btn){btn.textContent='✓ Guardado';setTimeout(function(){btn.textContent='Guardar nota';},2000);}
       toast('✓ Nota guardada',true);
     },
     function(){
-      if(btn)btn.textContent='❌ Error';
-      setTimeout(function(){if(btn)btn.textContent='Guardar nota';},2000);
+      if(btn){btn.textContent='❌ Error';setTimeout(function(){btn.textContent='Guardar nota';},2000);}
       toast('Error al guardar',false);
     }
   );
@@ -349,9 +310,7 @@ function filtrar(f,btn){
   btn.classList.add('active');render();
 }
 
-function wa(tel,nombre){
-  window.open('https://wa.me/549'+tel+'?text='+encodeURIComponent('Hola '+nombre+', te contacto de Swiss Medical Seguros de Vida.'),'_blank');
-}
+function wa(tel,nombre){window.open('https://wa.me/549'+tel+'?text='+encodeURIComponent('Hola '+nombre+', te contacto de Swiss Medical Seguros de Vida.'),'_blank');}
 
 function abrirModal(id){
   cardActiva=id;estadoActual=null;
@@ -386,27 +345,39 @@ function confirmar(){
 
 function guardar(estado,extras){
   cerrar();
-  showLoading(true);
-  var payload={accion:'actualizarEstado',id:cardActiva,estado:estado};
-  Object.keys(extras).forEach(function(k){payload[k]=extras[k];});
-  // Actualizar UI inmediatamente
-  var idx=derivaciones.findIndex(function(d){return d.id===cardActiva;});
-  if(idx!==-1){
-    derivaciones[idx].estado=estado;
-    if(extras.productoVida){derivaciones[idx].prodVida=extras.productoVida;derivaciones[idx].prima=extras.prima;}
-    if(extras.productoCotizado){derivaciones[idx].prodCotiz=extras.productoCotizado;derivaciones[idx].primaCotiz=extras.primaCotizada;}
-  }
-  stats();renderDonut();render();
-  // Guardar en servidor
-  postGuardar(
-    payload,
-    function(){
+  showLoading(true,'⏳ Guardando...');
+  var params={accion:'actualizarEstado',id:cardActiva,estado:estado};
+  Object.keys(extras).forEach(function(k){params[k]=extras[k];});
+  jsonp(
+    params,
+    function(data){
       showLoading(false);
       toast('✓ Estado guardado',true);
+      // Recargar datos frescos para confirmar
+      showLoading(true,'🔄 Actualizando...');
+      setTimeout(function(){
+        jsonp(
+          {accion:'getDerivaciones',asesorVida:ASESOR},
+          function(d){
+            showLoading(false);
+            derivaciones=(d.derivaciones||[]).map(function(r){
+              return{id:r['ID']||'',nombre:r['Cliente Nombre']||'',tel:r['Cliente Teléfono']||'',
+                producto:r['Producto Prepaga']||'',obs:r['Observación']||'',
+                prepaga:r['Asesor Prepaga']||'',fecha:r['Fecha']||'',
+                estado:norm(r['Estado']),prodVida:r['Producto VIDA']||'',
+                prima:r['Prima Vendida']||'',fechaVenta:r['Fecha Venta']||'',
+                prodCotiz:r['Producto Cotizado']||'',primaCotiz:r['Prima Cotizada']||'',
+                notas:r['Notas VIDA']||''};
+            });
+            stats();renderDonut();renderRanking();render();
+          },
+          function(){showLoading(false);}
+        );
+      },1500);
     },
     function(){
       showLoading(false);
-      toast('❌ Error al guardar',false);
+      toast('❌ Error al guardar — intentá de nuevo',false);
     }
   );
 }
