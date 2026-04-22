@@ -265,12 +265,24 @@ function norm(e){
   return'Pendiente';
 }
 
+function parseFecha(f){
+  if(!f)return null;
+  f=String(f).split(',')[0].trim();
+  var d,p=f.split('/');
+  if(p.length===3){
+    var y=p[2].length===4?p[2]:'20'+p[2];
+    d=new Date(y+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'));
+    if(!isNaN(d))return d;
+    d=new Date(y+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0'));
+    if(!isNaN(d))return d;
+  }
+  if(f.match(/^\d{4}-\d{2}-\d{2}/)){d=new Date(f.slice(0,10));if(!isNaN(d))return d;}
+  d=new Date(f);return isNaN(d)?null:d;
+}
+
 function getSemana(fecha){
-  if(!fecha)return null;
-  var p=fecha.split('/');
-  if(p.length<3)return null;
-  var d=new Date(p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'));
-  if(isNaN(d))return null;
+  var d=parseFecha(fecha);
+  if(!d)return null;
   d.setDate(d.getDate()-d.getDay()+1);
   return d.toISOString().split('T')[0];
 }
@@ -535,6 +547,10 @@ cargarDatos();
       <input type="text" id="mn-nombre" placeholder="Ej: Juan García" maxlength="100">
     </div>
     <div class="field">
+      <label>Asesor Prepaga que derivó</label>
+      <input type="text" id="mn-prepaga" placeholder="Ej: Carlos Rodríguez" maxlength="100">
+    </div>
+    <div class="field">
       <label>Teléfono <span class="req">*</span></label>
       <input type="tel" id="mn-tel" placeholder="Ej: 1145678901" maxlength="20">
       <div class="field-hint">Sin 0 ni 15, solo números</div>
@@ -562,6 +578,7 @@ document.getElementById('overlay-manual').addEventListener('click',function(e){i
 
 function abrirCargaManual(){
   document.getElementById('mn-nombre').value='';
+  document.getElementById('mn-prepaga').value='';
   document.getElementById('mn-tel').value='';
   document.getElementById('mn-producto').value='';
   document.getElementById('mn-obs').value='';
@@ -571,6 +588,7 @@ function cerrarCargaManual(){document.getElementById('overlay-manual').classList
 
 function guardarManual(){
   var nombre=document.getElementById('mn-nombre').value.trim();
+  var prepaga=document.getElementById('mn-prepaga').value.trim();
   var tel=document.getElementById('mn-tel').value.trim();
   var producto=document.getElementById('mn-producto').value;
   var obs=document.getElementById('mn-obs').value.trim();
@@ -585,7 +603,7 @@ function guardarManual(){
     clienteTelefono:tel,
     productoPrepaga:producto,
     observacion:obs,
-    asesorPrepaga:'Carga manual',
+    asesorPrepaga: prepaga||'Carga manual',
     asesorVida:ASESOR,
     zona:'',
     estado:'Pendiente'
