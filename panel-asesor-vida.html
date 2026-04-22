@@ -107,6 +107,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .abtn:last-child{border-right:none}
 .abtn.wa{color:#25d366}
 .empty{text-align:center;padding:40px 24px;color:var(--text2)}
+/* Modal carga manual */
+.overlay-manual{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;align-items:flex-end;justify-content:center}
+.overlay-manual.open{display:flex}
+.modal-manual{background:white;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 18px 32px;max-height:90vh;overflow-y:auto}
+.modal-manual h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.modal-manual .sub{font-size:11px;color:var(--text2);margin-bottom:16px}
+.req{color:#ef4444;margin-left:2px}
+.field-hint{font-size:10px;color:var(--text2);margin-top:3px}
+.btn-carga{display:flex;align-items:center;gap:8px;margin:10px 14px 0;background:var(--azul);color:white;border:none;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;cursor:pointer;width:calc(100% - 28px)}
+.btn-carga:hover{background:#002244}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;display:none;min-width:200px;text-align:center}
 .toast.show{display:block}
 .loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,51,102,.4);z-index:200;align-items:center;justify-content:center}
@@ -139,6 +149,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
   <div class="stat"><div class="val" id="sC">-</div><div class="lbl">Cotizados</div></div>
   <div class="stat"><div class="val" id="sV">-</div><div class="lbl">Ventas</div></div>
 </div>
+
+<button class="btn-carga" onclick="abrirCargaManual()">➕ Cargar prospecto manualmente</button>
 
 <div class="tabs">
   <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
@@ -512,5 +524,80 @@ function showTab(name,el){
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)cerrar();});
 cargarDatos();
 </script>
+
+<!-- MODAL CARGA MANUAL — debe estar ANTES del script que registra listeners -->
+<div class="overlay-manual" id="overlay-manual">
+  <div class="modal-manual">
+    <h3>➕ Cargar prospecto</h3>
+    <div class="sub">Campos con <span class="req">*</span> son obligatorios</div>
+    <div class="field">
+      <label>Nombre del cliente <span class="req">*</span></label>
+      <input type="text" id="mn-nombre" placeholder="Ej: Juan García" maxlength="100">
+    </div>
+    <div class="field">
+      <label>Teléfono <span class="req">*</span></label>
+      <input type="tel" id="mn-tel" placeholder="Ej: 1145678901" maxlength="20">
+      <div class="field-hint">Sin 0 ni 15, solo números</div>
+    </div>
+    <div class="field">
+      <label>Producto Prepaga <span class="req">*</span></label>
+      <select id="mn-producto">
+        <option value="">Seleccioná...</option>
+        <option>Swiss Medical Medicina Prepaga</option>
+        <option>SMG Salud</option>
+        <option>Otros</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Observación</label>
+      <input type="text" id="mn-obs" placeholder="Contexto del cliente (opcional)" maxlength="200">
+    </div>
+    <button class="btn-ok" onclick="guardarManual()">✓ Guardar prospecto</button>
+    <button class="btn-cancel" onclick="cerrarCargaManual()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+document.getElementById('overlay-manual').addEventListener('click',function(e){if(e.target===this)cerrarCargaManual();});
+
+function abrirCargaManual(){
+  document.getElementById('mn-nombre').value='';
+  document.getElementById('mn-tel').value='';
+  document.getElementById('mn-producto').value='';
+  document.getElementById('mn-obs').value='';
+  document.getElementById('overlay-manual').classList.add('open');
+}
+function cerrarCargaManual(){document.getElementById('overlay-manual').classList.remove('open');}
+
+function guardarManual(){
+  var nombre=document.getElementById('mn-nombre').value.trim();
+  var tel=document.getElementById('mn-tel').value.trim();
+  var producto=document.getElementById('mn-producto').value;
+  var obs=document.getElementById('mn-obs').value.trim();
+  if(!nombre){alert('El nombre del cliente es obligatorio.');document.getElementById('mn-nombre').focus();return;}
+  if(!tel){alert('El teléfono es obligatorio.');document.getElementById('mn-tel').focus();return;}
+  if(!producto){alert('Seleccioná el producto Prepaga.');document.getElementById('mn-producto').focus();return;}
+  cerrarCargaManual();
+  showLoading(true,'⏳ Guardando prospecto...');
+  jsonp({
+    accion:'nuevaDerivacion',
+    clienteNombre:nombre,
+    clienteTelefono:tel,
+    productoPrepaga:producto,
+    observacion:obs,
+    asesorPrepaga:'Carga manual',
+    asesorVida:ASESOR,
+    zona:'',
+    estado:'Pendiente'
+  },function(resp){
+    showLoading(false);
+    if(resp&&resp.ok){toast('✓ Prospecto cargado',true);cargarDatos();}
+    else{toast('❌ Error al guardar',false);}
+  },function(){
+    showLoading(false);toast('❌ Error de conexión',false);
+  });
+}
+</script>
+
 </body>
 </html>
