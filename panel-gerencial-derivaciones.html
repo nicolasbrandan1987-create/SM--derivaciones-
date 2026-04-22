@@ -299,14 +299,41 @@ function norm(e){
 
 function getZona(av){for(var z in ZONAS){if(ZONAS[z].some(function(a){return a.toLowerCase()===(av||'').toLowerCase();}))return z;}return'Otros';}
 
-function getSemana(f){
+function parseFecha(f){
   if(!f)return null;
-  var p=f.split('/');if(p.length<3)return null;
-  var d=new Date(p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'));
-  if(isNaN(d))return null;d.setDate(d.getDate()-d.getDay()+1);return d.toISOString().split('T')[0];
+  f=String(f).split(',')[0].trim(); // quitar hora si viene con coma
+  var d;
+  // Formato DD/MM/YYYY o D/M/YYYY
+  var p=f.split('/');
+  if(p.length===3){
+    var y=p[2].length===4?p[2]:'20'+p[2];
+    d=new Date(y+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'));
+    if(!isNaN(d))return d;
+    // Puede ser M/D/YYYY (formato USA)
+    d=new Date(y+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0'));
+    if(!isNaN(d))return d;
+  }
+  // Formato YYYY-MM-DD
+  if(f.match(/^\d{4}-\d{2}-\d{2}/)){
+    d=new Date(f.slice(0,10));
+    if(!isNaN(d))return d;
+  }
+  // Fallback: dejar que Date lo intente
+  d=new Date(f);
+  if(!isNaN(d))return d;
+  return null;
+}
+
+function getSemana(f){
+  var d=parseFecha(f);
+  if(!d)return null;
+  d.setDate(d.getDate()-d.getDay()+1);
+  return d.toISOString().split('T')[0];
 }
 function getMes(f){
-  if(!f)return null;var p=f.split('/');if(p.length<3)return null;return p[2]+'-'+p[1].padStart(2,'0');
+  var d=parseFecha(f);
+  if(!d)return null;
+  return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');
 }
 
 var cbN=0;
