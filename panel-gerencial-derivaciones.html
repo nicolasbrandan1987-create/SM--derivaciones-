@@ -87,8 +87,16 @@ tr:hover td{background:#f8fafc}
 .fbtn{padding:5px 10px;border-radius:20px;border:1.5px solid #dde3ec;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;background:white;color:var(--text2);margin-right:4px;margin-bottom:6px}
 .fbtn.active{background:var(--azul);border-color:var(--azul);color:white}
 
-/* Bar chart */
-.bar-group{margin-bottom:8px}
+/* Gráfico barras semanal */
+.bar-chart-svg-wrap{overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.bar-chart-svg-wrap::-webkit-scrollbar{display:none}
+.bar-chart-svg{display:block;min-width:100%}
+.bc-axis-label{font-size:9px;fill:#94a3b8;font-family:'DM Sans',sans-serif}
+.bc-bar-label{font-size:9px;fill:#003366;font-weight:700;font-family:'DM Mono',monospace}
+.bc-bar-label-v{font-size:9px;fill:#10b981;font-weight:700;font-family:'DM Mono',monospace}
+.chart-legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.chart-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.chart-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .bar-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
 .bar-name{font-weight:600}
 .bar-val{font-weight:700;color:var(--azul);font-family:'DM Mono',monospace}
@@ -197,6 +205,16 @@ tr:hover td{background:#f8fafc}
 
 <!-- SEMANAL -->
 <div class="tc" id="tab-semanal">
+  <div class="card-white">
+    <div class="sec-title" style="margin-top:0">📊 Derivaciones por semana</div>
+    <div class="chart-legend">
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#003366"></div>Derivaciones</div>
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#10b981"></div>Ventas</div>
+    </div>
+    <div class="bar-chart-svg-wrap" id="chart-semanas-wrap">
+      <div style="color:#aaa;font-size:12px">Cargando...</div>
+    </div>
+  </div>
   <div class="card-white">
     <div class="sec-title" style="margin-top:0">Semana actual vs anterior — por asesor</div>
     <div id="comp-asesores"></div>
@@ -497,7 +515,49 @@ function renderAsesor(){
   }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
 }
 
+function renderChartSemanas(){
+  var sems={};
+  filtrados.forEach(function(d){
+    if(!d.semana)return;
+    if(!sems[d.semana])sems[d.semana]={der:0,ven:0};
+    sems[d.semana].der++;
+    if(d.estado==='CerradoVenta')sems[d.semana].ven++;
+  });
+  var semsArr=Object.keys(sems).sort();
+  var wrap=document.getElementById('chart-semanas-wrap');
+  if(!semsArr.length){wrap.innerHTML='<div style="color:#aaa;font-size:12px">Sin datos</div>';return;}
+  var maxDer=Math.max.apply(null,semsArr.map(function(s){return sems[s].der;}))||1;
+  var barW=28,gap=16,padL=28,padR=12,padT=16,padB=36;
+  var chartH=140,totalW=padL+(barW*2+gap)*semsArr.length+(semsArr.length-1)*8+padR;
+  var svgH=padT+chartH+padB;
+  var lines='';
+  [0,.25,.5,.75,1].forEach(function(f){
+    var y=padT+chartH-(f*chartH);
+    var val=Math.round(f*maxDer);
+    lines+='<line x1="'+padL+'" y1="'+y+'" x2="'+(totalW-padR)+'" y2="'+y+'" stroke="#f0f0f0" stroke-width="1"/>';
+    lines+='<text class="bc-axis-label" x="'+(padL-4)+'" y="'+(y+3)+'" text-anchor="end">'+val+'</text>';
+  });
+  var bars='',labels='';
+  semsArr.forEach(function(s,i){
+    var sd=sems[s];
+    var x=padL+i*(barW*2+gap+8);
+    var hDer=Math.max(2,Math.round(sd.der/maxDer*chartH));
+    var hVen=Math.max(sd.ven?2:0,Math.round(sd.ven/maxDer*chartH));
+    var yDer=padT+chartH-hDer,yVen=padT+chartH-hVen;
+    bars+='<rect x="'+x+'" y="'+yDer+'" width="'+barW+'" height="'+hDer+'" fill="#003366" rx="3"/>';
+    bars+='<rect x="'+(x+barW+2)+'" y="'+yVen+'" width="'+barW+'" height="'+hVen+'" fill="#10b981" rx="3"/>';
+    // valor encima de barra derivaciones
+    bars+='<text class="bc-bar-label" x="'+(x+barW/2)+'" y="'+(yDer-4)+'" text-anchor="middle">'+sd.der+'</text>';
+    if(sd.ven>0)bars+='<text class="bc-bar-label-v" x="'+(x+barW+2+barW/2)+'" y="'+(yVen-4)+'" text-anchor="middle">'+sd.ven+'</text>';
+    // label semana
+    var lbl=s.slice(8,10)+'/'+s.slice(5,7);
+    labels+='<text class="bc-axis-label" x="'+(x+barW)+'" y="'+(padT+chartH+14)+'" text-anchor="middle">'+lbl+'</text>';
+  });
+  wrap.innerHTML='<svg class="bar-chart-svg" width="'+Math.max(totalW,300)+'" height="'+svgH+'">'+lines+bars+labels+'</svg>';
+}
+
 function renderSemanal(){
+  renderChartSemanas();
   var sems={};
   filtrados.forEach(function(d){
     if(!d.semana)return;
