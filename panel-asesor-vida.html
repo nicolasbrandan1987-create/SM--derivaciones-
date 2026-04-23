@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mis Derivaciones — Swiss Medical VIDA</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--azul:#003366;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--violeta:#8b5cf6;--bg:#f0f4f8;--text:#1a1a2e;--text2:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -126,6 +127,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .field-hint{font-size:10px;color:var(--text2);margin-top:3px}
 .btn-carga{display:flex;align-items:center;gap:8px;margin:10px 14px 0;background:var(--azul);color:white;border:none;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;cursor:pointer;width:calc(100% - 28px)}
 .btn-carga:hover{background:#002244}
+.btn-exportar-vida{display:flex;align-items:center;gap:8px;margin:8px 14px 0;background:#e2e8f0;color:#1a1a2e;border:none;border-radius:12px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;width:calc(100% - 28px)}
+.btn-exportar-vida:hover{background:#cbd5e1}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;display:none;min-width:200px;text-align:center}
 .toast.show{display:block}
 .loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,51,102,.4);z-index:200;align-items:center;justify-content:center}
@@ -160,6 +163,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 </div>
 
 <button class="btn-carga" onclick="abrirCargaManual()">➕ Cargar prospecto manualmente</button>
+<button class="btn-exportar-vida" onclick="exportarExcelVida()">📥 Exportar mis derivaciones a Excel</button>
 
 <div class="tabs">
   <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
@@ -627,6 +631,76 @@ cargarDatos();
 
 <script>
 document.getElementById('overlay-manual').addEventListener('click',function(e){if(e.target===this)cerrarCargaManual();});
+
+function exportarExcelVida(){
+  if(!derivaciones.length){alert('No hay derivaciones para exportar.');return;}
+  var BL2={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible',CerradoVenta:'Cerrado con venta',CerradoSinVenta:'Cerrado sin venta'};
+
+  // Hoja 1: Detalle completo
+  var filas=[['ID','Fecha','Cliente','Teléfono','Producto Prepaga','Asesor Prepaga','Estado','Notas','Producto VIDA','Prima Vendida','Producto Cotizado','Prima Cotizada','Calificación']];
+  derivaciones.forEach(function(d){
+    filas.push([
+      d.id, d.fecha, d.nombre, d.tel||'', d.producto||'',
+      d.prepaga||'', BL2[d.estado]||d.estado, d.notas||'',
+      d.prodVida||'', d.prima||'', d.prodCotiz||'', d.primaCotiz||'',
+      d.calificacion||''
+    ]);
+  });
+
+  // Hoja 2: Resumen por estado
+  var estados={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
+  var primaTotal=0;
+  derivaciones.forEach(function(d){
+    if(estados[d.estado]!==undefined)estados[d.estado]++;
+    if(d.estado==='CerradoVenta')primaTotal+=d.prima||0;
+  });
+  var filasRes=[
+    ['Resumen de cartera — '+ASESOR,''],
+    ['',''],
+    ['Estado','Cantidad'],
+    ['Pendiente',estados.Pendiente],
+    ['Contactado',estados.Contactado],
+    ['Cotizado',estados.Cotizado],
+    ['Cerrado con venta',estados.CerradoVenta],
+    ['Cerrado sin venta',estados.CerradoSinVenta],
+    ['Imposible',estados.Imposible],
+    ['',''],
+    ['Total derivaciones',derivaciones.length],
+    ['Prima total vendida','$'+primaTotal.toLocaleString('es-AR')],
+    ['% Conversión',derivaciones.length?Math.round(estados.CerradoVenta/derivaciones.length*100)+'%':'0%'],
+  ];
+
+  // Hoja 3: Por semana
+  var semMap={};
+  derivaciones.forEach(function(d){
+    if(!d.semana)return;
+    if(!semMap[d.semana])semMap[d.semana]={der:0,ven:0};
+    semMap[d.semana].der++;
+    if(d.estado==='CerradoVenta')semMap[d.semana].ven++;
+  });
+  var filasSem=[['Semana','Derivaciones','Ventas','% Conv.']];
+  Object.keys(semMap).sort().forEach(function(s){
+    var sd=semMap[s];
+    var lbl=s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+    filasSem.push([lbl,sd.der,sd.ven,sd.der?Math.round(sd.ven/sd.der*100)+'%':'0%']);
+  });
+
+  var wb=XLSX.utils.book_new();
+  var ws1=XLSX.utils.aoa_to_sheet(filas);
+  var ws2=XLSX.utils.aoa_to_sheet(filasRes);
+  var ws3=XLSX.utils.aoa_to_sheet(filasSem);
+
+  ws1['!cols']=[{wch:12},{wch:12},{wch:24},{wch:14},{wch:22},{wch:24},{wch:20},{wch:30},{wch:20},{wch:14},{wch:20},{wch:14},{wch:12}];
+  ws2['!cols']=[{wch:28},{wch:16}];
+  ws3['!cols']=[{wch:12},{wch:14},{wch:8},{wch:10}];
+
+  XLSX.utils.book_append_sheet(wb,ws1,'Mis derivaciones');
+  XLSX.utils.book_append_sheet(wb,ws2,'Resumen');
+  XLSX.utils.book_append_sheet(wb,ws3,'Por semana');
+
+  var fecha=new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
+  XLSX.writeFile(wb,'Derivaciones_'+ASESOR.replace(/ /g,'_')+'_'+fecha+'.xlsx');
+}
 
 function abrirCargaManual(){
   document.getElementById('mn-nombre').value='';
