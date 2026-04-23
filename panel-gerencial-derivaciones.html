@@ -151,6 +151,12 @@ tr:hover td{background:#f8fafc}
       <option>Mendoza</option><option>Neuquén</option><option>Córdoba</option>
       <option>Salta</option><option>Chaco</option><option>Bs As Sur</option><option>Rosario</option>
     </select></div>
+  <div class="fg"><label>Asesor Prepaga</label>
+    <select id="filtroPool" onchange="aplicarFiltros()">
+      <option value="todos">Todos</option>
+      <option value="pool">🔵 Solo Pool</option>
+      <option value="nopool">⚪ Solo No-Pool</option>
+    </select></div>
 </div>
 <div class="tabs">
   <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
@@ -278,7 +284,29 @@ var ZONAS={
 var ZONA_COLORS={'Mendoza':'#003366','Neuquén':'#0066cc','Córdoba':'#10b981','Salta':'#f59e0b','Chaco':'#ef4444','Bs As Sur':'#8b5cf6','Rosario':'#ec4899'};
 var BL={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible',CerradoVenta:'✅ Venta',CerradoSinVenta:'❌ Sin venta'};
 var BC={Pendiente:'bPendiente',Contactado:'bContactado',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
-var todosRaw=[],filtrados=[],filtroEstado='todos';
+var todosRaw=[],filtrados=[],filtroEstado='todos',filtroPool='todos';
+
+// Lista fija de asesores Prepaga que están en el Pool de datos web
+var POOL=new Set([
+  'Aixa Rios','Daniel Barrera','Diana Espinoza','Marta Muriel','Gustavo Ardiles',
+  'Jorgelina Fernandez','Celeste Zalazar','Virginia Cañazares','Sergio Valeriano',
+  'Facundo Palacio','Valeria Sumbaino','Maria Barros','Alfonsina Molina','Franco Torres',
+  'Sonia Ferreyra','Fernando Yalis','Eliana Garcias','Gaston Pauer','Fabio Cacciagiu',
+  'Daiana Ricchieri','Evelyn Carrizo','Erika Decima','Carlos Consorte','Silvana Quiroga',
+  'Stella Almeri','Cristian Conti','Silvina Soraiz','Alejandra Etcheverry',
+  'Karina Gorvalan','Adriana Bonardi','Adriana Bucas','Claudia Ferres','Gustavo Alloco',
+  'Laura Neuman','Betina Ledesma','David Alcanis','Alejandro Vicentela','Jorge del Campo',
+  'Mariana Garcia','Daniel Gribaudo','Franco Zandanel','Celeste Olmedo','Yoel Lagos',
+  'Laura Beck','Valeria Colucci','Monica Russo','Mariana Carrilli','Yamila Chandia',
+  'Julieta Mandelli','Mariana Novara'
+]);
+
+function esPool(nombre){
+  if(!nombre)return false;
+  var n=nombre.trim().toLowerCase();
+  for(var p of POOL){if(p.toLowerCase()===n)return true;}
+  return false;
+}
 
 function norm(e){
   if(!e)return'Pendiente';
@@ -390,10 +418,13 @@ function aplicarFiltros(){
   var mes=document.getElementById('filtroMes').value;
   var sem=document.getElementById('filtroSemana').value;
   var zona=document.getElementById('filtroZona').value;
+  filtroPool=document.getElementById('filtroPool').value;
   filtrados=todosRaw.filter(function(d){
     if(mes&&d.mes!==mes)return false;
     if(sem&&d.semana!==sem)return false;
     if(zona&&d.zona!==zona)return false;
+    if(filtroPool==='pool'&&!esPool(d.prepaga))return false;
+    if(filtroPool==='nopool'&&esPool(d.prepaga))return false;
     return true;
   });
   kpis();renderEstados();renderFunnel();renderSemanas();renderZonas();renderAsesor();renderSemanal();renderTabla();
@@ -468,16 +499,19 @@ function renderSemanas(){
 
 function renderZonas(){
   var zonaData={};
-  Object.keys(ZONAS).forEach(function(z){zonaData[z]={total:0,pend:0,ventas:0,asesores:ZONAS[z]};});
+  Object.keys(ZONAS).forEach(function(z){zonaData[z]={total:0,pool:0,nopool:0,pend:0,ventas:0,asesores:ZONAS[z]};});
   filtrados.forEach(function(d){
     if(zonaData[d.zona]){
       zonaData[d.zona].total++;
+      if(esPool(d.prepaga))zonaData[d.zona].pool++;
+      else zonaData[d.zona].nopool++;
       if(d.estado==='Pendiente')zonaData[d.zona].pend++;
       if(d.estado==='CerradoVenta')zonaData[d.zona].ventas++;
     }
   });
   document.getElementById('zonas-grid').innerHTML=Object.keys(zonaData).map(function(z){
     var zd=zonaData[z],conv=zd.total?Math.round(zd.ventas/zd.total*100):0;
+    var pctPool=zd.total?Math.round(zd.pool/zd.total*100):0;
     return'<div class="zona-card" style="border-top-color:'+ZONA_COLORS[z]+'" onclick="abrirModalZona(\''+z+'\')">'+
       '<div class="zona-name">'+z+'</div>'+
       '<div class="zona-asesores">'+zd.asesores.join(' · ')+'</div>'+
@@ -486,7 +520,21 @@ function renderZonas(){
         '<div class="zk"><div class="zv">'+zd.ventas+'</div><div class="zl">Ventas</div></div>'+
         '<div class="zk"><div class="zv">'+conv+'%</div><div class="zl">Conv.</div></div>'+
       '</div>'+
-      '<div class="conv-bar"><div class="conv-fill" style="width:'+conv+'%;background:'+ZONA_COLORS[z]+'"></div></div>'+
+      '<div style="display:flex;gap:6px;margin-top:8px">'+
+        '<div style="flex:1;background:#eff6ff;border-radius:8px;padding:5px 6px;text-align:center">'+
+          '<div style="font-size:13px;font-weight:800;color:#1e40af;font-family:\'DM Mono\',monospace">'+zd.pool+'</div>'+
+          '<div style="font-size:8px;color:#3b82f6;font-weight:700;text-transform:uppercase">🔵 Pool</div>'+
+        '</div>'+
+        '<div style="flex:1;background:#f8fafc;border-radius:8px;padding:5px 6px;text-align:center">'+
+          '<div style="font-size:13px;font-weight:800;color:#475569;font-family:\'DM Mono\',monospace">'+zd.nopool+'</div>'+
+          '<div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">⚪ No-Pool</div>'+
+        '</div>'+
+        '<div style="flex:1;background:#f0fdf4;border-radius:8px;padding:5px 6px;text-align:center">'+
+          '<div style="font-size:13px;font-weight:800;color:#065f46;font-family:\'DM Mono\',monospace">'+pctPool+'%</div>'+
+          '<div style="font-size:8px;color:#10b981;font-weight:700;text-transform:uppercase">% Pool</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="conv-bar" style="margin-top:6px"><div class="conv-fill" style="width:'+conv+'%;background:'+ZONA_COLORS[z]+'"></div></div>'+
       '</div>';
   }).join('');
 }
@@ -533,11 +581,14 @@ function renderAsesor(){
   // Ranking derivadores prepaga
   var c2={};
   data.forEach(function(d){if(d.prepaga)c2[d.prepaga]=(c2[d.prepaga]||0)+1;});
-  var s2=Object.keys(c2).sort(function(a,b){return c2[b]-c2[a];}).slice(0,8),max2=s2.length?c2[s2[0]]:1;
+  var s2=Object.keys(c2).sort(function(a,b){return c2[b]-c2[a];}).slice(0,20),max2=s2.length?c2[s2[0]]:1;
   document.getElementById('asesor-ranking').innerHTML=s2.map(function(n,i){
+    var badge=esPool(n)
+      ?'<span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:4px">🔵 Pool</span>'
+      :'<span style="font-size:9px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:4px">⚪ No-Pool</span>';
     return'<div class="bar-group">'+
-      '<div class="bar-label"><span class="bar-name">'+(i+1)+'. '+n+'</span><span class="bar-val">'+c2[n]+'</span></div>'+
-      '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(c2[n]/max2*100)+'%;background:var(--celeste)"></div></div>'+
+      '<div class="bar-label"><span class="bar-name">'+(i+1)+'. '+n+badge+'</span><span class="bar-val">'+c2[n]+'</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(c2[n]/max2*100)+'%;background:'+(esPool(n)?'#3b82f6':'#94a3b8')+'"></div></div>'+
       '</div>';
   }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
 }
