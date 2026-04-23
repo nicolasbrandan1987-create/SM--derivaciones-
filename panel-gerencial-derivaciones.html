@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Panel Gerencial — Swiss Medical VIDA</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--azul:#003366;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--violeta:#8b5cf6;--bg:#f0f4f8;--text:#1a1a2e;--text2:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -128,6 +129,12 @@ tr:hover td{background:#f8fafc}
 .legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2)}
 .legend-dot{width:8px;height:8px;border-radius:2px}
+/* Exportar */
+.export-bar{display:flex;gap:8px;padding:0 14px 12px;flex-wrap:wrap}
+.btn-export{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-export.filtrado{background:#003366;color:white}
+.btn-export.todo{background:#e2e8f0;color:#1a1a2e}
+.btn-export:hover{opacity:.88}
 </style>
 </head>
 <body>
@@ -157,6 +164,10 @@ tr:hover td{background:#f8fafc}
       <option value="pool">🔵 Solo Pool</option>
       <option value="nopool">⚪ Solo No-Pool</option>
     </select></div>
+</div>
+<div class="export-bar">
+  <button class="btn-export filtrado" onclick="exportarExcel(false)">📥 Exportar vista filtrada</button>
+  <button class="btn-export todo" onclick="exportarExcel(true)">📥 Exportar todo el historial</button>
 </div>
 <div class="tabs">
   <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
@@ -289,16 +300,23 @@ var todosRaw=[],filtrados=[],filtroEstado='todos',filtroPool='todos';
 // Lista fija de asesores Prepaga que están en el Pool de datos web
 var POOL=new Set([
   'Aixa Rios','Daniel Barrera','Diana Espinoza','Marta Muriel','Gustavo Ardiles',
-  'Jorgelina Fernandez','Celeste Zalazar','Virginia Cañazares','Sergio Valeriano',
-  'Facundo Palacio','Valeria Sumbaino','Maria Barros','Alfonsina Molina','Franco Torres',
-  'Sonia Ferreyra','Fernando Yalis','Eliana Garcias','Gaston Pauer','Fabio Cacciagiu',
-  'Daiana Ricchieri','Evelyn Carrizo','Erika Decima','Carlos Consorte','Silvana Quiroga',
-  'Stella Almeri','Cristian Conti','Silvina Soraiz','Alejandra Etcheverry',
-  'Karina Gorvalan','Adriana Bonardi','Adriana Bucas','Claudia Ferres','Gustavo Alloco',
-  'Laura Neuman','Betina Ledesma','David Alcanis','Alejandro Vicentela','Jorge del Campo',
-  'Mariana Garcia','Daniel Gribaudo','Franco Zandanel','Celeste Olmedo','Yoel Lagos',
-  'Laura Beck','Valeria Colucci','Monica Russo','Mariana Carrilli','Yamila Chandia',
-  'Julieta Mandelli','Mariana Novara'
+  'Jorgelina Fernandez','Celeste Zalazar',
+  'Virginia Cañazares','Sergio Valeriano','Facundo Palacio','Valeria Sumbaino',
+  'Maria Barros','Alfonsina Molina','Franco Torres',
+  'Sonia Ferreyra','Fernando Yalis','Eliana Garcias','Eliana Garcia',
+  'Gaston Pauer','Fabio Cacciagiu','Daiana Ricchieri','Evelyn Carrizo',
+  'Erika Decima','Carlos Consorte','Silvana Quiroga','Stella Almeri',
+  'Cristian Conti','Silvina Soraiz','Alejandra Etcheverry',
+  'Karina Gorvalan','Adriana Bonardi','Adriana Bucas','Claudia Ferres',
+  'Gustavo Allocco','Gustavo Alloco','Gustavo Ariel Allocco Godes',
+  'Laura Neumann','Laura Neuman',
+  'Betina Ledesma','ledesma maria betina',
+  'David Alcanis','Alejandro Vicentela','Jorge del Campo',
+  'Mariana Garcia','Daniel Gribaudo','Daniel Gribaldo',
+  'Franco Zandanel','Celeste Olmedo',
+  'Yoel Lagos','Mariana Novara','Laura Beck','Valeria Colucci',
+  'Monica Russo','Mariana Carrilli','Yamila Chandia','Julieta Mandelli',
+  'Ismael hernandez','Ismael Hernandez'
 ]);
 
 function esPool(nombre){
@@ -723,6 +741,98 @@ function abrirModalZona(zona){
 
 function cerrarModal(){document.getElementById('modal-zona').classList.remove('open');}
 document.getElementById('modal-zona').addEventListener('click',function(e){if(e.target===this)cerrarModal();});
+
+function exportarExcel(todo){
+  var datos = todo ? todosRaw : filtrados;
+  var BL2={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible',CerradoVenta:'Cerrado con venta',CerradoSinVenta:'Cerrado sin venta'};
+
+  // Hoja 1: Detalle de derivaciones
+  var filas=[['ID','Fecha','Cliente','Teléfono','Producto Prepaga','Asesor Prepaga','Pool','Zona','Asesor VIDA','Estado','Prima Vendida','Prima Cotizada','Producto VIDA','Producto Cotizado']];
+  datos.forEach(function(d){
+    filas.push([
+      d.id, d.fecha, d.nombre, d.tel||'', d.producto||'',
+      d.prepaga||'', esPool(d.prepaga)?'Pool':'No-Pool', d.zona||'',
+      d.asesorVida||'', BL2[d.estado]||d.estado,
+      d.prima||'', d.primaCotiz||'', d.prodVida||'', d.prodCotiz||''
+    ]);
+  });
+
+  // Hoja 2: Resumen por zona
+  var zonaMap={};
+  datos.forEach(function(d){
+    if(!zonaMap[d.zona])zonaMap[d.zona]={total:0,pool:0,nopool:0,ventas:0,cotizados:0,pendientes:0,primaTotal:0};
+    var z=zonaMap[d.zona];
+    z.total++;
+    if(esPool(d.prepaga))z.pool++; else z.nopool++;
+    if(d.estado==='CerradoVenta'){z.ventas++;z.primaTotal+=d.prima||0;}
+    if(d.estado==='Cotizado')z.cotizados++;
+    if(d.estado==='Pendiente')z.pendientes++;
+  });
+  var filasZona=[['Zona','Total','Pool','No-Pool','% Pool','Ventas','Cotizados','Pendientes','Prima Total','% Conversión']];
+  Object.keys(zonaMap).sort().forEach(function(z){
+    var zd=zonaMap[z];
+    filasZona.push([
+      z, zd.total, zd.pool, zd.nopool,
+      zd.total?Math.round(zd.pool/zd.total*100)+'%':'0%',
+      zd.ventas, zd.cotizados, zd.pendientes,
+      zd.primaTotal?'$'+zd.primaTotal.toLocaleString('es-AR'):'',
+      zd.total?Math.round(zd.ventas/zd.total*100)+'%':'0%'
+    ]);
+  });
+
+  // Hoja 3: Ranking asesores prepaga
+  var prepMap={};
+  datos.forEach(function(d){
+    if(!d.prepaga)return;
+    if(!prepMap[d.prepaga])prepMap[d.prepaga]={zona:d.zona,pool:esPool(d.prepaga),total:0,ventas:0};
+    prepMap[d.prepaga].total++;
+    if(d.estado==='CerradoVenta')prepMap[d.prepaga].ventas++;
+  });
+  var filasPrep=[['Asesor Prepaga','Zona','Pool','Derivaciones','Ventas','% Conversión']];
+  Object.keys(prepMap).sort(function(a,b){return prepMap[b].total-prepMap[a].total;}).forEach(function(n){
+    var pd=prepMap[n];
+    filasPrep.push([n,pd.zona,pd.pool?'Pool':'No-Pool',pd.total,pd.ventas,pd.total?Math.round(pd.ventas/pd.total*100)+'%':'0%']);
+  });
+
+  // Hoja 4: Semanas
+  var semMap={};
+  datos.forEach(function(d){
+    if(!d.semana)return;
+    if(!semMap[d.semana])semMap[d.semana]={der:0,ven:0,pool:0,nopool:0};
+    semMap[d.semana].der++;
+    if(d.estado==='CerradoVenta')semMap[d.semana].ven++;
+    if(esPool(d.prepaga))semMap[d.semana].pool++; else semMap[d.semana].nopool++;
+  });
+  var filassSem=[['Semana','Derivaciones','Ventas','Pool','No-Pool','% Conversión']];
+  Object.keys(semMap).sort().forEach(function(s){
+    var sd=semMap[s];
+    var lbl=s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+    filassSem.push([lbl,sd.der,sd.ven,sd.pool,sd.nopool,sd.der?Math.round(sd.ven/sd.der*100)+'%':'0%']);
+  });
+
+  // Armar workbook
+  var wb=XLSX.utils.book_new();
+  var ws1=XLSX.utils.aoa_to_sheet(filas);
+  var ws2=XLSX.utils.aoa_to_sheet(filasZona);
+  var ws3=XLSX.utils.aoa_to_sheet(filasPrep);
+  var ws4=XLSX.utils.aoa_to_sheet(filassSem);
+
+  // Anchos de columna hoja 1
+  ws1['!cols']=[{wch:12},{wch:12},{wch:24},{wch:14},{wch:22},{wch:24},{wch:10},{wch:12},{wch:22},{wch:20},{wch:14},{wch:14},{wch:20},{wch:20}];
+  ws2['!cols']=[{wch:14},{wch:8},{wch:8},{wch:10},{wch:8},{wch:8},{wch:10},{wch:12},{wch:16},{wch:14}];
+  ws3['!cols']=[{wch:26},{wch:12},{wch:10},{wch:14},{wch:8},{wch:14}];
+  ws4['!cols']=[{wch:12},{wch:14},{wch:8},{wch:8},{wch:10},{wch:14}];
+
+  XLSX.utils.book_append_sheet(wb,ws1,'Derivaciones');
+  XLSX.utils.book_append_sheet(wb,ws2,'Por Zona');
+  XLSX.utils.book_append_sheet(wb,ws3,'Ranking Prepaga');
+  XLSX.utils.book_append_sheet(wb,ws4,'Por Semana');
+
+  var fecha=new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
+  var nombre=(todo?'Historial_completo':'Vista_filtrada')+'_Derivaciones_'+fecha+'.xlsx';
+  XLSX.writeFile(wb,nombre);
+}
+
 cargarDatos();
 </script>
 </body>
