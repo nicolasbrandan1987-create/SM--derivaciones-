@@ -106,6 +106,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .abtn{flex:1;padding:10px 6px;font-size:11px;font-weight:600;border:none;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;color:var(--text2);border-right:1px solid #f0f0f0}
 .abtn:last-child{border-right:none}
 .abtn.wa{color:#25d366}
+/* Estrellitas calificación */
+.cstars{padding:6px 12px 8px;border-top:1px solid #f0f0f0;display:flex;align-items:center;gap:8px}
+.cstars-label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.stars{display:flex;gap:3px}
+.star{font-size:20px;cursor:pointer;color:#e2e8f0;transition:color .15s;line-height:1}
+.star.on{color:#f59e0b}
+.star:hover,.star.hover{color:#f59e0b}
+.stars-saved{font-size:10px;color:#10b981;font-weight:700;margin-left:4px;display:none}
+.stars-saved.show{display:inline}
 .empty{text-align:center;padding:40px 24px;color:var(--text2)}
 /* Modal carga manual */
 .overlay-manual{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;align-items:flex-end;justify-content:center}
@@ -324,6 +333,7 @@ function cargarDatos(){
           primaCotiz:parseFloat(d['Prima Cotizada'])||0,
           prodCotiz:d['Producto Cotizado']||'',
           notas:d['Notas VIDA']||'',
+          calificacion:parseInt(d['Calificacion'])||0,
           semana:getSemana(fc)};
       });
       renderTodo();
@@ -447,6 +457,18 @@ function render(){
       (d.obs?'<div class="cobs">"'+d.obs+'"</div>':'')+
       (d.estado==='Cotizado'&&d.prodCotiz?'<div class="cinfo"><span>💬 '+d.prodCotiz+'</span>'+(d.primaCotiz?'<span>💰 $'+d.primaCotiz+'</span>':'')+'</div>':'')+
       (d.estado==='CerradoVenta'&&d.prodVida?'<div class="vinfo"><span>🛡️ '+d.prodVida+'</span>'+(d.prima?'<span>💰 $'+d.prima+'</span>':'')+'</div>':'')+
+      '<div class="cstars">'+
+        '<span class="cstars-label">Calidad:</span>'+
+        '<div class="stars" id="stars-'+d.id+'">'+
+          [1,2,3,4,5].map(function(n){
+            return'<span class="star'+(n<=d.calificacion?' on':'')+'" '+
+              'onclick="calificar(\''+d.id+'\','+n+')" '+
+              'onmouseover="hoverStars(\''+d.id+'\','+n+')" '+
+              'onmouseout="unhoverStars(\''+d.id+'\','+d.calificacion+')">★</span>';
+          }).join('')+
+        '</div>'+
+        '<span class="stars-saved" id="saved-'+d.id+'">✓</span>'+
+      '</div>'+
       '<div class="cnota-wrap">'+
         '<textarea class="cnota" rows="2" placeholder="Agregar comentario..." id="nota-'+d.id+'">'+d.notas+'</textarea>'+
         '<button class="cnota-btn" onclick="guardarNota(\''+d.id+'\')">Guardar nota</button>'+
@@ -457,6 +479,36 @@ function render(){
         '<button class="abtn" onclick="abrirModal(\''+d.id+'\')">✏️ Estado</button>'+
       '</div></div>';
   }).join('');
+}
+
+function hoverStars(id,n){
+  document.querySelectorAll('#stars-'+id+' .star').forEach(function(s,i){
+    s.classList.toggle('on',i<n);
+  });
+}
+function unhoverStars(id,calificacion){
+  document.querySelectorAll('#stars-'+id+' .star').forEach(function(s,i){
+    s.classList.toggle('on',i<calificacion);
+  });
+}
+function calificar(id,n){
+  var idx=derivaciones.findIndex(function(d){return d.id===id;});
+  if(idx===-1)return;
+  derivaciones[idx].calificacion=n;
+  // Actualizar visual
+  document.querySelectorAll('#stars-'+id+' .star').forEach(function(s,i){
+    s.classList.toggle('on',i<n);
+    // actualizar onmouseout con nueva calificacion
+    s.setAttribute('onmouseout',"unhoverStars('"+id+"',"+n+")");
+  });
+  // Guardar en sheet
+  jsonp({accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,calificacion:n},
+    function(){
+      var saved=document.getElementById('saved-'+id);
+      if(saved){saved.classList.add('show');setTimeout(function(){saved.classList.remove('show');},2000);}
+    },
+    function(){toast('❌ Error al guardar calificación',false);}
+  );
 }
 
 function guardarNota(id){
