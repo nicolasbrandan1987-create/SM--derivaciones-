@@ -2,838 +2,297 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel Gerencial — Swiss Medical VIDA</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivar a Seguros de Vida — Swiss Medical</title>
 <style>
-:root{--azul:#003366;--verde:#10b981;--naranja:#f59e0b;--rojo:#ef4444;--gris:#94a3b8;--celeste:#3b82f6;--violeta:#8b5cf6;--bg:#f0f4f8;--text:#1a1a2e;--text2:#64748b}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:60px;color:var(--text)}
-.hdr{background:linear-gradient(135deg,var(--azul) 0%,#001f4d 100%);padding:20px;color:white}
-.logo{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:4px}
-.hdr h1{font-size:20px;font-weight:800}
-.hdr-sub{font-size:11px;opacity:.5;margin-top:2px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px}
-.kpi{background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.06)}
-.kpi .val{font-size:22px;font-weight:800;color:var(--azul);font-family:'DM Mono',monospace}
-.kpi .lbl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
-.filtros{display:flex;gap:8px;padding:0 14px 12px;flex-wrap:wrap}
-.fg{display:flex;flex-direction:column;gap:3px}
-.fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)}
-.fg select{padding:7px 10px;border:1.5px solid #dde3ec;border-radius:8px;font-size:12px;font-family:inherit;background:white;outline:none;color:var(--text)}
-.tabs{display:flex;background:white;margin:0 14px 12px;border-radius:10px;padding:3px;box-shadow:0 2px 6px rgba(0,0,0,.06);overflow-x:auto}
-.tab{flex:1;padding:8px 4px;font-size:10px;font-weight:700;cursor:pointer;border-radius:8px;text-align:center;color:var(--text2);white-space:nowrap;min-width:60px}
-.tab.active{background:var(--azul);color:white}
-.tc{display:none;padding:0 14px 14px}
-.tc.active{display:block}
-.sec-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--azul);margin:12px 0 8px}
-.card-white{background:white;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px}
-
-/* Estado grid */
-.estado-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.ec{border-radius:10px;padding:10px;text-align:center}
-.ec .ev{font-size:20px;font-weight:800;font-family:'DM Mono',monospace}
-.ec .el{font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;font-weight:700}
-.ec-pendiente{background:#fef3c7;color:#92400e}
-.ec-contactado{background:#ede9fe;color:#5b21b6}
-.ec-cotizado{background:#dbeafe;color:#1e40af}
-.ec-venta{background:#d1fae5;color:#065f46}
-.ec-sinventa{background:#fee2e2;color:#991b1b}
-.ec-imposible{background:#f1f5f9;color:#475569}
-
-/* Funnel */
-.funnel-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.funnel-label{font-size:11px;font-weight:700;width:90px;text-align:right}
-.funnel-bg{flex:1;height:26px;background:#f0f4f8;border-radius:8px;overflow:hidden}
-.funnel-fill{height:26px;border-radius:8px;display:flex;align-items:center;padding:0 8px;min-width:24px}
-.funnel-meta{font-size:10px;color:var(--text2);width:90px;font-family:'DM Mono',monospace}
-
-/* Semanas */
-.weeks-scroll{overflow-x:auto;scrollbar-width:none}
-.weeks-scroll::-webkit-scrollbar{display:none}
-.weeks-row{display:flex;gap:8px;min-width:max-content;padding-bottom:4px}
-.wk{min-width:56px;text-align:center}
-.wk-bars{display:flex;align-items:flex-end;gap:2px;height:55px;justify-content:center}
-.wk-bar{width:12px;border-radius:3px 3px 0 0}
-.wk-label{font-size:9px;color:var(--text2);font-weight:600;margin-top:3px}
-.wk-vals{font-size:9px;font-family:'DM Mono',monospace;display:flex;gap:3px;justify-content:center;margin-top:2px}
-
-/* Zonas */
-.zonas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:10px}
-.zona-card{background:white;border-radius:10px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);border-top:3px solid var(--azul);cursor:pointer}
-.zona-card:hover{box-shadow:0 4px 14px rgba(0,51,102,.15)}
-.zona-name{font-size:12px;font-weight:800;color:var(--azul);margin-bottom:6px}
-.zona-asesores{font-size:10px;color:var(--text2);margin-bottom:8px;line-height:1.5}
-.zona-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
-.zk{background:#f8fafc;border-radius:6px;padding:5px;text-align:center}
-.zk .zv{font-size:14px;font-weight:800;color:var(--azul);font-family:'DM Mono',monospace}
-.zk .zl{font-size:8px;color:var(--text2);text-transform:uppercase}
-.conv-bar{height:4px;background:#f0f4f8;border-radius:4px;margin-top:6px}
-.conv-fill{height:4px;border-radius:4px}
-
-/* Tabla */
-table{width:100%;background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.06);border-collapse:collapse;font-size:11px}
-th{background:var(--azul);color:white;padding:8px 8px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
-td{padding:7px 8px;border-bottom:1px solid #f0f0f0}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#f8fafc}
-.badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px}
-.bPendiente{background:#fef3c7;color:#92400e}
-.bContactado{background:#ede9fe;color:#5b21b6}
-.bCotizado{background:#dbeafe;color:#1e40af}
-.bImposible{background:#f1f5f9;color:#475569}
-.bCerradoVenta{background:#d1fae5;color:#065f46}
-.bCerradoSinVenta{background:#fee2e2;color:#991b1b}
-.fbtn{padding:5px 10px;border-radius:20px;border:1.5px solid #dde3ec;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;background:white;color:var(--text2);margin-right:4px;margin-bottom:6px}
-.fbtn.active{background:var(--azul);border-color:var(--azul);color:white}
-
-/* Gráfico barras semanal */
-.bar-chart-svg-wrap{overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
-.bar-chart-svg-wrap::-webkit-scrollbar{display:none}
-.bar-chart-svg{display:block;min-width:100%}
-.bc-axis-label{font-size:9px;fill:#94a3b8;font-family:'DM Sans',sans-serif}
-.bc-bar-label{font-size:9px;fill:#003366;font-weight:700;font-family:'DM Mono',monospace}
-.bc-bar-label-v{font-size:9px;fill:#10b981;font-weight:700;font-family:'DM Mono',monospace}
-.chart-legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
-.chart-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
-.chart-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.bar-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
-.bar-name{font-weight:600}
-.bar-val{font-weight:700;color:var(--azul);font-family:'DM Mono',monospace}
-.bar-track{height:7px;background:#f0f4f8;border-radius:8px}
-.bar-fill{height:7px;border-radius:8px}
-
-/* Asesor select */
-.asesor-selector{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.asesor-selector label{font-size:11px;font-weight:700;color:var(--text2)}
-.asesor-selector select{padding:6px 10px;border:1.5px solid #dde3ec;border-radius:8px;font-size:12px;font-family:inherit;background:white;outline:none}
-
-/* Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal-detail{background:white;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
-.modal-hdr{background:var(--azul);padding:16px 18px;color:white;position:relative}
-.modal-hdr h2{font-size:16px;font-weight:800}
-.modal-sub{font-size:10px;opacity:.6;margin-top:2px}
-.modal-stats{display:grid;grid-template-columns:repeat(4,1fr);background:#002244}
-.modal-stat{padding:10px 4px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
-.modal-stat:last-child{border-right:none}
-.modal-stat .mv{font-size:16px;font-weight:800;color:white;font-family:'DM Mono',monospace}
-.modal-stat .ml{font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase}
-.modal-body{padding:12px}
-.modal-table{width:100%;border-collapse:collapse;font-size:11px}
-.modal-table th{background:#f8fafc;padding:7px 8px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text2);border-bottom:1px solid #f0f0f0}
-.modal-table td{padding:7px 8px;border-bottom:1px solid #f8fafc}
-.close-btn{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.2);border:none;color:white;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2)}
-.legend-dot{width:8px;height:8px;border-radius:2px}
-/* Exportar */
-.export-bar{display:flex;gap:8px;padding:0 14px 12px;flex-wrap:wrap}
-.btn-export{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.btn-export.filtrado{background:#003366;color:white}
-.btn-export.todo{background:#e2e8f0;color:#1a1a2e}
-.btn-export:hover{opacity:.88}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px 48px; }
+  .container { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); width: 100%; max-width: 480px; overflow: hidden; }
+  .header { background: #003366; padding: 24px 24px 20px; color: white; }
+  .header .logo { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+  .header h1 { font-size: 22px; font-weight: 700; line-height: 1.2; }
+  .header p { font-size: 13px; opacity: 0.75; margin-top: 6px; }
+  .asesor-badge { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 14px; margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.9); display: none; }
+  .asesor-badge span { font-weight: 700; color: #fff; }
+  .form-body { padding: 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #003366; margin-bottom: 14px; margin-top: 8px; }
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  label span.req { color: #c00; margin-left: 2px; }
+  input, select, textarea { width: 100%; border: 1.5px solid #dde3ec; border-radius: 8px; padding: 11px 14px; font-size: 15px; color: #1a1a1a; background: #fafbfd; transition: border-color 0.2s; outline: none; font-family: inherit; }
+  input:focus, select:focus, textarea:focus { border-color: #003366; background: #fff; }
+  textarea { resize: vertical; min-height: 80px; }
+  .divider { border: none; border-top: 1px solid #eef0f4; margin: 20px 0; }
+  .criteria-box { background: #eef4ff; border: 1px solid #c3d6f5; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; }
+  .criteria-box .criteria-title { font-size: 12px; font-weight: 700; color: #003366; margin-bottom: 6px; }
+  .criteria-list { list-style: none; }
+  .criteria-list li { font-size: 12px; color: #334; padding: 2px 0; }
+  .criteria-list li::before { content: '✓ '; color: #0066cc; font-weight: 700; }
+  .productos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .prod-option { display: flex; align-items: center; gap: 8px; background: #fafbfd; border: 1.5px solid #dde3ec; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; color: #333; }
+  .prod-option input[type=checkbox] { width: 16px; height: 16px; flex-shrink: 0; accent-color: #003366; border: none; padding: 0; background: transparent; }
+  .prod-option:has(input:checked) { border-color: #003366; background: #eef4ff; color: #003366; }
+  .btn-submit { width: 100%; background: #003366; color: white; border: none; border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: background 0.2s; letter-spacing: 0.3px; }
+  .btn-submit:hover { background: #004488; }
+  .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+  .success-screen { display: none; padding: 48px 24px; text-align: center; }
+  .success-icon { width: 72px; height: 72px; background: #e6f4ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; }
+  .success-screen h2 { font-size: 22px; color: #1a3a1a; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: #555; margin-bottom: 24px; line-height: 1.5; }
+  .btn-nueva { background: #003366; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .loading { display: none; text-align: center; padding: 20px; color: #555; font-size: 14px; }
+  .error-msg { color: #c00; font-size: 12px; margin-top: 4px; display: none; }
+  .fallback-note { font-size: 11px; color: #888; margin-top: 4px; }
 </style>
 </head>
 <body>
-<div class="hdr">
-  <div class="logo">Swiss Medical · VIDA</div>
-  <h1>Panel Gerencial</h1>
-  <div class="hdr-sub">Interior — Derivaciones Prepaga→VIDA</div>
-</div>
-<div class="kpis">
-  <div class="kpi"><div class="val" id="kT">-</div><div class="lbl">Total</div></div>
-  <div class="kpi"><div class="val" id="kP">-</div><div class="lbl">Pendientes</div></div>
-  <div class="kpi"><div class="val" id="kV">-</div><div class="lbl">Ventas</div></div>
-  <div class="kpi"><div class="val" id="kC">-</div><div class="lbl">Conversión</div></div>
-</div>
-<div class="filtros">
-  <div class="fg"><label>Mes</label><select id="filtroMes" onchange="aplicarFiltros()"><option value="">Todos</option></select></div>
-  <div class="fg"><label>Semana</label><select id="filtroSemana" onchange="aplicarFiltros()"><option value="">Todas</option></select></div>
-  <div class="fg"><label>Zona</label>
-    <select id="filtroZona" onchange="aplicarFiltros()">
-      <option value="">Todas</option>
-      <option>Mendoza</option><option>Neuquén</option><option>Córdoba</option>
-      <option>Salta</option><option>Chaco</option><option>Bs As Sur</option><option>Rosario</option>
-    </select></div>
-  <div class="fg"><label>Asesor Prepaga</label>
-    <select id="filtroPool" onchange="aplicarFiltros()">
-      <option value="todos">Todos</option>
-      <option value="pool">🔵 Solo Pool</option>
-      <option value="nopool">⚪ Solo No-Pool</option>
-    </select></div>
-</div>
-<div class="export-bar">
-  <button class="btn-export filtrado" onclick="exportarExcel(false)">📥 Exportar vista filtrada</button>
-  <button class="btn-export todo" onclick="exportarExcel(true)">📥 Exportar todo el historial</button>
-</div>
-<div class="tabs">
-  <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
-  <div class="tab" onclick="showTab('zonas',this)">🗺️ Zonas</div>
-  <div class="tab" onclick="showTab('asesores',this)">👤 Asesores</div>
-  <div class="tab" onclick="showTab('semanal',this)">📅 Semanal</div>
-  <div class="tab" onclick="showTab('lista',this)">📋 Lista</div>
-</div>
+<div class="container">
+  <div class="header">
+    <div class="logo">Swiss Medical Grupo · VIDA</div>
+    <h1>Derivar cliente a<br>Seguros de Vida</h1>
+    <p>Completá el formulario — el especialista VIDA lo recibe al instante</p>
+    <div class="asesor-badge" id="asesorBadge">Enviando como: <span id="asesorBadgeNombre"></span></div>
+  </div>
 
-<!-- RESUMEN -->
-<div class="tc active" id="tab-resumen">
-  <div class="sec-title">Estado general</div>
-  <div class="estado-grid" id="estado-grid"></div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">💰 Funnel de ventas</div>
-    <div id="funnel-g"></div>
-  </div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">📅 Semanas</div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#003366"></div>Derivaciones</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Ventas</div>
-    </div>
-    <div class="weeks-scroll"><div class="weeks-row" id="weeks-g"></div></div>
-  </div>
-</div>
+  <div class="form-body" id="formBody">
 
-<!-- ZONAS -->
-<div class="tc" id="tab-zonas">
-  <div class="zonas-grid" id="zonas-grid"></div>
-</div>
+    <div class="criteria-box">
+      <div class="criteria-title">¿Cuándo derivar?</div>
+      <ul class="criteria-list">
+        <li>El cliente preguntó por cobertura de vida o accidentes</li>
+        <li>Tiene familia o dependientes económicos</li>
+        <li>Mencionó interés en ahorro o inversión</li>
+        <li>Titular entre 25 y 60 años</li>
+        <li>Intuición / buen perfil comercial</li>
+      </ul>
+    </div>
 
-<!-- ASESORES -->
-<div class="tc" id="tab-asesores">
-  <div class="asesor-selector">
-    <label>Ver asesor:</label>
-    <select id="asesorSelect" onchange="renderAsesor()"><option value="">Todos</option></select>
-  </div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">Estado por asesor</div>
-    <div id="asesor-estado"></div>
-  </div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">Funnel por asesor</div>
-    <div id="asesor-funnel"></div>
-  </div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">Ranking derivadores</div>
-    <div id="asesor-ranking"></div>
-  </div>
-</div>
+    <div class="section-label">Datos del cliente</div>
 
-<!-- SEMANAL -->
-<div class="tc" id="tab-semanal">
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">📊 Derivaciones por semana</div>
-    <div class="chart-legend">
-      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#003366"></div>Derivaciones</div>
-      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#10b981"></div>Ventas</div>
+    <div class="field">
+      <label>Nombre y apellido <span class="req">*</span></label>
+      <input type="text" id="clienteNombre" placeholder="Ej: María González" autocomplete="off">
+      <div class="error-msg" id="err-nombre">Este campo es obligatorio</div>
     </div>
-    <div class="bar-chart-svg-wrap" id="chart-semanas-wrap">
-      <div style="color:#aaa;font-size:12px">Cargando...</div>
-    </div>
-  </div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">Semana actual vs anterior — por asesor</div>
-    <div id="comp-asesores"></div>
-  </div>
-  <div class="card-white">
-    <div class="sec-title" style="margin-top:0">Mes a mes</div>
-    <div id="chart-meses"></div>
-  </div>
-</div>
 
-<!-- LISTA -->
-<div class="tc" id="tab-lista">
-  <div style="margin-bottom:8px">
-    <button class="fbtn active" onclick="filtrarEstado('todos',this)">Todos</button>
-    <button class="fbtn" onclick="filtrarEstado('Pendiente',this)">⏳ Pendiente</button>
-    <button class="fbtn" onclick="filtrarEstado('Contactado',this)">📞 Contactado</button>
-    <button class="fbtn" onclick="filtrarEstado('Cotizado',this)">💬 Cotizado</button>
-    <button class="fbtn" onclick="filtrarEstado('CerradoVenta',this)">✅ Venta</button>
-    <button class="fbtn" onclick="filtrarEstado('CerradoSinVenta',this)">❌ Sin venta</button>
-  </div>
-  <table>
-    <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Prepaga</th><th>VIDA</th><th>Zona</th><th>Estado</th><th>Prima</th></tr></thead>
-    <tbody id="tbody"></tbody>
-  </table>
-</div>
+    <div class="field">
+      <label>Teléfono <span class="req">*</span></label>
+      <input type="tel" id="clienteTel" placeholder="Ej: 1145678901" autocomplete="off">
+      <div class="error-msg" id="err-tel">Ingresá un teléfono válido</div>
+    </div>
 
-<!-- MODAL ZONA -->
-<div class="modal-overlay" id="modal-zona">
-  <div class="modal-detail">
-    <div class="modal-hdr">
-      <button class="close-btn" onclick="cerrarModal()">✕</button>
-      <h2 id="mz-nombre">Zona</h2>
-      <div class="modal-sub" id="mz-sub"></div>
+    <div class="field">
+      <label>Producto prepaga que tiene <span class="req">*</span></label>
+      <div class="productos-grid" id="productosGrid">
+        <label class="prod-option"><input type="checkbox" value="S2"> S2</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 20"> SMG 20</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 30"> SMG 30</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 40"> SMG 40</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 50"> SMG 50</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 60"> SMG 60</label>
+        <label class="prod-option"><input type="checkbox" value="SMG 70"> SMG 70</label>
+        <label class="prod-option"><input type="checkbox" value="Otro"> Otro</label>
+      </div>
+      <div class="error-msg" id="err-producto">Seleccioná al menos un producto</div>
     </div>
-    <div class="modal-stats">
-      <div class="modal-stat"><div class="mv" id="mz-total">0</div><div class="ml">Total</div></div>
-      <div class="modal-stat"><div class="mv" id="mz-pend">0</div><div class="ml">Pendientes</div></div>
-      <div class="modal-stat"><div class="mv" id="mz-ventas">0</div><div class="ml">Ventas</div></div>
-      <div class="modal-stat"><div class="mv" id="mz-conv">0%</div><div class="ml">Conversión</div></div>
+
+    <div class="field">
+      <label>Observación <span class="req">*</span></label>
+      <textarea id="observacion" placeholder="¿Por qué lo derivás? ¿Qué mencionó el cliente? Cualquier dato útil para el especialista..."></textarea>
+      <div class="error-msg" id="err-obs">Escribí una observación breve</div>
     </div>
-    <div class="modal-body">
-      <table class="modal-table">
-        <thead><tr><th>Fecha</th><th>Cliente</th><th>Prepaga</th><th>VIDA</th><th>Estado</th><th>Prima</th></tr></thead>
-        <tbody id="mz-tbody"></tbody>
-      </table>
+
+    <hr class="divider">
+
+    <!-- SECCIÓN TUS DATOS: solo se muestra si NO viene asesor en la URL -->
+    <div id="seccionTusDatos" style="display:none;">
+      <div class="section-label">Tus datos</div>
+      <div class="field">
+        <label>Tu nombre <span class="req">*</span></label>
+        <input type="text" id="asesorNombreFallback" placeholder="Ej: Juan García" autocomplete="off">
+        <div class="fallback-note">Escribí tu nombre completo tal como aparece en el sistema</div>
+        <div class="error-msg" id="err-asesor">Ingresá tu nombre</div>
+      </div>
     </div>
+
+    <div class="section-label">Asesor de Vida</div>
+
+    <div class="field">
+      <label>Seleccioná el especialista <span class="req">*</span></label>
+      <select id="asesorVida">
+        <option value="" disabled selected>Seleccioná el asesor de Vida...</option>
+      </select>
+      <div class="error-msg" id="err-vida">Seleccioná el asesor de Vida</div>
+    </div>
+
+    <div class="loading" id="loadingMsg">⏳ Enviando derivación...</div>
+
+    <button class="btn-submit" id="btnEnviar" onclick="enviarDerivacion()">
+      Derivar cliente →
+    </button>
+
   </div>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✅</div>
+    <h2>¡Derivación enviada!</h2>
+    <p>El especialista VIDA recibió los datos del cliente y lo va a contactar en breve.<br><br>
+    Gracias por derivar — tu colaboración hace crecer el equipo.</p>
+    <button class="btn-nueva" onclick="nuevaDerivacion()">Derivar otro cliente</button>
+  </div>
+
 </div>
 
 <script>
-var URL_SCRIPT='https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
-var ZONAS={
-  'Mendoza':['Gaston Flores','Marina Quevedo'],
-  'Neuquén':['Ana Laura Dominguez','Ricardo Blanco'],
-  'Córdoba':['Nadia Rivero','Miguel Nuñez'],
-  'Salta':['Agustina Aguirre','Karina Bagnasco','Rina Beltran'],
-  'Chaco':['Martin Lopez','Lucas Armand','Julia Pierlucca'],
-  'Bs As Sur':['Florencia Berlocq','Jose Passeri'],
-  'Rosario':['Silvina Bruno']
-};
-var ZONA_COLORS={'Mendoza':'#003366','Neuquén':'#0066cc','Córdoba':'#10b981','Salta':'#f59e0b','Chaco':'#ef4444','Bs As Sur':'#8b5cf6','Rosario':'#ec4899'};
-var BL={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible',CerradoVenta:'✅ Venta',CerradoSinVenta:'❌ Sin venta'};
-var BC={Pendiente:'bPendiente',Contactado:'bContactado',Cotizado:'bCotizado',Imposible:'bImposible',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta'};
-var todosRaw=[],filtrados=[],filtroEstado='todos',filtroPool='todos';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
 
-// Lista fija de asesores Prepaga que están en el Pool de datos web
-var POOL=new Set([
-  'Aixa Rios','Daniel Barrera','Diana Espinoza','Marta Muriel','Gustavo Ardiles',
-  'Jorgelina Fernandez','Celeste Zalazar',
-  'Virginia Cañazares','Sergio Valeriano','Facundo Palacio','Valeria Sumbaino',
-  'Maria Barros','Alfonsina Molina','Franco Torres',
-  'Sonia Ferreyra','Fernando Yalis','Eliana Garcias','Eliana Garcia',
-  'Gaston Pauer','Fabio Cacciagiu','Daiana Ricchieri','Evelyn Carrizo',
-  'Erika Decima','Carlos Consorte','Silvana Quiroga','Stella Almeri',
-  'Cristian Conti','Silvina Soraiz','Alejandra Etcheverry',
-  'Karina Gorvalan','Adriana Bonardi','Adriana Bucas','Claudia Ferres',
-  'Gustavo Allocco','Gustavo Alloco','Gustavo Ariel Allocco Godes',
-  'Laura Neumann','Laura Neuman',
-  'Betina Ledesma','ledesma maria betina',
-  'David Alcanis','Alejandro Vicentela','Jorge del Campo',
-  'Mariana Garcia','Daniel Gribaudo','Daniel Gribaldo',
-  'Franco Zandanel','Celeste Olmedo',
-  'Yoel Lagos','Mariana Novara','Laura Beck','Valeria Colucci',
-  'Monica Russo','Mariana Carrilli','Yamila Chandia','Julieta Mandelli',
-  'Ismael hernandez','Ismael Hernandez'
-]);
+// ── Leer asesor desde URL ──────────────────────────────────────────────────
+var asesorDesdeURL = '';
 
-function esPool(nombre){
-  if(!nombre)return false;
-  var n=nombre.trim().toLowerCase();
-  for(var p of POOL){if(p.toLowerCase()===n)return true;}
-  return false;
+function getParam(name) {
+  var url = new URLSearchParams(window.location.search);
+  return url.get(name) || '';
 }
 
-function norm(e){
-  if(!e)return'Pendiente';
-  var s=String(e).toLowerCase().replace(/\s/g,'');
-  if(s==='cerradoconventa'||s==='cerradoventa')return'CerradoVenta';
-  if(s==='cerradosinventa')return'CerradoSinVenta';
-  if(s==='contactado')return'Contactado';
-  if(s==='cotizado')return'Cotizado';
-  if(s==='imposible'||s==='imposiblecontactar')return'Imposible';
-  var r=String(e).toLowerCase();
-  if(r.indexOf('sin venta')>=0)return'CerradoSinVenta';
-  if(r.indexOf('con venta')>=0)return'CerradoVenta';
-  if(r.indexOf('cotizado')>=0)return'Cotizado';
-  if(r.indexOf('contactado')>=0)return'Contactado';
-  if(r.indexOf('imposible')>=0)return'Imposible';
-  return'Pendiente';
-}
-
-function getZona(av){for(var z in ZONAS){if(ZONAS[z].some(function(a){return a.toLowerCase()===(av||'').toLowerCase();}))return z;}return'Otros';}
-
-function parseFecha(f){
-  if(!f)return null;
-  f=String(f).split(',')[0].trim(); // quitar hora si viene con coma
-  var d;
-  // Formato DD/MM/YYYY o D/M/YYYY
-  var p=f.split('/');
-  if(p.length===3){
-    var y=p[2].length===4?p[2]:'20'+p[2];
-    d=new Date(y+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'));
-    if(!isNaN(d))return d;
-    // Puede ser M/D/YYYY (formato USA)
-    d=new Date(y+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0'));
-    if(!isNaN(d))return d;
-  }
-  // Formato YYYY-MM-DD
-  if(f.match(/^\d{4}-\d{2}-\d{2}/)){
-    d=new Date(f.slice(0,10));
-    if(!isNaN(d))return d;
-  }
-  // Fallback: dejar que Date lo intente
-  d=new Date(f);
-  if(!isNaN(d))return d;
-  return null;
-}
-
-function getSemana(f){
-  var d=parseFecha(f);
-  if(!d)return null;
-  d.setDate(d.getDate()-d.getDay()+1);
-  return d.toISOString().split('T')[0];
-}
-function getMes(f){
-  var d=parseFecha(f);
-  if(!d)return null;
-  return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');
-}
-
-var cbN=0;
-function jsonp(params,onOk,onErr){
-  var name='_gm'+(cbN++);
-  var url=URL_SCRIPT+'?callback='+name+'&t='+Date.now();
-  Object.keys(params).forEach(function(k){url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(params[k]);});
-  var s=document.createElement('script');
-  var timer=setTimeout(function(){delete window[name];if(s.parentNode)s.parentNode.removeChild(s);if(onErr)onErr('timeout');},20000);
-  window[name]=function(d){clearTimeout(timer);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);onOk(d);};
-  s.onerror=function(){clearTimeout(timer);delete window[name];if(onErr)onErr('error');};
-  s.src=url;document.head.appendChild(s);
-}
-
-function cargarDatos(){
-  jsonp({accion:'getDerivaciones',asesorVida:''},function(data){
-    todosRaw=(data.derivaciones||[]).map(function(d){
-      var av=d['Asesor VIDA']||'',fc=(d['Fecha']||'').split(',')[0];
-      return{id:d['ID']||'',fecha:fc,nombre:d['Cliente Nombre']||'',
-        tel:d['Cliente Teléfono']||'',producto:d['Producto Prepaga']||'',
-        prepaga:d['Asesor Prepaga']||'',asesorVida:av,zona:getZona(av),
-        estado:norm(d['Estado']),prima:parseFloat(d['Prima Vendida'])||0,
-        primaCotiz:parseFloat(d['Prima Cotizada'])||0,
-        semana:getSemana(fc),mes:getMes(fc)};
-    });
-    poblarFiltros();poblarAsesores();aplicarFiltros();
-  },function(){});
-}
-
-function poblarFiltros(){
-  var meses={},semanas={};
-  todosRaw.forEach(function(d){if(d.mes)meses[d.mes]=true;if(d.semana)semanas[d.semana]=true;});
-  var names=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var selMes=document.getElementById('filtroMes');
-  Object.keys(meses).sort().reverse().forEach(function(m){
-    var opt=document.createElement('option'),p=m.split('-');opt.value=m;opt.textContent=names[parseInt(p[1])]+' '+p[0];selMes.appendChild(opt);
-  });
-  var selSem=document.getElementById('filtroSemana');
-  Object.keys(semanas).sort().reverse().forEach(function(s){
-    var opt=document.createElement('option');opt.value=s;opt.textContent='Sem '+s.slice(8,10)+'/'+s.slice(5,7);selSem.appendChild(opt);
-  });
-}
-
-function poblarAsesores(){
-  var asesores={};
-  todosRaw.forEach(function(d){if(d.asesorVida)asesores[d.asesorVida]=true;});
-  var sel=document.getElementById('asesorSelect');
-  Object.keys(asesores).sort().forEach(function(a){
-    var opt=document.createElement('option');opt.value=a;opt.textContent=a;sel.appendChild(opt);
-  });
-}
-
-function aplicarFiltros(){
-  var mes=document.getElementById('filtroMes').value;
-  var sem=document.getElementById('filtroSemana').value;
-  var zona=document.getElementById('filtroZona').value;
-  filtroPool=document.getElementById('filtroPool').value;
-  filtrados=todosRaw.filter(function(d){
-    if(mes&&d.mes!==mes)return false;
-    if(sem&&d.semana!==sem)return false;
-    if(zona&&d.zona!==zona)return false;
-    if(filtroPool==='pool'&&!esPool(d.prepaga))return false;
-    if(filtroPool==='nopool'&&esPool(d.prepaga))return false;
-    return true;
-  });
-  kpis();renderEstados();renderFunnel();renderSemanas();renderZonas();renderAsesor();renderSemanal();renderTabla();
-}
-
-function kpis(){
-  var ventas=filtrados.filter(function(d){return d.estado==='CerradoVenta';}).length;
-  document.getElementById('kT').textContent=filtrados.length;
-  document.getElementById('kP').textContent=filtrados.filter(function(d){return d.estado==='Pendiente';}).length;
-  document.getElementById('kV').textContent=ventas;
-  document.getElementById('kC').textContent=filtrados.length?Math.round(ventas/filtrados.length*100)+'%':'0%';
-}
-
-function renderEstados(){
-  var c={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
-  filtrados.forEach(function(d){if(c[d.estado]!==undefined)c[d.estado]++;});
-  document.getElementById('estado-grid').innerHTML=
-    '<div class="ec ec-pendiente"><div class="ev">'+c.Pendiente+'</div><div class="el">Pendiente</div></div>'+
-    '<div class="ec ec-contactado"><div class="ev">'+c.Contactado+'</div><div class="el">Contactado</div></div>'+
-    '<div class="ec ec-cotizado"><div class="ev">'+c.Cotizado+'</div><div class="el">Cotizado</div></div>'+
-    '<div class="ec ec-venta"><div class="ev">'+c.CerradoVenta+'</div><div class="el">Con venta</div></div>'+
-    '<div class="ec ec-sinventa"><div class="ev">'+c.CerradoSinVenta+'</div><div class="el">Sin venta</div></div>'+
-    '<div class="ec ec-imposible"><div class="ev">'+c.Imposible+'</div><div class="el">Imposible</div></div>';
-}
-
-function buildFunnel(data,elId){
-  var total=data.length||1;
-  var contactados=data.filter(function(d){return['Contactado','Cotizado','CerradoVenta','CerradoSinVenta'].indexOf(d.estado)>=0;}).length;
-  var cotizados=data.filter(function(d){return d.estado==='Cotizado';});
-  var ventas=data.filter(function(d){return d.estado==='CerradoVenta';});
-  var primaCotiz=cotizados.reduce(function(s,d){return s+(d.primaCotiz||0);},0);
-  var primaVentas=ventas.reduce(function(s,d){return s+(d.prima||0);},0);
-  var rows=[
-    {label:'Derivados',n:total,pct:100,color:'#003366',meta:''},
-    {label:'Contactados',n:contactados,pct:Math.round(contactados/total*100),color:'#8b5cf6',meta:''},
-    {label:'Cotizados',n:cotizados.length,pct:Math.round(cotizados.length/total*100),color:'#3b82f6',meta:primaCotiz?'$'+Math.round(primaCotiz).toLocaleString('es-AR'):''},
-    {label:'Ventas',n:ventas.length,pct:Math.round(ventas.length/total*100),color:'#10b981',meta:primaVentas?'$'+Math.round(primaVentas).toLocaleString('es-AR'):''},
-  ];
-  document.getElementById(elId).innerHTML=rows.map(function(r){
-    return'<div class="funnel-row">'+
-      '<div class="funnel-label" style="color:'+r.color+'">'+r.label+'</div>'+
-      '<div class="funnel-bg"><div class="funnel-fill" style="width:'+r.pct+'%;background:'+r.color+'">'+
-        '<span style="color:white;font-size:10px;font-weight:700">'+r.n+'</span>'+
-      '</div></div>'+
-      '<div class="funnel-meta">'+r.meta+'</div>'+
-      '</div>';
-  }).join('');
-}
-
-function renderFunnel(){buildFunnel(filtrados,'funnel-g');}
-
-function renderSemanas(){
-  var semanas={};
-  filtrados.forEach(function(d){
-    if(!d.semana)return;
-    if(!semanas[d.semana])semanas[d.semana]={der:0,ven:0};
-    semanas[d.semana].der++;
-    if(d.estado==='CerradoVenta')semanas[d.semana].ven++;
-  });
-  var sems=Object.keys(semanas).sort();
-  var maxDer=Math.max.apply(null,sems.map(function(s){return semanas[s].der;}))||1;
-  document.getElementById('weeks-g').innerHTML=sems.map(function(s){
-    var sd=semanas[s],hDer=Math.round(sd.der/maxDer*50)+5,hVen=Math.round(sd.ven/maxDer*50)+2;
-    var label=s.slice(8,10)+'/'+s.slice(5,7);
-    return'<div class="wk">'+
-      '<div class="wk-bars"><div class="wk-bar" style="height:'+hDer+'px;background:#003366"></div><div class="wk-bar" style="height:'+hVen+'px;background:#10b981"></div></div>'+
-      '<div class="wk-label">'+label+'</div>'+
-      '<div class="wk-vals"><span style="color:#003366">'+sd.der+'</span><span style="color:#10b981">'+sd.ven+'</span></div>'+
-      '</div>';
-  }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
-}
-
-function renderZonas(){
-  var zonaData={};
-  Object.keys(ZONAS).forEach(function(z){zonaData[z]={total:0,pool:0,nopool:0,pend:0,ventas:0,asesores:ZONAS[z]};});
-  filtrados.forEach(function(d){
-    if(zonaData[d.zona]){
-      zonaData[d.zona].total++;
-      if(esPool(d.prepaga))zonaData[d.zona].pool++;
-      else zonaData[d.zona].nopool++;
-      if(d.estado==='Pendiente')zonaData[d.zona].pend++;
-      if(d.estado==='CerradoVenta')zonaData[d.zona].ventas++;
-    }
-  });
-  document.getElementById('zonas-grid').innerHTML=Object.keys(zonaData).map(function(z){
-    var zd=zonaData[z],conv=zd.total?Math.round(zd.ventas/zd.total*100):0;
-    var pctPool=zd.total?Math.round(zd.pool/zd.total*100):0;
-    return'<div class="zona-card" style="border-top-color:'+ZONA_COLORS[z]+'" onclick="abrirModalZona(\''+z+'\')">'+
-      '<div class="zona-name">'+z+'</div>'+
-      '<div class="zona-asesores">'+zd.asesores.join(' · ')+'</div>'+
-      '<div class="zona-kpis">'+
-        '<div class="zk"><div class="zv">'+zd.total+'</div><div class="zl">Total</div></div>'+
-        '<div class="zk"><div class="zv">'+zd.ventas+'</div><div class="zl">Ventas</div></div>'+
-        '<div class="zk"><div class="zv">'+conv+'%</div><div class="zl">Conv.</div></div>'+
-      '</div>'+
-      '<div style="display:flex;gap:6px;margin-top:8px">'+
-        '<div style="flex:1;background:#eff6ff;border-radius:8px;padding:5px 6px;text-align:center">'+
-          '<div style="font-size:13px;font-weight:800;color:#1e40af;font-family:\'DM Mono\',monospace">'+zd.pool+'</div>'+
-          '<div style="font-size:8px;color:#3b82f6;font-weight:700;text-transform:uppercase">🔵 Pool</div>'+
-        '</div>'+
-        '<div style="flex:1;background:#f8fafc;border-radius:8px;padding:5px 6px;text-align:center">'+
-          '<div style="font-size:13px;font-weight:800;color:#475569;font-family:\'DM Mono\',monospace">'+zd.nopool+'</div>'+
-          '<div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">⚪ No-Pool</div>'+
-        '</div>'+
-        '<div style="flex:1;background:#f0fdf4;border-radius:8px;padding:5px 6px;text-align:center">'+
-          '<div style="font-size:13px;font-weight:800;color:#065f46;font-family:\'DM Mono\',monospace">'+pctPool+'%</div>'+
-          '<div style="font-size:8px;color:#10b981;font-weight:700;text-transform:uppercase">% Pool</div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="conv-bar" style="margin-top:6px"><div class="conv-fill" style="width:'+conv+'%;background:'+ZONA_COLORS[z]+'"></div></div>'+
-      '</div>';
-  }).join('');
-}
-
-function renderAsesor(){
-  var asesorSel=document.getElementById('asesorSelect').value;
-  var data=asesorSel?filtrados.filter(function(d){return d.asesorVida===asesorSel;}):filtrados;
-  // Estado por asesor
-  if(asesorSel){
-    var c={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
-    data.forEach(function(d){if(c[d.estado]!==undefined)c[d.estado]++;});
-    document.getElementById('asesor-estado').innerHTML=
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">'+
-      '<div class="ec ec-pendiente"><div class="ev">'+c.Pendiente+'</div><div class="el">Pendiente</div></div>'+
-      '<div class="ec ec-contactado"><div class="ev">'+c.Contactado+'</div><div class="el">Contactado</div></div>'+
-      '<div class="ec ec-cotizado"><div class="ev">'+c.Cotizado+'</div><div class="el">Cotizado</div></div>'+
-      '<div class="ec ec-venta"><div class="ev">'+c.CerradoVenta+'</div><div class="el">Venta</div></div>'+
-      '<div class="ec ec-sinventa"><div class="ev">'+c.CerradoSinVenta+'</div><div class="el">Sin venta</div></div>'+
-      '<div class="ec ec-imposible"><div class="ev">'+c.Imposible+'</div><div class="el">Imposible</div></div>'+
-      '</div>';
-    buildFunnel(data,'asesor-funnel');
+function iniciarAsesorPrepaga() {
+  var raw = getParam('asesor');
+  if (raw) {
+    asesorDesdeURL = decodeURIComponent(raw.replace(/_/g, ' '));
+    // Mostrar badge en el header
+    document.getElementById('asesorBadgeNombre').textContent = asesorDesdeURL;
+    document.getElementById('asesorBadge').style.display = 'block';
+    // Ocultar sección "Tus datos"
+    document.getElementById('seccionTusDatos').style.display = 'none';
   } else {
-    // Ranking de asesores por derivaciones
-    var asesorData={};
-    filtrados.forEach(function(d){
-      if(!d.asesorVida)return;
-      if(!asesorData[d.asesorVida])asesorData[d.asesorVida]={der:0,ven:0,cotiz:0};
-      asesorData[d.asesorVida].der++;
-      if(d.estado==='CerradoVenta')asesorData[d.asesorVida].ven++;
-      if(d.estado==='Cotizado')asesorData[d.asesorVida].cotiz++;
-    });
-    var sorted=Object.keys(asesorData).sort(function(a,b){return asesorData[b].der-asesorData[a].der;});
-    var maxDer=sorted.length?asesorData[sorted[0]].der:1;
-    document.getElementById('asesor-estado').innerHTML='<div style="font-size:11px;color:var(--text2);margin-bottom:8px">Seleccioná un asesor para ver detalle, o ves el ranking general:</div>'+
-      sorted.map(function(a){
-        var ad=asesorData[a],conv=ad.der?Math.round(ad.ven/ad.der*100):0;
-        return'<div class="bar-group">'+
-          '<div class="bar-label"><span class="bar-name">'+a+'</span><span class="bar-val">'+ad.der+' der · '+ad.ven+' ven · '+conv+'% conv</span></div>'+
-          '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(ad.der/maxDer*100)+'%;background:#003366"></div></div>'+
-          '</div>';
-      }).join('');
-    buildFunnel(filtrados,'asesor-funnel');
+    // Sin parámetro: mostrar campo de texto como fallback
+    document.getElementById('seccionTusDatos').style.display = 'block';
   }
-  // Ranking derivadores prepaga
-  var c2={};
-  data.forEach(function(d){if(d.prepaga)c2[d.prepaga]=(c2[d.prepaga]||0)+1;});
-  var s2=Object.keys(c2).sort(function(a,b){return c2[b]-c2[a];}).slice(0,20),max2=s2.length?c2[s2[0]]:1;
-  document.getElementById('asesor-ranking').innerHTML=s2.map(function(n,i){
-    var badge=esPool(n)
-      ?'<span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:4px">🔵 Pool</span>'
-      :'<span style="font-size:9px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:4px">⚪ No-Pool</span>';
-    return'<div class="bar-group">'+
-      '<div class="bar-label"><span class="bar-name">'+(i+1)+'. '+n+badge+'</span><span class="bar-val">'+c2[n]+'</span></div>'+
-      '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(c2[n]/max2*100)+'%;background:'+(esPool(n)?'#3b82f6':'#94a3b8')+'"></div></div>'+
-      '</div>';
-  }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
 }
 
-function renderChartSemanas(){
-  var sems={};
-  filtrados.forEach(function(d){
-    if(!d.semana)return;
-    if(!sems[d.semana])sems[d.semana]={der:0,ven:0};
-    sems[d.semana].der++;
-    if(d.estado==='CerradoVenta')sems[d.semana].ven++;
+// ── Cargar asesores de Vida desde Google Sheets ───────────────────────────
+window.recibirAsesoresVida = function(data) {
+  var select = document.getElementById('asesorVida');
+  select.innerHTML = '<option value="" disabled selected>Seleccioná el asesor de Vida...</option>';
+  var asesores = data.asesoresVida || [];
+  if (asesores.length === 0) {
+    // Fallback hardcodeado si el Sheet no responde
+    var fallback = ['Ricardo Blanco','Ana Laura Dominguez','Agustina Aguirre','Rina Beltran',
+      'Karina Bagnasco','Florencia Berlocq','Jose Passeri','Martin Lopez',
+      'Julia Pierlucca','Lucas Armand','Gaston Flores','Marina Quevedo',
+      'Silvina Bruno','Nadia Rivero','Miguel Nuñez'];
+    fallback.forEach(function(n) {
+      select.innerHTML += '<option value="' + n + '">' + n + '</option>';
+    });
+    return;
+  }
+  asesores.forEach(function(a) {
+    select.innerHTML += '<option value="' + a.nombre + '">' + a.nombre + '</option>';
   });
-  var semsArr=Object.keys(sems).sort();
-  var wrap=document.getElementById('chart-semanas-wrap');
-  if(!semsArr.length){wrap.innerHTML='<div style="color:#aaa;font-size:12px">Sin datos</div>';return;}
-  var maxDer=Math.max.apply(null,semsArr.map(function(s){return sems[s].der;}))||1;
-  var barW=28,gap=16,padL=28,padR=12,padT=16,padB=36;
-  var chartH=140,totalW=padL+(barW*2+gap)*semsArr.length+(semsArr.length-1)*8+padR;
-  var svgH=padT+chartH+padB;
-  var lines='';
-  [0,.25,.5,.75,1].forEach(function(f){
-    var y=padT+chartH-(f*chartH);
-    var val=Math.round(f*maxDer);
-    lines+='<line x1="'+padL+'" y1="'+y+'" x2="'+(totalW-padR)+'" y2="'+y+'" stroke="#f0f0f0" stroke-width="1"/>';
-    lines+='<text class="bc-axis-label" x="'+(padL-4)+'" y="'+(y+3)+'" text-anchor="end">'+val+'</text>';
-  });
-  var bars='',labels='';
-  semsArr.forEach(function(s,i){
-    var sd=sems[s];
-    var x=padL+i*(barW*2+gap+8);
-    var hDer=Math.max(2,Math.round(sd.der/maxDer*chartH));
-    var hVen=Math.max(sd.ven?2:0,Math.round(sd.ven/maxDer*chartH));
-    var yDer=padT+chartH-hDer,yVen=padT+chartH-hVen;
-    bars+='<rect x="'+x+'" y="'+yDer+'" width="'+barW+'" height="'+hDer+'" fill="#003366" rx="3"/>';
-    bars+='<rect x="'+(x+barW+2)+'" y="'+yVen+'" width="'+barW+'" height="'+hVen+'" fill="#10b981" rx="3"/>';
-    // valor encima de barra derivaciones
-    bars+='<text class="bc-bar-label" x="'+(x+barW/2)+'" y="'+(yDer-4)+'" text-anchor="middle">'+sd.der+'</text>';
-    if(sd.ven>0)bars+='<text class="bc-bar-label-v" x="'+(x+barW+2+barW/2)+'" y="'+(yVen-4)+'" text-anchor="middle">'+sd.ven+'</text>';
-    // label semana
-    var lbl=s.slice(8,10)+'/'+s.slice(5,7);
-    labels+='<text class="bc-axis-label" x="'+(x+barW)+'" y="'+(padT+chartH+14)+'" text-anchor="middle">'+lbl+'</text>';
-  });
-  wrap.innerHTML='<svg class="bar-chart-svg" width="'+Math.max(totalW,300)+'" height="'+svgH+'">'+lines+bars+labels+'</svg>';
+};
+
+function cargarAsesoresVida() {
+  var s = document.createElement('script');
+  s.src = SCRIPT_URL + '?accion=getAsesoresVida&callback=recibirAsesoresVida&t=' + Date.now();
+  s.onerror = function() {
+    // Usar fallback hardcodeado
+    recibirAsesoresVida({ asesoresVida: [] });
+  };
+  document.head.appendChild(s);
 }
 
-function renderSemanal(){
-  renderChartSemanas();
-  var sems={};
-  filtrados.forEach(function(d){
-    if(!d.semana)return;
-    if(!sems[d.semana])sems[d.semana]={der:0,ven:0};
-    sems[d.semana].der++;if(d.estado==='CerradoVenta')sems[d.semana].ven++;
-  });
-  var semsDesc=Object.keys(sems).sort().reverse();
-  var semA=semsDesc[0]||'',semAnt=semsDesc[1]||'';
-  var aA={},aAnt={};
-  filtrados.forEach(function(d){
-    if(d.semana===semA)aA[d.asesorVida]=(aA[d.asesorVida]||0)+1;
-    if(d.semana===semAnt)aAnt[d.asesorVida]=(aAnt[d.asesorVida]||0)+1;
-  });
-  var todos={};Object.keys(aA).forEach(function(a){todos[a]=true;});Object.keys(aAnt).forEach(function(a){todos[a]=true;});
-  var maxA=Math.max.apply(null,Object.keys(todos).map(function(a){return Math.max(aA[a]||0,aAnt[a]||0);}))||1;
-  document.getElementById('comp-asesores').innerHTML=
-    (semA?'<div style="font-size:10px;color:var(--text2);margin-bottom:8px">🔵 Semana '+semA.slice(8,10)+'/'+semA.slice(5,7)+' &nbsp; ⚪ Semana '+semAnt.slice(8,10)+'/'+semAnt.slice(5,7)+'</div>':'')+
-    Object.keys(todos).sort(function(a,b){return((aA[b]||0)+(aAnt[b]||0))-((aA[a]||0)+(aAnt[a]||0));}).map(function(a){
-      var vA=aA[a]||0,vAnt=aAnt[a]||0,pA=Math.round(vA/maxA*100),pAnt=Math.round(vAnt/maxA*100);
-      return'<div class="bar-group"><div class="bar-label"><span class="bar-name">'+a+'</span><span class="bar-val">'+vA+' vs '+vAnt+'</span></div>'+
-        '<div style="display:flex;flex-direction:column;gap:2px">'+
-          '<div class="bar-track"><div class="bar-fill" style="width:'+pA+'%;background:#003366"></div></div>'+
-          '<div class="bar-track"><div class="bar-fill" style="width:'+pAnt+'%;background:#94a3b8"></div></div>'+
-        '</div></div>';
-    }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
-
-  // Meses
-  var meses={};
-  filtrados.forEach(function(d){
-    if(!d.mes)return;
-    if(!meses[d.mes])meses[d.mes]={der:0,ven:0};
-    meses[d.mes].der++;if(d.estado==='CerradoVenta')meses[d.mes].ven++;
-  });
-  var names=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  function ml(m){var p=m.split('-');return names[parseInt(p[1])]+' '+p[0].slice(2);}
-  var mesArr=Object.keys(meses).sort();
-  var maxM=Math.max.apply(null,mesArr.map(function(m){return meses[m].der;}))||1;
-  document.getElementById('chart-meses').innerHTML=mesArr.map(function(m){
-    var md=meses[m],pDer=Math.round(md.der/maxM*100),pVen=Math.round(md.ven/maxM*100);
-    return'<div class="bar-group"><div class="bar-label"><span class="bar-name">'+ml(m)+'</span><span class="bar-val">'+md.der+' der · '+md.ven+' ven</span></div>'+
-      '<div style="display:flex;flex-direction:column;gap:2px">'+
-        '<div class="bar-track"><div class="bar-fill" style="width:'+pDer+'%;background:#003366"></div></div>'+
-        '<div class="bar-track"><div class="bar-fill" style="width:'+pVen+'%;background:#10b981"></div></div>'+
-      '</div></div>';
-  }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
+// ── Utilidades ────────────────────────────────────────────────────────────
+function getProductosSeleccionados() {
+  var checks = document.querySelectorAll('#productosGrid input[type=checkbox]:checked');
+  return Array.from(checks).map(function(c){ return c.value; }).join(', ');
 }
 
-function renderTabla(){
-  var items=filtroEstado==='todos'?filtrados:filtrados.filter(function(d){return d.estado===filtroEstado;});
-  var tbody=document.getElementById('tbody');
-  if(!items.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#888">No hay registros</td></tr>';return;}
-  tbody.innerHTML=items.map(function(d){
-    return'<tr><td>'+d.id+'</td><td>'+d.fecha+'</td><td>'+d.nombre+'</td><td>'+d.prepaga+'</td><td>'+d.asesorVida+'</td><td>'+d.zona+'</td><td><span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></td><td>'+(d.prima?'$'+d.prima.toLocaleString('es-AR'):'')+'</td></tr>';
-  }).join('');
+function showError(id, show) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = show ? 'block' : 'none';
 }
 
-function filtrarEstado(f,btn){
-  filtroEstado=f;
-  document.querySelectorAll('#tab-lista .fbtn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');renderTabla();
+function validar() {
+  var ok = true;
+  var nombre   = document.getElementById('clienteNombre').value.trim();
+  var tel      = document.getElementById('clienteTel').value.trim();
+  var productos = getProductosSeleccionados();
+  var obs      = document.getElementById('observacion').value.trim();
+  var vida     = document.getElementById('asesorVida').value.trim();
+
+  showError('err-nombre',  !nombre);            if (!nombre) ok = false;
+  showError('err-tel',     !tel || tel.length < 8); if (!tel || tel.length < 8) ok = false;
+  showError('err-producto', !productos);        if (!productos) ok = false;
+  showError('err-obs',     !obs);               if (!obs) ok = false;
+  showError('err-vida',    !vida);              if (!vida) ok = false;
+
+  // Validar nombre asesor solo si no viene de URL
+  if (!asesorDesdeURL) {
+    var fb = document.getElementById('asesorNombreFallback').value.trim();
+    showError('err-asesor', !fb);
+    if (!fb) ok = false;
+  }
+
+  return ok;
 }
 
-function showTab(name,el){
-  document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');
+function enviarDerivacion() {
+  if (!validar()) return;
+  var btn     = document.getElementById('btnEnviar');
+  var loading = document.getElementById('loadingMsg');
+  btn.disabled = true;
+  loading.style.display = 'block';
+
+  var nombreAsesor = asesorDesdeURL 
+    || document.getElementById('asesorNombreFallback').value.trim();
+
+  var payload = {
+    accion:        'nuevaDerivacion',
+    clienteNombre: document.getElementById('clienteNombre').value.trim(),
+    clienteTel:    document.getElementById('clienteTel').value.trim(),
+    productos:     getProductosSeleccionados(),
+    observacion:   document.getElementById('observacion').value.trim(),
+    asesorPrepaga: nombreAsesor,
+    asesorZona:    '',
+    asesorVida:    document.getElementById('asesorVida').value.trim()
+  };
+
+  fetch(SCRIPT_URL, {
+    method:  'POST',
+    mode:    'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload)
+  }).then(function() {
+    mostrarExito();
+  }).catch(function() {
+    alert('Error al enviar. Revisá tu conexión e intentá de nuevo.');
+    btn.disabled = false;
+    loading.style.display = 'none';
+  });
 }
 
-function abrirModalZona(zona){
-  var derivs=filtrados.filter(function(d){return d.zona===zona;});
-  var ventas=derivs.filter(function(d){return d.estado==='CerradoVenta';}).length;
-  var pend=derivs.filter(function(d){return d.estado==='Pendiente';}).length;
-  var conv=derivs.length?Math.round(ventas/derivs.length*100):0;
-  document.getElementById('mz-nombre').textContent=zona;
-  document.getElementById('mz-sub').textContent=ZONAS[zona]?ZONAS[zona].join(' · '):'';
-  document.getElementById('mz-total').textContent=derivs.length;
-  document.getElementById('mz-pend').textContent=pend;
-  document.getElementById('mz-ventas').textContent=ventas;
-  document.getElementById('mz-conv').textContent=conv+'%';
-  document.getElementById('mz-tbody').innerHTML=derivs.map(function(d){
-    return'<tr><td>'+d.fecha+'</td><td>'+d.nombre+'</td><td>'+d.prepaga+'</td><td>'+d.asesorVida+'</td><td><span class="badge '+BC[d.estado]+'">'+(BL[d.estado]||d.estado)+'</span></td><td>'+(d.prima?'$'+d.prima.toLocaleString('es-AR'):'—')+'</td></tr>';
-  }).join('');
-  document.getElementById('modal-zona').classList.add('open');
+function mostrarExito() {
+  document.getElementById('formBody').style.display = 'none';
+  document.getElementById('successScreen').style.display = 'block';
 }
 
-function cerrarModal(){document.getElementById('modal-zona').classList.remove('open');}
-document.getElementById('modal-zona').addEventListener('click',function(e){if(e.target===this)cerrarModal();});
-
-function exportarExcel(todo){
-  var datos = todo ? todosRaw : filtrados;
-  var BL2={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible',CerradoVenta:'Cerrado con venta',CerradoSinVenta:'Cerrado sin venta'};
-
-  // Hoja 1: Detalle de derivaciones
-  var filas=[['ID','Fecha','Cliente','Teléfono','Producto Prepaga','Asesor Prepaga','Pool','Zona','Asesor VIDA','Estado','Prima Vendida','Prima Cotizada','Producto VIDA','Producto Cotizado']];
-  datos.forEach(function(d){
-    filas.push([
-      d.id, d.fecha, d.nombre, d.tel||'', d.producto||'',
-      d.prepaga||'', esPool(d.prepaga)?'Pool':'No-Pool', d.zona||'',
-      d.asesorVida||'', BL2[d.estado]||d.estado,
-      d.prima||'', d.primaCotiz||'', d.prodVida||'', d.prodCotiz||''
-    ]);
-  });
-
-  // Hoja 2: Resumen por zona
-  var zonaMap={};
-  datos.forEach(function(d){
-    if(!zonaMap[d.zona])zonaMap[d.zona]={total:0,pool:0,nopool:0,ventas:0,cotizados:0,pendientes:0,primaTotal:0};
-    var z=zonaMap[d.zona];
-    z.total++;
-    if(esPool(d.prepaga))z.pool++; else z.nopool++;
-    if(d.estado==='CerradoVenta'){z.ventas++;z.primaTotal+=d.prima||0;}
-    if(d.estado==='Cotizado')z.cotizados++;
-    if(d.estado==='Pendiente')z.pendientes++;
-  });
-  var filasZona=[['Zona','Total','Pool','No-Pool','% Pool','Ventas','Cotizados','Pendientes','Prima Total','% Conversión']];
-  Object.keys(zonaMap).sort().forEach(function(z){
-    var zd=zonaMap[z];
-    filasZona.push([
-      z, zd.total, zd.pool, zd.nopool,
-      zd.total?Math.round(zd.pool/zd.total*100)+'%':'0%',
-      zd.ventas, zd.cotizados, zd.pendientes,
-      zd.primaTotal?'$'+zd.primaTotal.toLocaleString('es-AR'):'',
-      zd.total?Math.round(zd.ventas/zd.total*100)+'%':'0%'
-    ]);
-  });
-
-  // Hoja 3: Ranking asesores prepaga
-  var prepMap={};
-  datos.forEach(function(d){
-    if(!d.prepaga)return;
-    if(!prepMap[d.prepaga])prepMap[d.prepaga]={zona:d.zona,pool:esPool(d.prepaga),total:0,ventas:0};
-    prepMap[d.prepaga].total++;
-    if(d.estado==='CerradoVenta')prepMap[d.prepaga].ventas++;
-  });
-  var filasPrep=[['Asesor Prepaga','Zona','Pool','Derivaciones','Ventas','% Conversión']];
-  Object.keys(prepMap).sort(function(a,b){return prepMap[b].total-prepMap[a].total;}).forEach(function(n){
-    var pd=prepMap[n];
-    filasPrep.push([n,pd.zona,pd.pool?'Pool':'No-Pool',pd.total,pd.ventas,pd.total?Math.round(pd.ventas/pd.total*100)+'%':'0%']);
-  });
-
-  // Hoja 4: Semanas
-  var semMap={};
-  datos.forEach(function(d){
-    if(!d.semana)return;
-    if(!semMap[d.semana])semMap[d.semana]={der:0,ven:0,pool:0,nopool:0};
-    semMap[d.semana].der++;
-    if(d.estado==='CerradoVenta')semMap[d.semana].ven++;
-    if(esPool(d.prepaga))semMap[d.semana].pool++; else semMap[d.semana].nopool++;
-  });
-  var filassSem=[['Semana','Derivaciones','Ventas','Pool','No-Pool','% Conversión']];
-  Object.keys(semMap).sort().forEach(function(s){
-    var sd=semMap[s];
-    var lbl=s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
-    filassSem.push([lbl,sd.der,sd.ven,sd.pool,sd.nopool,sd.der?Math.round(sd.ven/sd.der*100)+'%':'0%']);
-  });
-
-  // Armar workbook
-  var wb=XLSX.utils.book_new();
-  var ws1=XLSX.utils.aoa_to_sheet(filas);
-  var ws2=XLSX.utils.aoa_to_sheet(filasZona);
-  var ws3=XLSX.utils.aoa_to_sheet(filasPrep);
-  var ws4=XLSX.utils.aoa_to_sheet(filassSem);
-
-  // Anchos de columna hoja 1
-  ws1['!cols']=[{wch:12},{wch:12},{wch:24},{wch:14},{wch:22},{wch:24},{wch:10},{wch:12},{wch:22},{wch:20},{wch:14},{wch:14},{wch:20},{wch:20}];
-  ws2['!cols']=[{wch:14},{wch:8},{wch:8},{wch:10},{wch:8},{wch:8},{wch:10},{wch:12},{wch:16},{wch:14}];
-  ws3['!cols']=[{wch:26},{wch:12},{wch:10},{wch:14},{wch:8},{wch:14}];
-  ws4['!cols']=[{wch:12},{wch:14},{wch:8},{wch:8},{wch:10},{wch:14}];
-
-  XLSX.utils.book_append_sheet(wb,ws1,'Derivaciones');
-  XLSX.utils.book_append_sheet(wb,ws2,'Por Zona');
-  XLSX.utils.book_append_sheet(wb,ws3,'Ranking Prepaga');
-  XLSX.utils.book_append_sheet(wb,ws4,'Por Semana');
-
-  var fecha=new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
-  var nombre=(todo?'Historial_completo':'Vista_filtrada')+'_Derivaciones_'+fecha+'.xlsx';
-  XLSX.writeFile(wb,nombre);
+function nuevaDerivacion() {
+  document.getElementById('formBody').style.display = 'block';
+  document.getElementById('successScreen').style.display = 'none';
+  document.getElementById('clienteNombre').value = '';
+  document.getElementById('clienteTel').value = '';
+  document.getElementById('observacion').value = '';
+  document.querySelectorAll('#productosGrid input').forEach(function(c){ c.checked = false; });
+  document.getElementById('loadingMsg').style.display = 'none';
+  var sv = document.getElementById('asesorVida');
+  if (sv) sv.selectedIndex = 0;
+  document.getElementById('btnEnviar').disabled = false;
+  var fb = document.getElementById('asesorNombreFallback');
+  if (fb) fb.value = '';
 }
 
-cargarDatos();
+// ── Init ──────────────────────────────────────────────────────────────────
+iniciarAsesorPrepaga();
+cargarAsesoresVida();
 </script>
 </body>
 </html>
