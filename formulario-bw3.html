@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Derivar a Seguros de Vida — Swiss Medical BW3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px}
+.container{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:480px;overflow:hidden}
+.header{background:#003366;padding:24px 24px 20px;color:white}
+.header .logo{font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;margin-bottom:6px}
+.header h1{font-size:22px;font-weight:700;line-height:1.2}
+.header p{font-size:13px;opacity:.75;margin-top:6px}
+.asesor-badge{background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;margin-top:12px;font-size:13px;color:rgba(255,255,255,.9)}
+.asesor-badge span{font-weight:700;color:#fff}
+.form-body{padding:24px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#003366;margin-bottom:14px;margin-top:8px}
+.field{margin-bottom:18px}
+label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px}
+label span.req{color:#c00;margin-left:2px}
+input,select,textarea{width:100%;border:1.5px solid #dde3ec;border-radius:8px;padding:11px 14px;font-size:15px;color:#1a1a1a;background:#fafbfd;font-family:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#003366;background:#fff}
+textarea{resize:vertical;min-height:80px}
+.divider{border:none;border-top:1px solid #eef0f4;margin:20px 0}
+.submit-btn{width:100%;background:#003366;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;font-family:inherit}
+.submit-btn:hover{background:#002244}
+.submit-btn:disabled{background:#94a3b8;cursor:not-allowed}
+.success{display:none;text-align:center;padding:40px 24px}
+.success-icon{font-size:52px;margin-bottom:16px}
+.success h2{font-size:20px;font-weight:700;color:#003366;margin-bottom:8px}
+.success p{font-size:14px;color:#64748b;line-height:1.6}
+.success .new-btn{display:inline-block;margin-top:20px;padding:12px 28px;background:#003366;color:white;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+.error-msg{color:#c00;font-size:12px;margin-top:4px;display:none}
+.loading{display:none;text-align:center;padding:40px 24px;color:#64748b;font-size:14px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">Swiss Medical · Brigada Web 3</div>
+    <h1>Derivar a Seguros de Vida</h1>
+    <p>Completá los datos del cliente para derivarlo a Carlos Gerez</p>
+    <div class="asesor-badge" id="asesor-badge" style="display:none">Asesor: <span id="asesor-nombre"></span></div>
+  </div>
+
+  <div id="form-view">
+    <div class="form-body">
+      <div class="section-label">Datos del cliente</div>
+
+      <div class="field">
+        <label>Nombre y apellido <span class="req">*</span></label>
+        <input type="text" id="nombre" placeholder="Ej: Juan García" maxlength="100">
+        <div class="error-msg" id="err-nombre">Campo obligatorio</div>
+      </div>
+
+      <div class="field">
+        <label>Teléfono <span class="req">*</span></label>
+        <input type="tel" id="tel" placeholder="Ej: 1145678901" maxlength="20">
+        <div class="error-msg" id="err-tel">Campo obligatorio</div>
+      </div>
+
+      <div class="field">
+        <label>Producto Prepaga <span class="req">*</span></label>
+        <select id="producto">
+          <option value="">Seleccioná...</option>
+          <option>SMG 20</option>
+          <option>SMG 30</option>
+          <option>SMG 40</option>
+          <option>SMG 50</option>
+          <option>S2</option>
+          <option>Otro</option>
+        </select>
+        <div class="error-msg" id="err-producto">Campo obligatorio</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">Información adicional</div>
+
+      <div class="field">
+        <label>Observación</label>
+        <textarea id="obs" placeholder="Situación del cliente, motivo de la derivación, datos relevantes..."></textarea>
+      </div>
+
+      <button class="submit-btn" id="btn-enviar" onclick="enviar()">📤 Enviar derivación</button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading-view">
+    <div style="font-size:32px;margin-bottom:12px">⏳</div>
+    Enviando derivación...
+  </div>
+
+  <div class="success" id="success-view">
+    <div class="success-icon">✅</div>
+    <h2>¡Derivación enviada!</h2>
+    <p>Carlos Gerez recibió los datos del cliente y se pondrá en contacto a la brevedad.</p>
+    <p style="margin-top:10px;font-size:13px;color:#94a3b8" id="success-id"></p>
+    <button class="new-btn" onclick="nueva()">Derivar otro cliente</button>
+  </div>
+</div>
+
+<script>
+var URL_SCRIPT='https://script.google.com/macros/s/AKfycbx0pv8Yx8pKn-5cw7BrGoGS0YC8Qfj8t7-v4ggJhUJknErepmep6N0j2QcP_AITUSXZvQ/exec';
+var ASESOR=decodeURIComponent((new URLSearchParams(window.location.search).get('asesor')||'').replace(/\+/g,' '));
+
+if(ASESOR){
+  document.getElementById('asesor-badge').style.display='block';
+  document.getElementById('asesor-nombre').textContent=ASESOR;
+}
+
+var cbN=0;
+function jsonp(params,onOk,onErr){
+  var name='_bw3'+(cbN++);
+  var url=URL_SCRIPT+'?callback='+name+'&t='+Date.now();
+  Object.keys(params).forEach(function(k){url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(params[k]||'');});
+  var s=document.createElement('script');
+  var timer=setTimeout(function(){delete window[name];if(s.parentNode)s.parentNode.removeChild(s);if(onErr)onErr('timeout');},20000);
+  window[name]=function(d){clearTimeout(timer);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);onOk(d);};
+  s.onerror=function(){clearTimeout(timer);delete window[name];if(onErr)onErr('error');};
+  s.src=url;document.head.appendChild(s);
+}
+
+function enviar(){
+  var nombre=document.getElementById('nombre').value.trim();
+  var tel=document.getElementById('tel').value.trim();
+  var producto=document.getElementById('producto').value;
+  var obs=document.getElementById('obs').value.trim();
+  var ok=true;
+
+  ['nombre','tel','producto'].forEach(function(id){
+    var val=document.getElementById(id).value.trim();
+    var err=document.getElementById('err-'+id);
+    if(!val){err.style.display='block';ok=false;}
+    else{err.style.display='none';}
+  });
+  if(!ok)return;
+
+  document.getElementById('form-view').style.display='none';
+  document.getElementById('loading-view').style.display='block';
+
+  jsonp({
+    accion:'nuevaDerivacion',
+    clienteNombre:nombre,
+    clienteTel:tel,
+    productos:producto,
+    observacion:obs,
+    asesorPrepaga:ASESOR||'Sin identificar',
+    asesorZona:'Brigada Web 3',
+    asesorVida:'Carlos Gerez'
+  },function(resp){
+    document.getElementById('loading-view').style.display='none';
+    if(resp&&resp.ok){
+      document.getElementById('success-view').style.display='block';
+      if(resp.id)document.getElementById('success-id').textContent='ID: '+resp.id;
+    }else{
+      document.getElementById('form-view').style.display='block';
+      alert('Error al enviar. Intentá de nuevo.');
+    }
+  },function(){
+    document.getElementById('loading-view').style.display='none';
+    document.getElementById('form-view').style.display='block';
+    alert('Error de conexión. Verificá tu internet e intentá de nuevo.');
+  });
+}
+
+function nueva(){
+  document.getElementById('nombre').value='';
+  document.getElementById('tel').value='';
+  document.getElementById('producto').value='';
+  document.getElementById('obs').value='';
+  document.getElementById('success-view').style.display='none';
+  document.getElementById('form-view').style.display='block';
+}
+</script>
+</body>
+</html>
