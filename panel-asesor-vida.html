@@ -598,8 +598,20 @@ cargarDatos();
   <div class="modal-manual">
     <h3>➕ Cargar prospecto</h3>
     <div class="sub">Campos con <span class="req">*</span> son obligatorios</div>
+
+    <!-- Tipo -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div id="mn-tipo-fisica" onclick="mnSetTipo('fisica')" style="border:2px solid #003366;border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:#eef4ff">
+        <div style="font-size:20px">👤</div><div style="font-size:12px;font-weight:700;color:#003366">Persona Física</div>
+      </div>
+      <div id="mn-tipo-juridica" onclick="mnSetTipo('juridica')" style="border:2px solid #dde3ec;border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:#fafbfd">
+        <div style="font-size:20px">🏢</div><div style="font-size:12px;font-weight:700;color:#64748b">Empresa / Pyme</div>
+      </div>
+    </div>
+
+    <!-- Campos comunes -->
     <div class="field">
-      <label>Nombre del cliente <span class="req">*</span></label>
+      <label id="mn-label-nombre">Nombre del cliente <span class="req">*</span></label>
       <input type="text" id="mn-nombre" placeholder="Ej: Juan García" maxlength="100">
     </div>
     <div class="field">
@@ -607,24 +619,52 @@ cargarDatos();
       <input type="text" id="mn-prepaga" placeholder="Ej: Carlos Rodríguez" maxlength="100">
     </div>
     <div class="field">
-      <label>Teléfono <span class="req">*</span></label>
+      <label id="mn-label-tel">Teléfono <span class="req">*</span></label>
       <input type="tel" id="mn-tel" placeholder="Ej: 1145678901" maxlength="20">
-      <div class="field-hint">Sin 0 ni 15, solo números</div>
     </div>
-    <div class="field">
-      <label>Producto Prepaga <span class="req">*</span></label>
-      <select id="mn-producto">
-        <option value="">Seleccioná...</option>
-        <option>Swiss Medical Medicina Prepaga</option>
-        <option>SMG Salud</option>
-        <option>Otros</option>
-      </select>
+
+    <!-- Campos solo Física -->
+    <div id="mn-sec-fisica">
+      <div class="field">
+        <label>Producto Prepaga <span class="req">*</span></label>
+        <select id="mn-producto">
+          <option value="">Seleccioná...</option>
+          <option>Swiss Medical Medicina Prepaga</option>
+          <option>SMG Salud</option>
+          <option>Otros</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Observación</label>
+        <input type="text" id="mn-obs" placeholder="Contexto del cliente (opcional)" maxlength="200">
+      </div>
     </div>
-    <div class="field">
-      <label>Observación</label>
-      <input type="text" id="mn-obs" placeholder="Contexto del cliente (opcional)" maxlength="200">
+
+    <!-- Campos solo Pyme -->
+    <div id="mn-sec-pyme" style="display:none">
+      <div class="field">
+        <label>CUIT</label>
+        <input type="text" id="mn-cuit" placeholder="Ej: 30-12345678-9" maxlength="15">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="mn-mail" placeholder="rrhh@empresa.com">
+      </div>
+      <div class="field">
+        <label>Referente de la empresa <span class="req">*</span></label>
+        <input type="text" id="mn-referente" placeholder="Nombre del contacto de RRHH" maxlength="100">
+      </div>
+      <div class="field">
+        <label>Cantidad de empleados</label>
+        <input type="number" id="mn-empleados" placeholder="Ej: 25" min="1">
+      </div>
+      <div class="field">
+        <label>Observaciones</label>
+        <input type="text" id="mn-obs-pyme" placeholder="Info adicional (opcional)" maxlength="300">
+      </div>
     </div>
-    <button class="btn-ok" onclick="guardarManual()">✓ Guardar prospecto</button>
+
+    <button class="btn-ok" onclick="guardarManual()">✓ Guardar</button>
     <button class="btn-cancel" onclick="cerrarCargaManual()">Cancelar</button>
   </div>
 </div>
@@ -702,44 +742,68 @@ function exportarExcelVida(){
   XLSX.writeFile(wb,'Derivaciones_'+ASESOR.replace(/ /g,'_')+'_'+fecha+'.xlsx');
 }
 
+var mnTipo='fisica';
+function mnSetTipo(t){
+  mnTipo=t;
+  var esFis=t==='fisica';
+  var bFis=document.getElementById('mn-tipo-fisica');
+  var bJur=document.getElementById('mn-tipo-juridica');
+  bFis.style.borderColor=esFis?'#003366':'#dde3ec';bFis.style.background=esFis?'#eef4ff':'#fafbfd';
+  bFis.querySelector('div:last-child').style.color=esFis?'#003366':'#64748b';
+  bJur.style.borderColor=!esFis?'#003366':'#dde3ec';bJur.style.background=!esFis?'#eef4ff':'#fafbfd';
+  bJur.querySelector('div:last-child').style.color=!esFis?'#003366':'#64748b';
+  document.getElementById('mn-sec-fisica').style.display=esFis?'block':'none';
+  document.getElementById('mn-sec-pyme').style.display=!esFis?'block':'none';
+  document.getElementById('mn-label-nombre').innerHTML=(esFis?'Nombre del cliente':'Nombre de la empresa')+' <span class="req">*</span>';
+  document.getElementById('mn-nombre').placeholder=esFis?'Ej: Juan García':'Ej: Distribuidora Martínez SA';
+}
+
 function abrirCargaManual(){
-  document.getElementById('mn-nombre').value='';
-  document.getElementById('mn-prepaga').value='';
-  document.getElementById('mn-tel').value='';
-  document.getElementById('mn-producto').value='';
-  document.getElementById('mn-obs').value='';
+  ['mn-nombre','mn-prepaga','mn-tel','mn-obs','mn-cuit','mn-mail','mn-referente','mn-empleados','mn-obs-pyme'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  var prod=document.getElementById('mn-producto');if(prod)prod.value='';
+  mnSetTipo('fisica');
   document.getElementById('overlay-manual').classList.add('open');
 }
 function cerrarCargaManual(){document.getElementById('overlay-manual').classList.remove('open');}
 
 function guardarManual(){
   var nombre=document.getElementById('mn-nombre').value.trim();
-  var prepaga=document.getElementById('mn-prepaga').value.trim();
   var tel=document.getElementById('mn-tel').value.trim();
-  var producto=document.getElementById('mn-producto').value;
-  var obs=document.getElementById('mn-obs').value.trim();
-  if(!nombre){alert('El nombre del cliente es obligatorio.');document.getElementById('mn-nombre').focus();return;}
+  var prepaga=document.getElementById('mn-prepaga').value.trim();
+  if(!nombre){alert('El nombre es obligatorio.');document.getElementById('mn-nombre').focus();return;}
   if(!tel){alert('El teléfono es obligatorio.');document.getElementById('mn-tel').focus();return;}
-  if(!producto){alert('Seleccioná el producto Prepaga.');document.getElementById('mn-producto').focus();return;}
+
+  var params={accion:'nuevaDerivacion',clienteNombre:nombre,clienteTelefono:tel,
+    asesorPrepaga:prepaga||'Carga manual',asesorVida:ASESOR,zona:'',estado:'Pendiente',
+    tipoDer:mnTipo==='fisica'?'Fisica':'Pyme'};
+
+  if(mnTipo==='fisica'){
+    var prod=document.getElementById('mn-producto').value;
+    if(!prod){alert('Seleccioná el producto Prepaga.');document.getElementById('mn-producto').focus();return;}
+    params.productoPrepaga=prod;
+    params.observacion=document.getElementById('mn-obs').value.trim();
+  } else {
+    var ref=document.getElementById('mn-referente').value.trim();
+    if(!ref){alert('El referente de la empresa es obligatorio.');document.getElementById('mn-referente').focus();return;}
+    var emp=document.getElementById('mn-empleados').value.trim();
+    var mail=document.getElementById('mn-mail').value.trim();
+    var cuit=document.getElementById('mn-cuit').value.trim();
+    var obsP=document.getElementById('mn-obs-pyme').value.trim();
+    params.productoPrepaga='PYME'+(emp?' - '+emp+' empleados':'');
+    params.observacion=['Empresa:'+nombre,cuit?'CUIT:'+cuit:'','Referente:'+ref,
+      mail?'Email:'+mail:'',emp?'Empleados:'+emp:'',obsP?'Obs:'+obsP:''].filter(Boolean).join(' | ');
+    params.pymeCuit=cuit;params.pymeMail=mail;params.pymeReferente=ref;params.pymeEmpleados=emp;
+  }
+
   cerrarCargaManual();
-  showLoading(true,'⏳ Guardando prospecto...');
-  jsonp({
-    accion:'nuevaDerivacion',
-    clienteNombre:nombre,
-    clienteTelefono:tel,
-    productoPrepaga:producto,
-    observacion:obs,
-    asesorPrepaga: prepaga||'Carga manual',
-    asesorVida:ASESOR,
-    zona:'',
-    estado:'Pendiente'
-  },function(resp){
+  showLoading(true,'⏳ Guardando...');
+  jsonp(params,function(resp){
     showLoading(false);
-    if(resp&&resp.ok){toast('✓ Prospecto cargado',true);cargarDatos();}
+    if(resp&&resp.ok){toast('✓ Guardado',true);cargarDatos();}
     else{toast('❌ Error al guardar',false);}
-  },function(){
-    showLoading(false);toast('❌ Error de conexión',false);
-  });
+  },function(){showLoading(false);toast('❌ Error de conexión',false);});
 }
 </script>
 
