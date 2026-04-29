@@ -135,6 +135,27 @@ tr:hover td{background:#f8fafc}
 .btn-export.filtrado{background:#003366;color:white}
 .btn-export.todo{background:#e2e8f0;color:#1a1a2e}
 .btn-export:hover{opacity:.88}
+/* Modal carga gerencial */
+.ger-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;align-items:flex-end;justify-content:center}
+.ger-overlay.open{display:flex}
+.ger-modal{background:white;border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:20px 18px 32px;max-height:92vh;overflow-y:auto}
+.ger-modal h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.ger-modal .sub{font-size:11px;color:#64748b;margin-bottom:14px}
+.ger-field{margin-bottom:12px}
+.ger-field label{display:block;font-size:11px;font-weight:700;color:#333;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.ger-field input,.ger-field select,.ger-field textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fafbfd}
+.ger-field input:focus,.ger-field select:focus,.ger-field textarea:focus{border-color:#003366;background:white}
+.ger-field textarea{resize:vertical;min-height:70px}
+.ger-req{color:#ef4444;margin-left:2px}
+.ger-tipo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ger-tipo-btn{border:2px solid #dde3ec;border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:#fafbfd}
+.ger-tipo-btn.active{border-color:#003366;background:#eef4ff}
+.ger-tipo-btn .icon{font-size:20px}
+.ger-tipo-btn .lbl{font-size:12px;font-weight:700;color:#64748b}
+.ger-tipo-btn.active .lbl{color:#003366}
+.ger-sec-pyme{display:none}
+.ger-btn-ok{width:100%;background:#003366;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;font-family:inherit}
+.ger-btn-cancel{margin-top:8px;width:100%;padding:11px;border:none;background:#f0f4f8;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;font-family:inherit}
 </style>
 </head>
 <body>
@@ -166,6 +187,7 @@ tr:hover td{background:#f8fafc}
     </select></div>
 </div>
 <div class="export-bar">
+  <button class="btn-export filtrado" onclick="abrirCargaGerencial()">➕ Cargar derivación</button>
   <button class="btn-export filtrado" onclick="exportarExcel(false)">📥 Exportar vista filtrada</button>
   <button class="btn-export todo" onclick="exportarExcel(true)">📥 Exportar todo el historial</button>
 </div>
@@ -834,6 +856,196 @@ function exportarExcel(todo){
 }
 
 cargarDatos();
+</script>
+
+<!-- MODAL CARGA GERENCIAL -->
+<div class="ger-overlay" id="ger-overlay">
+  <div class="ger-modal">
+    <h3>➕ Cargar derivación</h3>
+    <div class="sub">Campos con <span style="color:#ef4444">*</span> son obligatorios</div>
+
+    <div class="ger-tipo">
+      <div class="ger-tipo-btn active" id="ger-tipo-fisica" onclick="gerSetTipo('fisica')">
+        <div class="icon">👤</div><div class="lbl">Persona Física</div>
+      </div>
+      <div class="ger-tipo-btn" id="ger-tipo-juridica" onclick="gerSetTipo('juridica')">
+        <div class="icon">🏢</div><div class="lbl">Empresa / Pyme</div>
+      </div>
+    </div>
+
+    <div class="ger-field">
+      <label id="ger-label-nombre">Nombre del cliente <span class="ger-req">*</span></label>
+      <input type="text" id="ger-nombre" placeholder="Ej: Juan García" maxlength="100">
+    </div>
+    <div class="ger-field">
+      <label>Teléfono <span class="ger-req">*</span></label>
+      <input type="tel" id="ger-tel" placeholder="Ej: 1145678901" maxlength="20">
+    </div>
+    <div class="ger-field">
+      <label>Asesor Prepaga que derivó</label>
+      <input type="text" id="ger-prepaga" placeholder="Nombre del asesor Prepaga" maxlength="100">
+    </div>
+    <div class="ger-field">
+      <label>Zona</label>
+      <select id="ger-zona">
+        <option value="">Seleccioná...</option>
+        <option>Mendoza</option><option>Neuquén</option><option>Córdoba</option>
+        <option>Salta</option><option>Chaco</option><option>Bs As Sur</option><option>Rosario</option>
+      </select>
+    </div>
+    <div class="ger-field">
+      <label>Asesor VIDA <span class="ger-req">*</span></label>
+      <select id="ger-asesor-vida">
+        <option value="">Seleccioná...</option>
+      </select>
+    </div>
+
+    <!-- Campos Física -->
+    <div id="ger-sec-fisica">
+      <div class="ger-field">
+        <label>Producto Prepaga <span class="ger-req">*</span></label>
+        <select id="ger-producto">
+          <option value="">Seleccioná...</option>
+          <option>S2</option><option>SMG 20</option><option>SMG 30</option>
+          <option>SMG 40</option><option>SMG 50</option><option>SMG 60</option>
+          <option>SMG 70</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="ger-field">
+        <label>Observación</label>
+        <textarea id="ger-obs" placeholder="Contexto del cliente..."></textarea>
+      </div>
+    </div>
+
+    <!-- Campos Pyme -->
+    <div class="ger-sec-pyme" id="ger-sec-pyme">
+      <div class="ger-field">
+        <label>CUIT</label>
+        <input type="text" id="ger-cuit" placeholder="Ej: 30-12345678-9" maxlength="15">
+      </div>
+      <div class="ger-field">
+        <label>Email</label>
+        <input type="email" id="ger-mail" placeholder="rrhh@empresa.com">
+      </div>
+      <div class="ger-field">
+        <label>Referente de la empresa <span class="ger-req">*</span></label>
+        <input type="text" id="ger-referente" placeholder="Nombre del contacto de RRHH" maxlength="100">
+      </div>
+      <div class="ger-field">
+        <label>Cantidad de empleados</label>
+        <input type="number" id="ger-empleados" placeholder="Ej: 25" min="1">
+      </div>
+      <div class="ger-field">
+        <label>Observaciones</label>
+        <textarea id="ger-obs-pyme" placeholder="Info adicional sobre la empresa..."></textarea>
+      </div>
+    </div>
+
+    <button class="ger-btn-ok" onclick="guardarCargaGerencial()">✓ Guardar derivación</button>
+    <button class="ger-btn-cancel" onclick="cerrarCargaGerencial()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+var gerTipo='fisica';
+
+function gerSetTipo(t){
+  gerTipo=t;
+  var esFis=t==='fisica';
+  var bF=document.getElementById('ger-tipo-fisica'),bJ=document.getElementById('ger-tipo-juridica');
+  bF.classList.toggle('active',esFis);bJ.classList.toggle('active',!esFis);
+  document.getElementById('ger-sec-fisica').style.display=esFis?'block':'none';
+  document.getElementById('ger-sec-pyme').style.display=!esFis?'block':'none';
+  document.getElementById('ger-label-nombre').innerHTML=(esFis?'Nombre del cliente':'Nombre de la empresa')+' <span class="ger-req">*</span>';
+  document.getElementById('ger-nombre').placeholder=esFis?'Ej: Juan García':'Ej: Distribuidora Martínez SA';
+}
+
+function abrirCargaGerencial(){
+  // Limpiar campos
+  ['ger-nombre','ger-tel','ger-prepaga','ger-obs','ger-cuit','ger-mail','ger-referente','ger-empleados','ger-obs-pyme'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('ger-zona').value='';
+  document.getElementById('ger-producto').value='';
+  gerSetTipo('fisica');
+  // Cargar asesores VIDA
+  cargarAsesoresVidaGer();
+  document.getElementById('ger-overlay').classList.add('open');
+}
+
+function cerrarCargaGerencial(){document.getElementById('ger-overlay').classList.remove('open');}
+
+function cargarAsesoresVidaGer(){
+  var sel=document.getElementById('ger-asesor-vida');
+  sel.innerHTML='<option value="">Cargando...</option>';
+  jsonp({accion:'getAsesoresVida'},function(data){
+    sel.innerHTML='<option value="">Seleccioná...</option>';
+    (data.asesoresVida||[]).forEach(function(a){
+      sel.innerHTML+='<option value="'+a.nombre+'">'+a.nombre+'</option>';
+    });
+  },function(){
+    // fallback hardcodeado
+    sel.innerHTML='<option value="">Seleccioná...</option>';
+    ['Ricardo Blanco','Ana Laura Dominguez','Agustina Aguirre','Rina Beltran',
+     'Karina Bagnasco','Florencia Berlocq','Jose Passeri','Martin Lopez',
+     'Julia Pierlucca','Lucas Armand','Gaston Flores','Marina Quevedo',
+     'Silvina Bruno','Nadia Rivero','Miguel Nuñez'].forEach(function(n){
+      sel.innerHTML+='<option value="'+n+'">'+n+'</option>';
+    });
+  });
+}
+
+function guardarCargaGerencial(){
+  var nombre=document.getElementById('ger-nombre').value.trim();
+  var tel=document.getElementById('ger-tel').value.trim();
+  var vida=document.getElementById('ger-asesor-vida').value;
+  if(!nombre){alert('El nombre es obligatorio.');document.getElementById('ger-nombre').focus();return;}
+  if(!tel){alert('El teléfono es obligatorio.');document.getElementById('ger-tel').focus();return;}
+  if(!vida){alert('Seleccioná el asesor VIDA.');document.getElementById('ger-asesor-vida').focus();return;}
+
+  var params={
+    accion:'nuevaDerivacion',tipoDer:gerTipo==='fisica'?'Fisica':'Pyme',
+    clienteNombre:nombre,clienteTelefono:tel,
+    asesorPrepaga:document.getElementById('ger-prepaga').value.trim()||'Carga supervisor',
+    asesorZona:document.getElementById('ger-zona').value,
+    asesorVida:vida,estado:'Pendiente'
+  };
+
+  if(gerTipo==='fisica'){
+    var prod=document.getElementById('ger-producto').value;
+    if(!prod){alert('Seleccioná el producto Prepaga.');document.getElementById('ger-producto').focus();return;}
+    params.productoPrepaga=prod;
+    params.observacion=document.getElementById('ger-obs').value.trim();
+  } else {
+    var ref=document.getElementById('ger-referente').value.trim();
+    if(!ref){alert('El referente es obligatorio.');document.getElementById('ger-referente').focus();return;}
+    var emp=document.getElementById('ger-empleados').value.trim();
+    var mail=document.getElementById('ger-mail').value.trim();
+    var cuit=document.getElementById('ger-cuit').value.trim();
+    var obsP=document.getElementById('ger-obs-pyme').value.trim();
+    params.productoPrepaga='PYME'+(emp?' - '+emp+' empleados':'');
+    params.observacion=['Empresa:'+nombre,cuit?'CUIT:'+cuit:'','Referente:'+ref,
+      mail?'Email:'+mail:'',emp?'Empleados:'+emp:'',obsP?'Obs:'+obsP:''].filter(Boolean).join(' | ');
+    params.pymeCuit=cuit;params.pymeMail=mail;params.pymeReferente=ref;params.pymeEmpleados=emp;
+  }
+
+  cerrarCargaGerencial();
+  // Mostrar feedback
+  var toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#003366;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300';
+  toast.textContent='⏳ Guardando...';document.body.appendChild(toast);
+
+  jsonp(params,function(resp){
+    toast.textContent=resp&&resp.ok?'✓ Derivación guardada':'❌ Error al guardar';
+    toast.style.background=resp&&resp.ok?'#065f46':'#991b1b';
+    setTimeout(function(){document.body.removeChild(toast);if(resp&&resp.ok)cargarDatos();},2500);
+  },function(){
+    toast.textContent='❌ Error de conexión';toast.style.background='#991b1b';
+    setTimeout(function(){document.body.removeChild(toast);},2500);
+  });
+}
+
+document.getElementById('ger-overlay').addEventListener('click',function(e){if(e.target===this)cerrarCargaGerencial();});
 </script>
 </body>
 </html>
