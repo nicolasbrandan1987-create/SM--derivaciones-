@@ -42,6 +42,13 @@
   .btn-nueva { background: #003366; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; }
   .loading { display: none; text-align: center; padding: 20px; color: #555; font-size: 14px; }
   .error-msg { color: #c00; font-size: 12px; margin-top: 4px; display: none; }
+  .tipo-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .tipo-btn { border: 2px solid #dde3ec; border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; background: #fafbfd; transition: all .15s; }
+  .tipo-btn.active { border-color: #003366; background: #eef4ff; }
+  .tipo-btn .tipo-icon { font-size: 24px; margin-bottom: 4px; }
+  .tipo-btn .tipo-label { font-size: 13px; font-weight: 700; color: #333; }
+  .tipo-btn.active .tipo-label { color: #003366; }
+  .seccion-pyme { display: none; }
   .fallback-note { font-size: 11px; color: #888; margin-top: 4px; }
 </style>
 </head>
@@ -67,39 +74,97 @@
       </ul>
     </div>
 
-    <div class="section-label">Datos del cliente</div>
-
-    <div class="field">
-      <label>Nombre y apellido <span class="req">*</span></label>
-      <input type="text" id="clienteNombre" placeholder="Ej: María González" autocomplete="off">
-      <div class="error-msg" id="err-nombre">Este campo es obligatorio</div>
-    </div>
-
-    <div class="field">
-      <label>Teléfono <span class="req">*</span></label>
-      <input type="tel" id="clienteTel" placeholder="Ej: 1145678901" autocomplete="off">
-      <div class="error-msg" id="err-tel">Ingresá un teléfono válido</div>
-    </div>
-
-    <div class="field">
-      <label>Producto prepaga que tiene <span class="req">*</span></label>
-      <div class="productos-grid" id="productosGrid">
-        <label class="prod-option"><input type="checkbox" value="S2"> S2</label>
-        <label class="prod-option"><input type="checkbox" value="SMG 20"> SMG 20</label>
-        <label class="prod-option"><input type="checkbox" value="SMG 30"> SMG 30</label>
-        <label class="prod-option"><input type="checkbox" value="SMG 40"> SMG 40</label>
-        <label class="prod-option"><input type="checkbox" value="SMG 50"> SMG 50</label>
-        <label class="prod-option"><input type="checkbox" value="SMG 60"> SMG 60</label>
-        <label class="prod-option"><input type="checkbox" value="SMG 70"> SMG 70</label>
-        <label class="prod-option"><input type="checkbox" value="Otro"> Otro</label>
+    <div class="section-label">Tipo de derivación</div>
+    <div class="tipo-selector">
+      <div class="tipo-btn active" id="tipo-fisica" onclick="setTipo('fisica')">
+        <div class="tipo-icon">👤</div>
+        <div class="tipo-label">Persona Física</div>
       </div>
-      <div class="error-msg" id="err-producto">Seleccioná al menos un producto</div>
+      <div class="tipo-btn" id="tipo-juridica" onclick="setTipo('juridica')">
+        <div class="tipo-icon">🏢</div>
+        <div class="tipo-label">Empresa / Pyme</div>
+      </div>
     </div>
 
-    <div class="field">
-      <label>Observación <span class="req">*</span></label>
-      <textarea id="observacion" placeholder="¿Por qué lo derivás? ¿Qué mencionó el cliente? Cualquier dato útil para el especialista..."></textarea>
-      <div class="error-msg" id="err-obs">Escribí una observación breve</div>
+    <!-- CAMPOS PERSONA FÍSICA -->
+    <div id="seccion-fisica">
+      <div class="section-label">Datos del cliente</div>
+
+      <div class="field">
+        <label>Nombre y apellido <span class="req">*</span></label>
+        <input type="text" id="clienteNombre" placeholder="Ej: María González" autocomplete="off">
+        <div class="error-msg" id="err-nombre">Este campo es obligatorio</div>
+      </div>
+
+      <div class="field">
+        <label>Teléfono <span class="req">*</span></label>
+        <input type="tel" id="clienteTel" placeholder="Ej: 1145678901" autocomplete="off">
+        <div class="error-msg" id="err-tel">Ingresá un teléfono válido</div>
+      </div>
+
+      <div class="field">
+        <label>Producto prepaga que tiene <span class="req">*</span></label>
+        <div class="productos-grid" id="productosGrid">
+          <label class="prod-option"><input type="checkbox" value="S2"> S2</label>
+          <label class="prod-option"><input type="checkbox" value="SMG 20"> SMG 20</label>
+          <label class="prod-option"><input type="checkbox" value="SMG 30"> SMG 30</label>
+          <label class="prod-option"><input type="checkbox" value="SMG 40"> SMG 40</label>
+          <label class="prod-option"><input type="checkbox" value="SMG 50"> SMG 50</label>
+          <label class="prod-option"><input type="checkbox" value="SMG 60"> SMG 60</label>
+          <label class="prod-option"><input type="checkbox" value="SMG 70"> SMG 70</label>
+          <label class="prod-option"><input type="checkbox" value="Otro"> Otro</label>
+        </div>
+        <div class="error-msg" id="err-producto">Seleccioná al menos un producto</div>
+      </div>
+
+      <div class="field">
+        <label>Observación <span class="req">*</span></label>
+        <textarea id="observacion" placeholder="¿Por qué lo derivás? ¿Qué mencionó el cliente? Cualquier dato útil para el especialista..."></textarea>
+        <div class="error-msg" id="err-obs">Escribí una observación breve</div>
+      </div>
+    </div>
+
+    <!-- CAMPOS PYME -->
+    <div id="seccion-pyme" class="seccion-pyme">
+      <div class="section-label">Datos de la empresa</div>
+
+      <div class="field">
+        <label>Nombre de la empresa <span class="req">*</span></label>
+        <input type="text" id="pymeNombre" placeholder="Ej: Distribuidora Martínez SA" autocomplete="off">
+        <div class="error-msg" id="err-pyme-nombre">Este campo es obligatorio</div>
+      </div>
+
+      <div class="field">
+        <label>CUIT</label>
+        <input type="text" id="pymeCuit" placeholder="Ej: 30-12345678-9" maxlength="15">
+      </div>
+
+      <div class="field">
+        <label>Teléfono <span class="req">*</span></label>
+        <input type="tel" id="pymeTel" placeholder="Ej: 1145678901" autocomplete="off">
+        <div class="error-msg" id="err-pyme-tel">Este campo es obligatorio</div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="pymeMail" placeholder="Ej: rrhh@empresa.com">
+      </div>
+
+      <div class="field">
+        <label>Referente de la empresa <span class="req">*</span></label>
+        <input type="text" id="pymeReferente" placeholder="Nombre del contacto de RRHH" autocomplete="off">
+        <div class="error-msg" id="err-pyme-referente">Este campo es obligatorio</div>
+      </div>
+
+      <div class="field">
+        <label>Cantidad de empleados</label>
+        <input type="number" id="pymeEmpleados" placeholder="Ej: 25" min="1">
+      </div>
+
+      <div class="field">
+        <label>Observaciones</label>
+        <textarea id="pymeObs" placeholder="Información adicional sobre la empresa o el contacto..."></textarea>
+      </div>
     </div>
 
     <hr class="divider">
@@ -144,6 +209,16 @@
 </div>
 
 <script>
+var tipoDerivacion = 'fisica';
+
+function setTipo(tipo) {
+  tipoDerivacion = tipo;
+  document.getElementById('tipo-fisica').classList.toggle('active', tipo === 'fisica');
+  document.getElementById('tipo-juridica').classList.toggle('active', tipo === 'juridica');
+  document.getElementById('seccion-fisica').style.display = tipo === 'fisica' ? 'block' : 'none';
+  document.getElementById('seccion-pyme').style.display = tipo === 'juridica' ? 'block' : 'none';
+}
+
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsjkLT20lwZ89zdk628ET1_nNV9fYgzTBnglMTSznRFR-ynbJWCIEIqO2Ex5mCuvJb0A/exec';
 
 // ── Leer asesor desde URL ──────────────────────────────────────────────────
@@ -213,25 +288,32 @@ function showError(id, show) {
 
 function validar() {
   var ok = true;
-  var nombre   = document.getElementById('clienteNombre').value.trim();
-  var tel      = document.getElementById('clienteTel').value.trim();
-  var productos = getProductosSeleccionados();
-  var obs      = document.getElementById('observacion').value.trim();
-  var vida     = document.getElementById('asesorVida').value.trim();
+  var vida = document.getElementById('asesorVida').value.trim();
+  showError('err-vida', !vida); if (!vida) ok = false;
 
-  showError('err-nombre',  !nombre);            if (!nombre) ok = false;
-  showError('err-tel',     !tel || tel.length < 8); if (!tel || tel.length < 8) ok = false;
-  showError('err-producto', !productos);        if (!productos) ok = false;
-  showError('err-obs',     !obs);               if (!obs) ok = false;
-  showError('err-vida',    !vida);              if (!vida) ok = false;
+  if (tipoDerivacion === 'fisica') {
+    var nombre   = document.getElementById('clienteNombre').value.trim();
+    var tel      = document.getElementById('clienteTel').value.trim();
+    var productos = getProductosSeleccionados();
+    var obs      = document.getElementById('observacion').value.trim();
+    showError('err-nombre',  !nombre);              if (!nombre) ok = false;
+    showError('err-tel',     !tel || tel.length < 8); if (!tel || tel.length < 8) ok = false;
+    showError('err-producto', !productos);          if (!productos) ok = false;
+    showError('err-obs',     !obs);                 if (!obs) ok = false;
+  } else {
+    var pNombre   = document.getElementById('pymeNombre').value.trim();
+    var pTel      = document.getElementById('pymeTel').value.trim();
+    var pRef      = document.getElementById('pymeReferente').value.trim();
+    showError('err-pyme-nombre',    !pNombre); if (!pNombre) ok = false;
+    showError('err-pyme-tel',       !pTel);    if (!pTel) ok = false;
+    showError('err-pyme-referente', !pRef);    if (!pRef) ok = false;
+  }
 
-  // Validar nombre asesor solo si no viene de URL
   if (!asesorDesdeURL) {
     var fb = document.getElementById('asesorNombreFallback').value.trim();
     showError('err-asesor', !fb);
     if (!fb) ok = false;
   }
-
   return ok;
 }
 
@@ -245,16 +327,44 @@ function enviarDerivacion() {
   var nombreAsesor = asesorDesdeURL 
     || document.getElementById('asesorNombreFallback').value.trim();
 
-  var payload = {
-    accion:        'nuevaDerivacion',
-    clienteNombre: document.getElementById('clienteNombre').value.trim(),
-    clienteTel:    document.getElementById('clienteTel').value.trim(),
-    productos:     getProductosSeleccionados(),
-    observacion:   document.getElementById('observacion').value.trim(),
-    asesorPrepaga: nombreAsesor,
-    asesorZona:    '',
-    asesorVida:    document.getElementById('asesorVida').value.trim()
-  };
+  var payload;
+  if (tipoDerivacion === 'fisica') {
+    payload = {
+      accion:        'nuevaDerivacion',
+      tipoDer:       'Fisica',
+      clienteNombre: document.getElementById('clienteNombre').value.trim(),
+      clienteTel:    document.getElementById('clienteTel').value.trim(),
+      productos:     getProductosSeleccionados(),
+      observacion:   document.getElementById('observacion').value.trim(),
+      asesorPrepaga: nombreAsesor,
+      asesorZona:    '',
+      asesorVida:    document.getElementById('asesorVida').value.trim()
+    };
+  } else {
+    payload = {
+      accion:        'nuevaDerivacion',
+      tipoDer:       'Pyme',
+      clienteNombre: document.getElementById('pymeNombre').value.trim(),
+      clienteTel:    document.getElementById('pymeTel').value.trim(),
+      productos:     'PYME - ' + (document.getElementById('pymeEmpleados').value || '?') + ' empleados',
+      observacion:   [
+        'Empresa: ' + document.getElementById('pymeNombre').value.trim(),
+        document.getElementById('pymeCuit').value ? 'CUIT: ' + document.getElementById('pymeCuit').value : '',
+        'Referente: ' + document.getElementById('pymeReferente').value.trim(),
+        document.getElementById('pymeMail').value ? 'Email: ' + document.getElementById('pymeMail').value : '',
+        document.getElementById('pymeEmpleados').value ? 'Empleados: ' + document.getElementById('pymeEmpleados').value : '',
+        document.getElementById('pymeObs').value ? 'Obs: ' + document.getElementById('pymeObs').value : ''
+      ].filter(Boolean).join(' | '),
+      asesorPrepaga: nombreAsesor,
+      asesorZona:    '',
+      asesorVida:    document.getElementById('asesorVida').value.trim(),
+      // campos extra pyme
+      pymeCuit:      document.getElementById('pymeCuit').value.trim(),
+      pymeMail:      document.getElementById('pymeMail').value.trim(),
+      pymeReferente: document.getElementById('pymeReferente').value.trim(),
+      pymeEmpleados: document.getElementById('pymeEmpleados').value.trim()
+    };
+  }
 
   fetch(SCRIPT_URL, {
     method:  'POST',
@@ -283,6 +393,10 @@ function nuevaDerivacion() {
   document.getElementById('observacion').value = '';
   document.querySelectorAll('#productosGrid input').forEach(function(c){ c.checked = false; });
   document.getElementById('loadingMsg').style.display = 'none';
+  ['pymeNombre','pymeCuit','pymeTel','pymeMail','pymeReferente','pymeEmpleados','pymeObs'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  setTipo('fisica');
   var sv = document.getElementById('asesorVida');
   if (sv) sv.selectedIndex = 0;
   document.getElementById('btnEnviar').disabled = false;
