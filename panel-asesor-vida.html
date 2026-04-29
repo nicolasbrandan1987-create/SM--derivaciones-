@@ -117,7 +117,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .stars-saved{font-size:10px;color:#10b981;font-weight:700;margin-left:4px;display:none}
 .stars-saved.show{display:inline}
 .empty{text-align:center;padding:40px 24px;color:var(--text2)}
-/* Modal carga manual */
+/* Estados Pyme */
+.ec-charla-ag{background:#fce7f3;color:#9d174d}
+.ec-charla-da{background:#f3e8ff;color:#6b21a8}
+.card.CharlaAgendada{border-left-color:#ec4899}
+.card.CharlaDada{border-left-color:#a855f7}
+.bCharlaAgendada{background:#fce7f3;color:#9d174d}
+.bCharlaDada{background:#f3e8ff;color:#6b21a8}
+/* Pyme info card */
+.pyme-card{background:white;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin-bottom:10px;border-left:4px solid #003366}
+.pyme-nombre{font-size:15px;font-weight:700;margin-bottom:4px}
+.pyme-meta{font-size:11px;color:var(--text2);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.pyme-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px}
+.pyme-actions{display:flex;border-top:1px solid #f0f0f0;margin-top:8px}
+.pyme-actions .abtn{flex:1;padding:10px 6px;font-size:11px;font-weight:600;border:none;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;color:var(--text2);border-right:1px solid #f0f0f0}
+.pyme-actions .abtn:last-child{border-right:none}
+.pyme-funnel-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pyme-funnel-lbl{font-size:11px;font-weight:700;width:120px;text-align:right}
+.pyme-funnel-bg{flex:1;height:22px;background:#f0f4f8;border-radius:6px;overflow:hidden}
+.pyme-funnel-fill{height:22px;border-radius:6px;display:flex;align-items:center;padding:0 8px;min-width:24px}
+.pyme-funnel-n{font-size:10px;color:white;font-weight:700}
 .overlay-manual{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;align-items:flex-end;justify-content:center}
 .overlay-manual.open{display:flex}
 .modal-manual{background:white;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 18px 32px;max-height:90vh;overflow-y:auto}
@@ -167,6 +186,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 
 <div class="tabs">
   <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
+  <div class="tab" onclick="showTab('pymes',this)">🏢 Pymes</div>
   <div class="tab" onclick="showTab('derivaciones',this)">📋 Gestión</div>
 </div>
 
@@ -205,6 +225,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
     <div class="section-title" style="margin-top:0">🏆 Top derivadores</div>
     <div id="ranking-wrap"></div>
   </div>
+</div>
+
+<!-- TAB PYMES -->
+<div class="tab-content" id="tab-pymes">
+  <div class="section-title">Resumen Pymes</div>
+  <div class="estado-grid" id="pyme-estado-grid"></div>
+
+  <div class="card-white">
+    <div class="section-title" style="margin-top:0">🏢 Pipeline de pymes</div>
+    <div id="pyme-funnel"></div>
+  </div>
+
+  <div class="section-title">Lista de empresas</div>
+  <div class="filters" id="filtros-pyme">
+    <button class="fbtn active" onclick="filtrarPyme('todos',this)">Todas</button>
+    <button class="fbtn" onclick="filtrarPyme('Pendiente',this)">⏳ Pendiente</button>
+    <button class="fbtn" onclick="filtrarPyme('Contactado',this)">📞 Contactado</button>
+    <button class="fbtn" onclick="filtrarPyme('CharlaAgendada',this)">📅 Charla agendada</button>
+    <button class="fbtn" onclick="filtrarPyme('CharlaDada',this)">✅ Charla dada</button>
+    <button class="fbtn" onclick="filtrarPyme('CerradoVenta',this)">💼 Venta</button>
+    <button class="fbtn" onclick="filtrarPyme('CerradoSinVenta',this)">❌ Sin venta</button>
+  </div>
+  <div class="list" id="lista-pymes" style="padding-top:6px"></div>
 </div>
 
 <!-- TAB GESTION -->
@@ -251,10 +294,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
   </div>
 </div>
 
+<div class="overlay" id="overlay-pyme">
+  <div class="modal">
+    <h3>Actualizar estado — Pyme</h3>
+    <div class="eopt" onclick="selPyme('Pendiente')">⏳ Pendiente</div>
+    <div class="eopt" onclick="selPyme('Contactado')">📞 Contactado</div>
+    <div class="eopt" onclick="selPyme('CharlaAgendada')">📅 Charla agendada</div>
+    <div class="eopt" onclick="selPyme('CharlaDada')">✅ Charla dada</div>
+    <div class="eopt" onclick="selPyme('CerradoVenta')">💼 Venta concretada</div>
+    <div class="eopt" onclick="selPyme('CerradoSinVenta')">❌ Sin venta</div>
+    <div class="eopt" onclick="selPyme('Imposible')">🚫 Imposible contactar</div>
+    <button class="btn-cancel" onclick="cerrarPyme()">Cancelar</button>
+  </div>
+</div>
+
 <script>
 var URL_SCRIPT='https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
 var ASESOR=decodeURIComponent((new URLSearchParams(window.location.search).get('asesor')||'').replace(/\+/g,' '));
-var derivaciones=[],filtroActual='todos',cardActiva=null,estadoActual=null;
+var derivaciones=[],filtroActual='todos',filtroActualPyme='todos',cardActiva=null,estadoActual=null,pymeActiva=null;
 document.getElementById('subtitulo').textContent=ASESOR?'Asesor: '+ASESOR:'Sin asesor';
 
 var COLORS={Pendiente:'#f59e0b',Contactado:'#8b5cf6',Cotizado:'#3b82f6',Imposible:'#94a3b8',CerradoVenta:'#10b981',CerradoSinVenta:'#ef4444'};
@@ -338,6 +395,7 @@ function cargarDatos(){
           prodCotiz:d['Producto Cotizado']||'',
           notas:d['Notas VIDA']||'',
           calificacion:parseInt(d['Calificacion'])||0,
+          tipoDer:d['Tipo Derivacion']||d['tipoDer']||'Fisica',
           semana:getSemana(fc)};
       });
       renderTodo();
@@ -347,19 +405,24 @@ function cargarDatos(){
 }
 
 function renderTodo(){
-  stats();renderEstados();renderDonut();renderFunnel();renderSemanas();renderRanking();render();
+  var fisicas=derivaciones.filter(function(d){return d.tipoDer!=='Pyme';});
+  var pymes=derivaciones.filter(function(d){return d.tipoDer==='Pyme';});
+  stats(fisicas);renderEstados(fisicas);renderDonut(fisicas);renderFunnel(fisicas);renderSemanas(fisicas);renderRanking(fisicas);render();
+  renderPymes(pymes);
 }
 
-function stats(){
-  document.getElementById('sT').textContent=derivaciones.length;
-  document.getElementById('sP').textContent=derivaciones.filter(function(d){return d.estado==='Pendiente';}).length;
-  document.getElementById('sC').textContent=derivaciones.filter(function(d){return d.estado==='Cotizado';}).length;
-  document.getElementById('sV').textContent=derivaciones.filter(function(d){return d.estado==='CerradoVenta';}).length;
+function stats(items){
+  items=items||derivaciones;
+  document.getElementById('sT').textContent=items.length;
+  document.getElementById('sP').textContent=items.filter(function(d){return d.estado==='Pendiente';}).length;
+  document.getElementById('sC').textContent=items.filter(function(d){return d.estado==='Cotizado';}).length;
+  document.getElementById('sV').textContent=items.filter(function(d){return d.estado==='CerradoVenta';}).length;
 }
 
-function renderEstados(){
+function renderEstados(items){
+  items=items||derivaciones;
   var c={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
-  derivaciones.forEach(function(d){if(c[d.estado]!==undefined)c[d.estado]++;});
+  items.forEach(function(d){if(c[d.estado]!==undefined)c[d.estado]++;});
   document.getElementById('estado-grid').innerHTML=
     '<div class="estado-card ec-pendiente"><div class="ev">'+c.Pendiente+'</div><div class="el">Pendiente</div></div>'+
     '<div class="estado-card ec-contactado"><div class="ev">'+c.Contactado+'</div><div class="el">Contactado</div></div>'+
@@ -369,10 +432,11 @@ function renderEstados(){
     '<div class="estado-card ec-imposible"><div class="ev">'+c.Imposible+'</div><div class="el">Imposible</div></div>';
 }
 
-function renderDonut(){
+function renderDonut(items){
+  items=items||derivaciones;
   var c={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
-  derivaciones.forEach(function(d){if(c[d.estado]!==undefined)c[d.estado]++;});
-  var total=derivaciones.length||1,r=35,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
+  items.forEach(function(d){if(c[d.estado]!==undefined)c[d.estado]++;});
+  var total=items.length||1,r=35,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
   var svg=document.getElementById('donut-svg');
   while(svg.children.length>1)svg.removeChild(svg.lastChild);
   var orden=['CerradoVenta','Cotizado','Contactado','Pendiente','CerradoSinVenta','Imposible'],lh='';
@@ -389,11 +453,12 @@ function renderDonut(){
   document.getElementById('donut-legend').innerHTML=lh||'Sin datos';
 }
 
-function renderFunnel(){
-  var total=derivaciones.length||1;
-  var contactados=derivaciones.filter(function(d){return['Contactado','Cotizado','CerradoVenta','CerradoSinVenta'].indexOf(d.estado)>=0;}).length;
-  var cotizados=derivaciones.filter(function(d){return d.estado==='Cotizado';});
-  var ventas=derivaciones.filter(function(d){return d.estado==='CerradoVenta';});
+function renderFunnel(items){
+  items=items||derivaciones;
+  var total=items.length||1;
+  var contactados=items.filter(function(d){return['Contactado','Cotizado','CerradoVenta','CerradoSinVenta'].indexOf(d.estado)>=0;}).length;
+  var cotizados=items.filter(function(d){return d.estado==='Cotizado';});
+  var ventas=items.filter(function(d){return d.estado==='CerradoVenta';});
   var primaCotiz=cotizados.reduce(function(s,d){return s+(d.primaCotiz||0);},0);
   var primaVentas=ventas.reduce(function(s,d){return s+(d.prima||0);},0);
   var rows=[
@@ -413,9 +478,10 @@ function renderFunnel(){
   }).join('');
 }
 
-function renderSemanas(){
+function renderSemanas(items){
+  items=items||derivaciones;
   var semanas={};
-  derivaciones.forEach(function(d){
+  items.forEach(function(d){
     if(!d.semana)return;
     if(!semanas[d.semana])semanas[d.semana]={der:0,ven:0};
     semanas[d.semana].der++;
@@ -438,9 +504,10 @@ function renderSemanas(){
   }).join('')||'<div style="color:#aaa;font-size:12px">Sin datos</div>';
 }
 
-function renderRanking(){
+function renderRanking(items){
+  items=items||derivaciones;
   var c={};
-  derivaciones.forEach(function(d){if(d.prepaga)c[d.prepaga]=(c[d.prepaga]||0)+1;});
+  items.forEach(function(d){if(d.prepaga)c[d.prepaga]=(c[d.prepaga]||0)+1;});
   var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,5),max=sorted.length?c[sorted[0]]:1;
   document.getElementById('ranking-wrap').innerHTML=sorted.length?sorted.map(function(n,i){
     return'<div class="rank-row"><div class="rank-num">'+(i+1)+'</div><div class="rank-name">'+n+'</div><div class="rank-bar-bg"><div class="rank-bar-fg" style="width:'+Math.round(c[n]/max*100)+'%"></div></div><div class="rank-n">'+c[n]+'</div></div>';
@@ -583,6 +650,131 @@ function guardar(estado,extras){
   );
 }
 
+var BL_PYME={Pendiente:'Pendiente',Contactado:'Contactado',CharlaAgendada:'Charla agendada',CharlaDada:'Charla dada',CerradoVenta:'Venta concretada',CerradoSinVenta:'Sin venta',Imposible:'Imposible'};
+var BC_PYME={Pendiente:'bPendiente',Contactado:'bContactado',CharlaAgendada:'bCharlaAgendada',CharlaDada:'bCharlaDada',CerradoVenta:'bCerradoVenta',CerradoSinVenta:'bCerradoSinVenta',Imposible:'bImposible'};
+var COLORS_PYME={Pendiente:'#f59e0b',Contactado:'#8b5cf6',CharlaAgendada:'#ec4899',CharlaDada:'#a855f7',CerradoVenta:'#10b981',CerradoSinVenta:'#ef4444',Imposible:'#94a3b8'};
+
+function normPyme(e){
+  if(!e)return'Pendiente';
+  var s=String(e).toLowerCase().replace(/\s/g,'');
+  if(s==='charlaagendada')return'CharlaAgendada';
+  if(s==='charladada')return'CharlaDada';
+  if(s==='cerradoconventa'||s==='cerradoventa')return'CerradoVenta';
+  if(s==='cerradosinventa')return'CerradoSinVenta';
+  if(s==='contactado')return'Contactado';
+  if(s==='imposible')return'Imposible';
+  return'Pendiente';
+}
+
+function renderPymes(pymes){
+  // Contadores
+  var c={Pendiente:0,Contactado:0,CharlaAgendada:0,CharlaDada:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
+  pymes.forEach(function(d){
+    var est=normPyme(d.estado);
+    if(c[est]!==undefined)c[est]++;
+  });
+  document.getElementById('pyme-estado-grid').innerHTML=
+    '<div class="estado-card ec-pendiente"><div class="ev">'+c.Pendiente+'</div><div class="el">Pendiente</div></div>'+
+    '<div class="estado-card ec-contactado"><div class="ev">'+c.Contactado+'</div><div class="el">Contactado</div></div>'+
+    '<div class="estado-card ec-charla-ag"><div class="ev">'+c.CharlaAgendada+'</div><div class="el">Charla agend.</div></div>'+
+    '<div class="estado-card ec-charla-da"><div class="ev">'+c.CharlaDada+'</div><div class="el">Charla dada</div></div>'+
+    '<div class="estado-card ec-venta"><div class="ev">'+c.CerradoVenta+'</div><div class="el">Venta</div></div>'+
+    '<div class="estado-card ec-sinventa"><div class="ev">'+c.CerradoSinVenta+'</div><div class="el">Sin venta</div></div>';
+
+  // Funnel pyme
+  var total=pymes.length||1;
+  var etapas=[
+    {label:'Empresas derivadas',n:pymes.length,color:'#003366'},
+    {label:'Contactadas',n:c.Contactado+c.CharlaAgendada+c.CharlaDada+c.CerradoVenta+c.CerradoSinVenta,color:'#8b5cf6'},
+    {label:'Charla agendada',n:c.CharlaAgendada+c.CharlaDada+c.CerradoVenta,color:'#ec4899'},
+    {label:'Charla dada',n:c.CharlaDada+c.CerradoVenta,color:'#a855f7'},
+    {label:'Venta concretada',n:c.CerradoVenta,color:'#10b981'},
+  ];
+  document.getElementById('pyme-funnel').innerHTML=etapas.map(function(e){
+    var pct=Math.round(e.n/total*100);
+    return'<div class="pyme-funnel-row">'+
+      '<div class="pyme-funnel-lbl" style="color:'+e.color+'">'+e.label+'</div>'+
+      '<div class="pyme-funnel-bg"><div class="pyme-funnel-fill" style="width:'+pct+'%;background:'+e.color+'">'+
+        '<span class="pyme-funnel-n">'+e.n+'</span></div></div>'+
+      '</div>';
+  }).join('');
+
+  renderListaPymes(pymes);
+}
+
+function filtrarPyme(f,btn){
+  filtroActualPyme=f;
+  document.querySelectorAll('#filtros-pyme .fbtn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var pymes=derivaciones.filter(function(d){return d.tipoDer==='Pyme';});
+  renderListaPymes(pymes);
+}
+
+function renderListaPymes(pymes){
+  var items=filtroActualPyme==='todos'?pymes:pymes.filter(function(d){return normPyme(d.estado)===filtroActualPyme;});
+  var el=document.getElementById('lista-pymes');
+  if(!items.length){el.innerHTML='<div class="empty">📭 Sin empresas en este estado</div>';return;}
+  el.innerHTML=items.map(function(d){
+    var est=normPyme(d.estado);
+    var badge=BC_PYME[est]||'bPendiente';
+    var lbl=BL_PYME[est]||est;
+    return'<div class="pyme-card" id="pcard-'+d.id+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+        '<div class="pyme-nombre">🏢 '+d.nombre+'</div>'+
+        '<span class="pyme-badge '+badge+'">'+lbl+'</span>'+
+      '</div>'+
+      '<div class="pyme-meta">'+
+        (d.tel?'<span>📞 '+d.tel+'</span>':'')+
+        (d.prepaga?'<span>👤 '+d.prepaga+'</span>':'')+
+        (d.fecha?'<span>📅 '+d.fecha+'</span>':'')+
+      '</div>'+
+      (d.obs?'<div style="font-size:11px;color:#555;font-style:italic;padding:4px 0">"'+d.obs+'"</div>':'')+
+      '<div class="cnota-wrap" style="margin-top:6px">'+
+        '<textarea class="cnota" rows="2" placeholder="Notas sobre la gestión..." id="pnota-'+d.id+'">'+d.notas+'</textarea>'+
+        '<button class="cnota-btn" onclick="guardarNotaPyme(\''+d.id+'\')">Guardar nota</button>'+
+      '</div>'+
+      '<div class="pyme-actions">'+
+        (d.tel?'<button class="abtn wa" onclick="wa(\''+d.tel+'\',\''+d.nombre.replace(/'/g,'&#39;')+'\')">💬 WhatsApp</button>':'')+
+        (d.tel?'<button class="abtn" onclick="window.location.href=\'tel:+549'+d.tel+'\'">📞 Llamar</button>':'')+
+        '<button class="abtn" onclick="abrirModalPyme(\''+d.id+'\')">✏️ Estado</button>'+
+      '</div>'+
+      '</div>';
+  }).join('');
+}
+
+function abrirModalPyme(id){
+  pymeActiva=id;
+  document.getElementById('overlay-pyme').classList.add('open');
+}
+function cerrarPyme(){document.getElementById('overlay-pyme').classList.remove('open');}
+
+function selPyme(estado){
+  cerrarPyme();
+  showLoading(true,'⏳ Guardando...');
+  var idx=derivaciones.findIndex(function(d){return d.id===pymeActiva;});
+  if(idx!==-1)derivaciones[idx].estado=estado;
+  jsonp({accion:'actualizarEstado',id:pymeActiva,estado:estado},
+    function(){
+      showLoading(false);toast('✓ Estado guardado',true);
+      var pymes=derivaciones.filter(function(d){return d.tipoDer==='Pyme';});
+      renderPymes(pymes);
+    },
+    function(){showLoading(false);toast('❌ Error al guardar',false);}
+  );
+}
+
+function guardarNotaPyme(id){
+  var nota=document.getElementById('pnota-'+id).value;
+  var idx=derivaciones.findIndex(function(d){return d.id===id;});
+  if(idx===-1)return;
+  var btn=document.querySelector('#pcard-'+id+' .cnota-btn');
+  if(btn)btn.textContent='⏳';
+  jsonp({accion:'actualizarEstado',id:id,estado:derivaciones[idx].estado,notasVida:nota},
+    function(){derivaciones[idx].notas=nota;if(btn){btn.textContent='✓';setTimeout(function(){btn.textContent='Guardar nota';},2000);}toast('✓ Nota guardada',true);},
+    function(){if(btn)btn.textContent='Error';toast('Error',false);}
+  );
+}
+
 function showTab(name,el){
   document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
@@ -590,6 +782,7 @@ function showTab(name,el){
 }
 
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)cerrar();});
+document.getElementById('overlay-pyme').addEventListener('click',function(e){if(e.target===this)cerrarPyme();});
 cargarDatos();
 </script>
 
@@ -598,20 +791,8 @@ cargarDatos();
   <div class="modal-manual">
     <h3>➕ Cargar prospecto</h3>
     <div class="sub">Campos con <span class="req">*</span> son obligatorios</div>
-
-    <!-- Tipo -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <div id="mn-tipo-fisica" onclick="mnSetTipo('fisica')" style="border:2px solid #003366;border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:#eef4ff">
-        <div style="font-size:20px">👤</div><div style="font-size:12px;font-weight:700;color:#003366">Persona Física</div>
-      </div>
-      <div id="mn-tipo-juridica" onclick="mnSetTipo('juridica')" style="border:2px solid #dde3ec;border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:#fafbfd">
-        <div style="font-size:20px">🏢</div><div style="font-size:12px;font-weight:700;color:#64748b">Empresa / Pyme</div>
-      </div>
-    </div>
-
-    <!-- Campos comunes -->
     <div class="field">
-      <label id="mn-label-nombre">Nombre del cliente <span class="req">*</span></label>
+      <label>Nombre del cliente <span class="req">*</span></label>
       <input type="text" id="mn-nombre" placeholder="Ej: Juan García" maxlength="100">
     </div>
     <div class="field">
@@ -619,52 +800,24 @@ cargarDatos();
       <input type="text" id="mn-prepaga" placeholder="Ej: Carlos Rodríguez" maxlength="100">
     </div>
     <div class="field">
-      <label id="mn-label-tel">Teléfono <span class="req">*</span></label>
+      <label>Teléfono <span class="req">*</span></label>
       <input type="tel" id="mn-tel" placeholder="Ej: 1145678901" maxlength="20">
+      <div class="field-hint">Sin 0 ni 15, solo números</div>
     </div>
-
-    <!-- Campos solo Física -->
-    <div id="mn-sec-fisica">
-      <div class="field">
-        <label>Producto Prepaga <span class="req">*</span></label>
-        <select id="mn-producto">
-          <option value="">Seleccioná...</option>
-          <option>Swiss Medical Medicina Prepaga</option>
-          <option>SMG Salud</option>
-          <option>Otros</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Observación</label>
-        <input type="text" id="mn-obs" placeholder="Contexto del cliente (opcional)" maxlength="200">
-      </div>
+    <div class="field">
+      <label>Producto Prepaga <span class="req">*</span></label>
+      <select id="mn-producto">
+        <option value="">Seleccioná...</option>
+        <option>Swiss Medical Medicina Prepaga</option>
+        <option>SMG Salud</option>
+        <option>Otros</option>
+      </select>
     </div>
-
-    <!-- Campos solo Pyme -->
-    <div id="mn-sec-pyme" style="display:none">
-      <div class="field">
-        <label>CUIT</label>
-        <input type="text" id="mn-cuit" placeholder="Ej: 30-12345678-9" maxlength="15">
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="mn-mail" placeholder="rrhh@empresa.com">
-      </div>
-      <div class="field">
-        <label>Referente de la empresa <span class="req">*</span></label>
-        <input type="text" id="mn-referente" placeholder="Nombre del contacto de RRHH" maxlength="100">
-      </div>
-      <div class="field">
-        <label>Cantidad de empleados</label>
-        <input type="number" id="mn-empleados" placeholder="Ej: 25" min="1">
-      </div>
-      <div class="field">
-        <label>Observaciones</label>
-        <input type="text" id="mn-obs-pyme" placeholder="Info adicional (opcional)" maxlength="300">
-      </div>
+    <div class="field">
+      <label>Observación</label>
+      <input type="text" id="mn-obs" placeholder="Contexto del cliente (opcional)" maxlength="200">
     </div>
-
-    <button class="btn-ok" onclick="guardarManual()">✓ Guardar</button>
+    <button class="btn-ok" onclick="guardarManual()">✓ Guardar prospecto</button>
     <button class="btn-cancel" onclick="cerrarCargaManual()">Cancelar</button>
   </div>
 </div>
@@ -742,68 +895,44 @@ function exportarExcelVida(){
   XLSX.writeFile(wb,'Derivaciones_'+ASESOR.replace(/ /g,'_')+'_'+fecha+'.xlsx');
 }
 
-var mnTipo='fisica';
-function mnSetTipo(t){
-  mnTipo=t;
-  var esFis=t==='fisica';
-  var bFis=document.getElementById('mn-tipo-fisica');
-  var bJur=document.getElementById('mn-tipo-juridica');
-  bFis.style.borderColor=esFis?'#003366':'#dde3ec';bFis.style.background=esFis?'#eef4ff':'#fafbfd';
-  bFis.querySelector('div:last-child').style.color=esFis?'#003366':'#64748b';
-  bJur.style.borderColor=!esFis?'#003366':'#dde3ec';bJur.style.background=!esFis?'#eef4ff':'#fafbfd';
-  bJur.querySelector('div:last-child').style.color=!esFis?'#003366':'#64748b';
-  document.getElementById('mn-sec-fisica').style.display=esFis?'block':'none';
-  document.getElementById('mn-sec-pyme').style.display=!esFis?'block':'none';
-  document.getElementById('mn-label-nombre').innerHTML=(esFis?'Nombre del cliente':'Nombre de la empresa')+' <span class="req">*</span>';
-  document.getElementById('mn-nombre').placeholder=esFis?'Ej: Juan García':'Ej: Distribuidora Martínez SA';
-}
-
 function abrirCargaManual(){
-  ['mn-nombre','mn-prepaga','mn-tel','mn-obs','mn-cuit','mn-mail','mn-referente','mn-empleados','mn-obs-pyme'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.value='';
-  });
-  var prod=document.getElementById('mn-producto');if(prod)prod.value='';
-  mnSetTipo('fisica');
+  document.getElementById('mn-nombre').value='';
+  document.getElementById('mn-prepaga').value='';
+  document.getElementById('mn-tel').value='';
+  document.getElementById('mn-producto').value='';
+  document.getElementById('mn-obs').value='';
   document.getElementById('overlay-manual').classList.add('open');
 }
 function cerrarCargaManual(){document.getElementById('overlay-manual').classList.remove('open');}
 
 function guardarManual(){
   var nombre=document.getElementById('mn-nombre').value.trim();
-  var tel=document.getElementById('mn-tel').value.trim();
   var prepaga=document.getElementById('mn-prepaga').value.trim();
-  if(!nombre){alert('El nombre es obligatorio.');document.getElementById('mn-nombre').focus();return;}
+  var tel=document.getElementById('mn-tel').value.trim();
+  var producto=document.getElementById('mn-producto').value;
+  var obs=document.getElementById('mn-obs').value.trim();
+  if(!nombre){alert('El nombre del cliente es obligatorio.');document.getElementById('mn-nombre').focus();return;}
   if(!tel){alert('El teléfono es obligatorio.');document.getElementById('mn-tel').focus();return;}
-
-  var params={accion:'nuevaDerivacion',clienteNombre:nombre,clienteTelefono:tel,
-    asesorPrepaga:prepaga||'Carga manual',asesorVida:ASESOR,zona:'',estado:'Pendiente',
-    tipoDer:mnTipo==='fisica'?'Fisica':'Pyme'};
-
-  if(mnTipo==='fisica'){
-    var prod=document.getElementById('mn-producto').value;
-    if(!prod){alert('Seleccioná el producto Prepaga.');document.getElementById('mn-producto').focus();return;}
-    params.productoPrepaga=prod;
-    params.observacion=document.getElementById('mn-obs').value.trim();
-  } else {
-    var ref=document.getElementById('mn-referente').value.trim();
-    if(!ref){alert('El referente de la empresa es obligatorio.');document.getElementById('mn-referente').focus();return;}
-    var emp=document.getElementById('mn-empleados').value.trim();
-    var mail=document.getElementById('mn-mail').value.trim();
-    var cuit=document.getElementById('mn-cuit').value.trim();
-    var obsP=document.getElementById('mn-obs-pyme').value.trim();
-    params.productoPrepaga='PYME'+(emp?' - '+emp+' empleados':'');
-    params.observacion=['Empresa:'+nombre,cuit?'CUIT:'+cuit:'','Referente:'+ref,
-      mail?'Email:'+mail:'',emp?'Empleados:'+emp:'',obsP?'Obs:'+obsP:''].filter(Boolean).join(' | ');
-    params.pymeCuit=cuit;params.pymeMail=mail;params.pymeReferente=ref;params.pymeEmpleados=emp;
-  }
-
+  if(!producto){alert('Seleccioná el producto Prepaga.');document.getElementById('mn-producto').focus();return;}
   cerrarCargaManual();
-  showLoading(true,'⏳ Guardando...');
-  jsonp(params,function(resp){
+  showLoading(true,'⏳ Guardando prospecto...');
+  jsonp({
+    accion:'nuevaDerivacion',
+    clienteNombre:nombre,
+    clienteTelefono:tel,
+    productoPrepaga:producto,
+    observacion:obs,
+    asesorPrepaga: prepaga||'Carga manual',
+    asesorVida:ASESOR,
+    zona:'',
+    estado:'Pendiente'
+  },function(resp){
     showLoading(false);
-    if(resp&&resp.ok){toast('✓ Guardado',true);cargarDatos();}
+    if(resp&&resp.ok){toast('✓ Prospecto cargado',true);cargarDatos();}
     else{toast('❌ Error al guardar',false);}
-  },function(){showLoading(false);toast('❌ Error de conexión',false);});
+  },function(){
+    showLoading(false);toast('❌ Error de conexión',false);
+  });
 }
 </script>
 
