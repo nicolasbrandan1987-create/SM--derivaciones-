@@ -934,78 +934,31 @@ function guardarManual(){
     else{toast('❌ Error al guardar',false);}
   },function(){showLoading(false);toast('❌ Error de conexión',false);});
 }
-</script>
 
-</body>
-</html>
+function exportarExcelVida(){
   if(!derivaciones.length){alert('No hay derivaciones para exportar.');return;}
   var BL2={Pendiente:'Pendiente',Contactado:'Contactado',Cotizado:'Cotizado',Imposible:'Imposible',CerradoVenta:'Cerrado con venta',CerradoSinVenta:'Cerrado sin venta'};
-
-  // Hoja 1: Detalle completo
   var filas=[['ID','Fecha','Cliente','Teléfono','Producto Prepaga','Asesor Prepaga','Estado','Notas','Producto VIDA','Prima Vendida','Producto Cotizado','Prima Cotizada','Calificación']];
   derivaciones.forEach(function(d){
-    filas.push([
-      d.id, d.fecha, d.nombre, d.tel||'', d.producto||'',
-      d.prepaga||'', BL2[d.estado]||d.estado, d.notas||'',
-      d.prodVida||'', d.prima||'', d.prodCotiz||'', d.primaCotiz||'',
-      d.calificacion||''
-    ]);
+    filas.push([d.id,d.fecha,d.nombre,d.tel||'',d.producto||'',d.prepaga||'',BL2[d.estado]||d.estado,d.notas||'',d.prodVida||'',d.prima||'',d.prodCotiz||'',d.primaCotiz||'',d.calificacion||'']);
   });
-
-  // Hoja 2: Resumen por estado
   var estados={Pendiente:0,Contactado:0,Cotizado:0,CerradoVenta:0,CerradoSinVenta:0,Imposible:0};
   var primaTotal=0;
-  derivaciones.forEach(function(d){
-    if(estados[d.estado]!==undefined)estados[d.estado]++;
-    if(d.estado==='CerradoVenta')primaTotal+=d.prima||0;
-  });
-  var filasRes=[
-    ['Resumen de cartera — '+ASESOR,''],
-    ['',''],
-    ['Estado','Cantidad'],
-    ['Pendiente',estados.Pendiente],
-    ['Contactado',estados.Contactado],
-    ['Cotizado',estados.Cotizado],
-    ['Cerrado con venta',estados.CerradoVenta],
-    ['Cerrado sin venta',estados.CerradoSinVenta],
-    ['Imposible',estados.Imposible],
-    ['',''],
-    ['Total derivaciones',derivaciones.length],
-    ['Prima total vendida','$'+primaTotal.toLocaleString('es-AR')],
-    ['% Conversión',derivaciones.length?Math.round(estados.CerradoVenta/derivaciones.length*100)+'%':'0%'],
-  ];
-
-  // Hoja 3: Por semana
+  derivaciones.forEach(function(d){if(estados[d.estado]!==undefined)estados[d.estado]++;if(d.estado==='CerradoVenta')primaTotal+=d.prima||0;});
+  var filasRes=[['Resumen de cartera — '+ASESOR,''],['',''],['Estado','Cantidad'],['Pendiente',estados.Pendiente],['Contactado',estados.Contactado],['Cotizado',estados.Cotizado],['Cerrado con venta',estados.CerradoVenta],['Cerrado sin venta',estados.CerradoSinVenta],['Imposible',estados.Imposible],['',''],['Total derivaciones',derivaciones.length],['Prima total vendida','$'+primaTotal.toLocaleString('es-AR')],['% Conversión',derivaciones.length?Math.round(estados.CerradoVenta/derivaciones.length*100)+'%':'0%']];
   var semMap={};
-  derivaciones.forEach(function(d){
-    if(!d.semana)return;
-    if(!semMap[d.semana])semMap[d.semana]={der:0,ven:0};
-    semMap[d.semana].der++;
-    if(d.estado==='CerradoVenta')semMap[d.semana].ven++;
-  });
+  derivaciones.forEach(function(d){if(!d.semana)return;if(!semMap[d.semana])semMap[d.semana]={der:0,ven:0};semMap[d.semana].der++;if(d.estado==='CerradoVenta')semMap[d.semana].ven++;});
   var filasSem=[['Semana','Derivaciones','Ventas','% Conv.']];
-  Object.keys(semMap).sort().forEach(function(s){
-    var sd=semMap[s];
-    var lbl=s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
-    filasSem.push([lbl,sd.der,sd.ven,sd.der?Math.round(sd.ven/sd.der*100)+'%':'0%']);
-  });
-
+  Object.keys(semMap).sort().forEach(function(s){var sd=semMap[s];var lbl=s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);filasSem.push([lbl,sd.der,sd.ven,sd.der?Math.round(sd.ven/sd.der*100)+'%':'0%']);});
   var wb=XLSX.utils.book_new();
-  var ws1=XLSX.utils.aoa_to_sheet(filas);
-  var ws2=XLSX.utils.aoa_to_sheet(filasRes);
-  var ws3=XLSX.utils.aoa_to_sheet(filasSem);
-
+  var ws1=XLSX.utils.aoa_to_sheet(filas);var ws2=XLSX.utils.aoa_to_sheet(filasRes);var ws3=XLSX.utils.aoa_to_sheet(filasSem);
   ws1['!cols']=[{wch:12},{wch:12},{wch:24},{wch:14},{wch:22},{wch:24},{wch:20},{wch:30},{wch:20},{wch:14},{wch:20},{wch:14},{wch:12}];
-  ws2['!cols']=[{wch:28},{wch:16}];
-  ws3['!cols']=[{wch:12},{wch:14},{wch:8},{wch:10}];
-
-  XLSX.utils.book_append_sheet(wb,ws1,'Mis derivaciones');
-  XLSX.utils.book_append_sheet(wb,ws2,'Resumen');
-  XLSX.utils.book_append_sheet(wb,ws3,'Por semana');
-
+  ws2['!cols']=[{wch:28},{wch:16}];ws3['!cols']=[{wch:12},{wch:14},{wch:8},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Mis derivaciones');XLSX.utils.book_append_sheet(wb,ws2,'Resumen');XLSX.utils.book_append_sheet(wb,ws3,'Por semana');
   var fecha=new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
   XLSX.writeFile(wb,'Derivaciones_'+ASESOR.replace(/ /g,'_')+'_'+fecha+'.xlsx');
 }
+
 </script>
 
 </body>
