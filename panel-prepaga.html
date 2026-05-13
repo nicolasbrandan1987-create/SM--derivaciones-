@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Prepaga — Swiss Medical</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07111f;--surface:#0e1e33;--surface2:#162840;--border:rgba(99,179,237,0.12);
+  --accent:#63b3ed;--accent2:#2b6cb0;--green:#48bb78;--yellow:#ecc94b;--red:#fc8181;--muted:#718096;--text:#e2e8f0;--radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
+.header{background:linear-gradient(135deg,#0e1e33,#162840);border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.brand{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-family:'Syne',sans-serif;font-weight:600;}
+.asesor-name{font-size:18px;font-weight:800;font-family:'Syne',sans-serif;}
+.semaforo{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;min-width:110px;}
+.sem-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.sem-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;}
+.sem-pct{font-size:10px;color:var(--muted);}
+.tabs{display:flex;gap:2px;padding:14px 20px 0;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+.tab{padding:9px 16px;border-radius:8px 8px 0 0;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(99,179,237,0.07);}
+.content{padding:20px;max-width:820px;margin:0 auto;}
+.panel{display:none;}.panel.active{display:block;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.kpi-n{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;}
+.kpi-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.card-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-family:'Syne',sans-serif;font-weight:600;margin-bottom:18px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg3{grid-template-columns:1fr 1fr 1fr;}
+.fg1{grid-template-columns:1fr;}
+.span2{grid-column:1/-1;}
+.fgroup{display:flex;flex-direction:column;gap:5px;}
+label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:500;}
+input,select,textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;transition:border-color 0.2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface);}
+textarea{resize:vertical;min-height:60px;}
+.divider{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;margin:18px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.computed{background:rgba(99,179,237,0.06);border:1px solid rgba(99,179,237,0.2);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--accent);}
+.tog-row{display:flex;gap:8px;}
+.tog{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.18s;}
+.tog.si{background:rgba(72,187,120,0.12);border-color:var(--green);color:var(--green);}
+.tog.no{background:rgba(252,129,129,0.1);border-color:var(--red);color:var(--red);}
+.btn-submit{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;letter-spacing:0.5px;transition:opacity 0.2s,transform 0.1s;}
+.btn-submit:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.table-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-head h3{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:'Syne',sans-serif;font-weight:600;}
+.tscroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:1000px;}
+th{padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03);white-space:nowrap;}
+tr:last-child td{border:none;}tr:hover td{background:rgba(99,179,237,0.04);}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.b-imp{background:rgba(99,179,237,0.15);color:var(--accent);}
+.b-ob{background:rgba(236,201,75,0.15);color:var(--yellow);}
+.b-fc{background:rgba(252,129,129,0.15);color:var(--red);}
+.b-aud{background:rgba(72,187,120,0.15);color:var(--green);}
+.b-pre,.b-car,.b-sup{background:rgba(113,128,150,0.15);color:var(--muted);}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.chart-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;font-family:'Syne',sans-serif;}
+.bar-chart{display:flex;flex-direction:column;gap:9px;}
+.bar-item{display:flex;align-items:center;gap:8px;}
+.bar-lbl{font-size:11px;color:var(--muted);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;background:var(--bg);border-radius:3px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width 0.7s ease;}
+.bar-val{font-size:11px;font-family:'DM Mono',monospace;width:60px;text-align:right;flex-shrink:0;}
+.ring-wrap{display:flex;align-items:center;gap:18px;}
+.ring-info{flex:1;}
+.ring-big{font-size:30px;font-weight:700;font-family:'DM Mono',monospace;}
+.ring-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+svg.ring{width:88px;height:88px;flex-shrink:0;}
+.loading{display:flex;align-items:center;justify-content:center;padding:36px;color:var(--muted);font-size:13px;gap:10px;}
+.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:13px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transition:transform 0.3s;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.err{border-color:var(--red);}
+@media(max-width:600px){.kpi-row{grid-template-columns:repeat(2,1fr);}.fg,.fg3{grid-template-columns:1fr;}.chart-row{grid-template-columns:1fr;}.header{flex-direction:column;align-items:flex-start;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand">Swiss Medical · Prepaga · Córdoba</div>
+    <div class="asesor-name" id="hName">Cargando...</div>
+  </div>
+  <div class="semaforo">
+    <span class="sem-label">Cuota Neta</span>
+    <span class="sem-val" id="semVal" style="color:var(--muted)">$0</span>
+    <span class="sem-pct" id="semPct">— del objetivo</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('cargar',this)">➕ Nueva Venta</button>
+  <button class="tab" onclick="showTab('ventas',this)">📋 Mis Ventas</button>
+  <button class="tab" onclick="showTab('graficos',this)">📊 Gráficos</button>
+</div>
+
+<div class="content">
+
+  <!-- NUEVA VENTA -->
+  <div class="panel active" id="tab-cargar">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-n" id="kImp">—</div><div class="kpi-l">Impactados</div></div>
+      <div class="kpi"><div class="kpi-n" id="kCap">—</div><div class="kpi-l">Capitas</div></div>
+      <div class="kpi"><div class="kpi-n" id="kCuota">—</div><div class="kpi-l">Cuota Neta</div></div>
+      <div class="kpi"><div class="kpi-n" id="kDeriv">—</div><div class="kpi-l">→ VIDA</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Datos del Afiliado</div>
+      <div class="fg fg3">
+        <div class="fgroup">
+          <label>N° Afilmed *</label>
+          <input id="fAfilmed" type="text" placeholder="16889586">
+        </div>
+        <div class="fgroup span2" style="grid-column:2/-1">
+          <label>Apellido y Nombre del Socio *</label>
+          <input id="fNombre" type="text" placeholder="García López Martín">
+        </div>
+        <div class="fgroup">
+          <label>DNI</label>
+          <input id="fDNI" type="text" placeholder="38280777">
+        </div>
+        <div class="fgroup">
+          <label>Teléfono</label>
+          <input id="fTel" type="text" placeholder="3562501625">
+        </div>
+        <div class="fgroup">
+          <label>Email</label>
+          <input id="fEmail" type="email" placeholder="socio@gmail.com">
+        </div>
+      </div>
+
+      <div class="divider">Datos de la Venta</div>
+      <div class="fg fg3">
+        <div class="fgroup">
+          <label>Vigencia</label>
+          <input id="fVigencia" type="text" placeholder="46143">
+        </div>
+        <div class="fgroup">
+          <label>Plan</label>
+          <select id="fPlan">
+            <option value="">Seleccioná...</option>
+            <option>SMG20</option><option>SMG40</option><option>S2</option>
+            <option>S3</option><option>SMG10</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Alta / Inclusión</label>
+          <select id="fAlta">
+            <option value="">Seleccioná...</option>
+            <option>Alta total</option><option>Alta parcial</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Capitas *</label>
+          <input id="fCapitas" type="number" placeholder="1" min="1" oninput="calcular()">
+        </div>
+        <div class="fgroup">
+          <label>Cuota $ *</label>
+          <input id="fCuota" type="number" placeholder="206402" min="0" oninput="calcular()">
+        </div>
+        <div class="fgroup">
+          <label>Estado *</label>
+          <select id="fEstado">
+            <option value="">Seleccioná...</option>
+            <option>Impactado</option><option>OB en Proceso</option>
+            <option>Falta Cobro</option><option>Precarga</option>
+            <option>Carga</option><option>Auditado A.M. Central</option><option>Supervisado</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Tipo de Venta</label>
+          <select id="fTipoVenta">
+            <option value="">Seleccioná...</option>
+            <option>Directo</option><option>Directo Desregulado</option>
+            <option>Pyme</option><option>Pyme Nueva</option><option>Afinidad</option>
+            <option>CorRe</option><option>Venta Asistida Individuo</option><option>Venta Asistida PYME</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Origen del Dato</label>
+          <select id="fOrigen">
+            <option value="">Seleccioná...</option>
+            <option>Propio</option><option>PYME</option><option>Guardia Presencial</option>
+            <option>Web</option><option>Telefonica</option><option>Vta Asistida</option><option>CorRe</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Productor</label>
+          <input id="fProductor" type="text" placeholder="Nombre productor">
+        </div>
+      </div>
+
+      <div class="divider">Comisiones</div>
+      <div class="fg">
+        <div class="fgroup">
+          <label>% Comisión</label>
+          <select id="fPctCom" onchange="calcular()">
+            <option value="0">—</option>
+            <option value="1">100%</option>
+            <option value="0.5">50%</option>
+            <option value="0.25">25%</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>$ Comisión</label>
+          <div class="computed" id="cCom">$0</div>
+        </div>
+        <div class="fgroup">
+          <label>% Premio</label>
+          <select id="fPctPre" onchange="calcular()">
+            <option value="0">Sin premio</option>
+            <option value="0.25">25% (Planes Abiertos)</option>
+            <option value="0.5">50% (S2)</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>$ Premio</label>
+          <div class="computed" id="cPre">$0</div>
+        </div>
+      </div>
+
+      <div class="divider">Derivación a VIDA</div>
+      <div class="fg">
+        <div class="fgroup">
+          <label>¿Derivar a LIFE? *</label>
+          <div class="tog-row">
+            <button class="tog" id="togSi" onclick="setDeriv('Si')">✅ SÍ</button>
+            <button class="tog" id="togNo" onclick="setDeriv('No')">✗ No</button>
+          </div>
+        </div>
+        <div class="fgroup" id="grpAsesorVida" style="display:none">
+          <label>Asesor VIDA</label>
+          <select id="fAsesorVida">
+            <option value="">Seleccioná...</option>
+            <option>Nadia</option><option>Miguel</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgroup" id="grpObs" style="display:none;margin-top:14px">
+        <label>Observación para VIDA</label>
+        <textarea id="fObs" placeholder="Info relevante para el asesor de Vida..."></textarea>
+      </div>
+
+      <div class="fgroup" style="margin-top:16px">
+        <label>Semana</label>
+        <select id="fSemana"></select>
+      </div>
+
+      <button class="btn-submit" id="btnEnviar" onclick="enviar()">Registrar Venta</button>
+    </div>
+  </div>
+
+  <!-- MIS VENTAS -->
+  <div class="panel" id="tab-ventas">
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3>Ventas del Mes</h3>
+        <span id="mesLbl" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+      <div class="tscroll" id="tablaVentas">
+        <div class="loading"><div class="spin"></div>Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="panel" id="tab-graficos">
+    <div class="card" style="margin-bottom:14px">
+      <div class="chart-title">Objetivo Mensual — Cuota Neta $</div>
+      <div class="ring-wrap">
+        <div class="ring-info">
+          <div class="ring-big" id="gAcum">$0</div>
+          <div class="ring-sub" id="gMeta">Meta: —</div>
+          <div class="ring-sub" id="gFalta" style="margin-top:4px;color:var(--yellow)"></div>
+        </div>
+        <svg class="ring" viewBox="0 0 88 88">
+          <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+          <circle id="ringArc" cx="44" cy="44" r="36" fill="none" stroke="var(--accent)" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="226.2"
+            transform="rotate(-90 44 44)" style="transition:stroke-dashoffset 1s ease,stroke 0.3s"/>
+          <text x="44" y="48" text-anchor="middle" fill="white" font-size="13" font-weight="700" font-family="DM Mono,monospace" id="ringPct">0%</text>
+        </svg>
+      </div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">Cuota por Semana</div><div class="bar-chart" id="gSemanas"></div></div>
+      <div class="chart-card"><div class="chart-title">Estado de Ventas</div><div class="bar-chart" id="gEstados"></div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">Tipo de Venta</div><div class="bar-chart" id="gTipos"></div></div>
+      <div class="chart-card"><div class="chart-title">Origen del Dato</div><div class="bar-chart" id="gOrigen"></div></div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxeAtIp3WOYyf7hFrxKbYUw2ynUjz2DJAY0uHGn0JMZLBESmTy9hH7qEHoPgn2JIyYJ/exec';
+let asesor='', derivVal='', ventas=[], objetivo=0;
+
+window.onload = () => {
+  const p = new URLSearchParams(window.location.search);
+  const raw = p.get('asesor');
+  if (!raw) { document.getElementById('hName').textContent='Sin identificar'; return; }
+  asesor = decodeURIComponent(raw);
+  document.getElementById('hName').textContent = asesor;
+  document.title = asesor + ' — Prepaga';
+  generarSemanas();
+  cargar();
+};
+
+function generarSemanas() {
+  const sel = document.getElementById('fSemana');
+  const hoy = new Date(), mes = hoy.getMonth(), anio = hoy.getFullYear();
+  let d = new Date(anio, mes, 1), n = 1, sems = [];
+  while (d.getMonth() === mes) {
+    const ini = new Date(d);
+    while (d.getDay() !== 0 && d.getMonth() === mes) d.setDate(d.getDate()+1);
+    const fin = d.getMonth() === mes ? new Date(d) : new Date(anio, mes+1, 0);
+    sems.push(`Sem ${n} (${ini.getDate()}/${ini.getMonth()+1}-${fin.getDate()}/${fin.getMonth()+1})`);
+    n++; d.setDate(d.getDate()+1);
+  }
+  sems.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o); });
+  if (sems.length) sel.value = sems[sems.length-1];
+}
+
+function setDeriv(v) {
+  derivVal = v;
+  document.getElementById('togSi').className = `tog ${v==='Si'?'si':''}`;
+  document.getElementById('togNo').className = `tog ${v==='No'?'no':''}`;
+  const s = v==='Si';
+  document.getElementById('grpAsesorVida').style.display = s?'flex':'none';
+  document.getElementById('grpObs').style.display = s?'block':'none';
+}
+
+function calcular() {
+  const cuota = parseFloat(document.getElementById('fCuota').value)||0;
+  const com = cuota * (parseFloat(document.getElementById('fPctCom').value)||0);
+  const pre = cuota * (parseFloat(document.getElementById('fPctPre').value)||0);
+  document.getElementById('cCom').textContent = '$'+Math.round(com).toLocaleString('es-AR');
+  document.getElementById('cPre').textContent = '$'+Math.round(pre).toLocaleString('es-AR');
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='graficos') renderGraficos();
+}
+
+async function cargar() {
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=getVentasAsesor&asesor=${encodeURIComponent(asesor)}`);
+    const d = await r.json();
+    ventas = d.ventas||[]; objetivo = d.objetivo||0;
+  } catch(e) { ventas=[]; objetivo=0; }
+  actualizarKPIs(); actualizarSemaforo(); renderTabla();
+}
+
+function actualizarKPIs() {
+  const imp = ventas.filter(v=>v.estado==='Impactado');
+  document.getElementById('kImp').textContent = imp.length;
+  document.getElementById('kCap').textContent = ventas.reduce((s,v)=>s+(parseInt(v.capitas)||0),0);
+  document.getElementById('kCuota').textContent = fmtM(imp.reduce((s,v)=>s+(parseFloat(v.cuota)||0),0));
+  document.getElementById('kDeriv').textContent = ventas.filter(v=>v.derivadoVida==='Si').length;
+}
+
+function actualizarSemaforo() {
+  const cuota = ventas.filter(v=>v.estado==='Impactado').reduce((s,v)=>s+(parseFloat(v.cuota)||0),0);
+  const pct = objetivo>0 ? cuota/objetivo*100 : 0;
+  const color = pct>=100?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+  document.getElementById('semVal').textContent = fmtM(cuota);
+  document.getElementById('semVal').style.color = color;
+  document.getElementById('semPct').textContent = Math.round(pct)+'% del objetivo';
+}
+
+function renderTabla() {
+  document.getElementById('mesLbl').textContent = new Date().toLocaleString('es-AR',{month:'long',year:'numeric'});
+  if (!ventas.length) { document.getElementById('tablaVentas').innerHTML='<div class="empty">Sin ventas este mes.</div>'; return; }
+  const bmap={'Impactado':'b-imp','OB en Proceso':'b-ob','Falta Cobro':'b-fc','Auditado A.M. Central':'b-aud'};
+  let h = `<table><thead><tr><th>Sem</th><th>Afilmed</th><th>Socio</th><th>Plan</th><th>Estado</th><th>Cap</th><th>Cuota</th><th>Tipo</th><th>Origen</th><th>$ Com</th><th>$ Premio</th><th>→ VIDA</th></tr></thead><tbody>`;
+  ventas.forEach(v=>{
+    h+=`<tr>
+      <td style="color:var(--muted);font-size:11px">${(v.semana||'').replace(/Sem (\d+).*/,'S$1')}</td>
+      <td><span style="font-family:DM Mono,monospace;font-size:12px">${v.afilmed||'—'}</span></td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${v.nombre||'—'}</td>
+      <td><span style="font-family:DM Mono,monospace;font-size:12px;color:var(--accent)">${v.plan||'—'}</span></td>
+      <td><span class="badge ${bmap[v.estado]||'b-pre'}">${v.estado||'—'}</span></td>
+      <td style="text-align:center">${v.capitas||0}</td>
+      <td style="font-family:DM Mono,monospace">${fmtM(v.cuota)}</td>
+      <td style="font-size:12px;color:var(--muted)">${v.tipoVenta||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${v.origen||'—'}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--green)">${fmtM(v.comision)}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--yellow)">${fmtM(v.premio)}</td>
+      <td>${v.derivadoVida==='Si'?`<span style="color:var(--accent);font-weight:700">VIDA${v.asesorVida?' ('+v.asesorVida+')':''}</span>`:'<span style="color:var(--muted)">No</span>'}</td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('tablaVentas').innerHTML=h;
+}
+
+function renderGraficos() {
+  const imp = ventas.filter(v=>v.estado==='Impactado');
+  const cuota = imp.reduce((s,v)=>s+(parseFloat(v.cuota)||0),0);
+  const pct = objetivo>0 ? Math.min(cuota/objetivo*100,100) : 0;
+  const arc = document.getElementById('ringArc');
+  arc.style.strokeDashoffset = 226.2*(1-pct/100);
+  arc.style.stroke = pct>=100?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+  document.getElementById('ringPct').textContent = Math.round(pct)+'%';
+  document.getElementById('gAcum').textContent = fmtM(cuota);
+  document.getElementById('gMeta').textContent = 'Meta: '+fmtM(objetivo);
+  const falta = objetivo - cuota;
+  document.getElementById('gFalta').textContent = falta>0?'Faltan '+fmtM(falta):'✅ Objetivo superado';
+  bars('gSemanas', agrupa(ventas,'semana','cuota'), true, s=>s.replace(/Sem (\d+).*/,'Sem $1'));
+  bars('gEstados', agrupaC(ventas,'estado'), false);
+  bars('gTipos', agrupaC(ventas,'tipoVenta'), false);
+  bars('gOrigen', agrupaC(ventas,'origen'), false);
+}
+
+function agrupa(arr,k,v){ const m={}; arr.forEach(x=>{m[x[k]||'?']=(m[x[k]||'?']||0)+(parseFloat(x[v])||0);}); return m; }
+function agrupaC(arr,k){ const m={}; arr.forEach(x=>{m[x[k]||'?']=(m[x[k]||'?']||0)+1;}); return m; }
+function bars(id,obj,money,lblFn) {
+  const max=Math.max(...Object.values(obj),1);
+  document.getElementById(id).innerHTML = Object.entries(obj).map(([k,v])=>`
+    <div class="bar-item">
+      <span class="bar-lbl">${lblFn?lblFn(k):k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%"></div></div>
+      <span class="bar-val">${money?fmtM(v):v}</span>
+    </div>`).join('')||'<div style="color:var(--muted);font-size:12px">Sin datos</div>';
+}
+
+async function enviar() {
+  const get = id => document.getElementById(id).value;
+  const d = {
+    afilmed:get('fAfilmed').trim(), nombre:get('fNombre').trim(), dni:get('fDNI').trim(),
+    tel:get('fTel').trim(), email:get('fEmail').trim(), vigencia:get('fVigencia').trim(),
+    plan:get('fPlan'), alta:get('fAlta'), capitas:parseInt(get('fCapitas'))||0,
+    cuota:parseFloat(get('fCuota'))||0, estado:get('fEstado'), tipoVenta:get('fTipoVenta'),
+    origen:get('fOrigen'), productor:get('fProductor').trim(),
+    pctCom:parseFloat(get('fPctCom'))||0, pctPre:parseFloat(get('fPctPre'))||0,
+    derivadoVida:derivVal, asesorVida:get('fAsesorVida'),
+    observacion:get('fObs').trim(), semana:get('fSemana'),
+  };
+  d.comision = d.cuota * d.pctCom;
+  d.premio = d.cuota * d.pctPre;
+  if (!d.afilmed||!d.nombre||!d.estado||!d.cuota||!d.semana||!derivVal) { toast('Completá los campos obligatorios (*)',true); return; }
+  const btn=document.getElementById('btnEnviar');
+  btn.textContent='Enviando...'; btn.disabled=true;
+  try {
+    await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'registrarVenta',asesor,fecha:new Date().toLocaleDateString('es-AR'),...d}),mode:'no-cors'});
+    toast(derivVal==='Si'?'✅ Venta registrada y derivación enviada a VIDA':'✅ Venta registrada');
+    resetForm(); setTimeout(cargar,1500);
+  } catch(e) { toast('Error al enviar',true); }
+  finally { btn.textContent='Registrar Venta'; btn.disabled=false; }
+}
+
+function resetForm() {
+  ['fAfilmed','fNombre','fDNI','fTel','fEmail','fVigencia','fProductor','fObs','fCapitas','fCuota'].forEach(id=>document.getElementById(id).value='');
+  ['fPlan','fAlta','fEstado','fTipoVenta','fOrigen','fAsesorVida'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fPctCom').value='0'; document.getElementById('fPctPre').value='0';
+  document.getElementById('cCom').textContent='$0'; document.getElementById('cPre').textContent='$0';
+  derivVal='';
+  document.getElementById('togSi').className='tog'; document.getElementById('togNo').className='tog';
+  document.getElementById('grpAsesorVida').style.display='none'; document.getElementById('grpObs').style.display='none';
+}
+
+function fmtM(n){const v=parseFloat(n)||0;if(v>=1000000)return '$'+(v/1000000).toFixed(1)+'M';if(v>=1000)return '$'+Math.round(v/1000)+'k';return '$'+Math.round(v).toLocaleString('es-AR');}
+function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast show ${err?'err':''}`;setTimeout(()=>t.className='toast',3200);}
+</script>
+</body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supervisor Prepaga — Ivan Rodriguez Jauregui</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07111f;--surface:#0e1e33;--surface2:#162840;--border:rgba(99,179,237,0.12);--accent:#63b3ed;--accent2:#2b6cb0;--green:#48bb78;--yellow:#ecc94b;--red:#fc8181;--muted:#718096;--text:#e2e8f0;--radius:12px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
+.header{background:linear-gradient(135deg,#0e1e33,#162840);border-bottom:1px solid var(--border);padding:16px 24px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;}
+.brand{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-family:'Syne',sans-serif;font-weight:600;}
+.header-name{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;}
+.header-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.tabs{display:flex;gap:2px;padding:14px 24px 0;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+.tab{padding:9px 16px;border-radius:8px 8px 0 0;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(99,179,237,0.07);}
+.content{padding:20px 24px;max-width:1200px;margin:0 auto;}
+.panel{display:none;}.panel.active{display:block;}
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.kpi-n{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;}
+.kpi-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;}
+/* FILTROS */
+.filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.fsearch{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;flex:1;min-width:150px;}
+.fsel{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;}
+.table-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-head h3{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:'Syne',sans-serif;font-weight:600;}
+.tscroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03);white-space:nowrap;}
+tr:last-child td{border:none;}tr:hover td{background:rgba(99,179,237,0.04);}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.b-imp{background:rgba(99,179,237,0.15);color:var(--accent);}
+.b-ob{background:rgba(236,201,75,0.15);color:var(--yellow);}
+.b-fc{background:rgba(252,129,129,0.15);color:var(--red);}
+.b-aud{background:rgba(72,187,120,0.15);color:var(--green);}
+.b-pre,.b-car,.b-sup{background:rgba(113,128,150,0.15);color:var(--muted);}
+/* RANKING */
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0;}
+.dg{background:var(--green);box-shadow:0 0 5px var(--green);}
+.dy{background:var(--yellow);box-shadow:0 0 5px var(--yellow);}
+.dr{background:var(--red);box-shadow:0 0 5px var(--red);}
+.mini-bar{display:flex;align-items:center;gap:6px;min-width:100px;}
+.mb-track{flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;}
+.mb-fill{height:100%;border-radius:3px;transition:width 0.6s;}
+/* CHARTS */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.chart-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;font-family:'Syne',sans-serif;}
+.bar-chart{display:flex;flex-direction:column;gap:9px;}
+.bar-item{display:flex;align-items:center;gap:8px;}
+.bar-lbl{font-size:11px;color:var(--muted);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;background:var(--bg);border-radius:3px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width 0.7s;}
+.bar-val{font-size:11px;font-family:'DM Mono',monospace;width:60px;text-align:right;flex-shrink:0;}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:28px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:20px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fgroup{display:flex;flex-direction:column;gap:5px;}
+.fgroup.full{grid-column:1/-1;}
+label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:500;}
+input,select,textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;transition:border-color 0.2s;}
+input:focus,select:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-primary{flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
+.btn-cancel{padding:12px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+.btn-cancel:hover{color:var(--text);}
+.btn-icon{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-icon:hover{border-color:var(--accent);color:var(--accent);}
+/* OBJETIVOS */
+.obj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.obj-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:6px;}
+.obj-card-name{font-size:13px;font-weight:600;}
+.obj-card-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent);}
+.obj-card-sub{font-size:11px;color:var(--muted);}
+/* ASESOR VIDA PANEL */
+.vida-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.vida-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.vida-name{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;font-family:'Syne',sans-serif;}
+/* SEMANA SELECTOR */
+.sem-selector{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.sem-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;}
+.sem-btn.active{background:rgba(99,179,237,0.15);border-color:var(--accent);color:var(--accent);}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:36px;color:var(--muted);font-size:13px;gap:10px;}
+.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:13px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transition:transform 0.3s;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}.toast.err{border-color:var(--red);}
+@media(max-width:800px){.kpi-row{grid-template-columns:repeat(3,1fr);}.chart-row,.vida-row,.obj-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand">Swiss Medical · Prepaga · Supervisor</div>
+    <div class="header-name">Ivan Rodriguez Jauregui</div>
+    <div class="header-sub" id="hSub">Córdoba — 18 Asesores</div>
+  </div>
+  <span style="font-size:12px;color:var(--muted)" id="hMes"></span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('bu',this)">📊 BU Equipo</button>
+  <button class="tab" onclick="showTab('ranking',this)">🏆 Ranking</button>
+  <button class="tab" onclick="showTab('detalle',this)">📋 Detalle Ventas</button>
+  <button class="tab" onclick="showTab('derivaciones',this)">→ Derivaciones VIDA</button>
+  <button class="tab" onclick="showTab('objetivos',this)">🎯 Objetivos</button>
+</div>
+
+<div class="content">
+
+  <!-- BU EQUIPO -->
+  <div class="panel active" id="tab-bu">
+    <div class="sem-selector" id="semSelector"></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-n" id="buCapitas">—</div><div class="kpi-l">Capitas</div></div>
+      <div class="kpi"><div class="kpi-n" id="buCuota">—</div><div class="kpi-l">Cuota Neta</div></div>
+      <div class="kpi"><div class="kpi-n" id="buAlcance">—</div><div class="kpi-l">% Alcance</div></div>
+      <div class="kpi"><div class="kpi-n" id="buImpactado">—</div><div class="kpi-l">Impactado</div></div>
+      <div class="kpi"><div class="kpi-n" id="buOB">—</div><div class="kpi-l">OB Proceso</div></div>
+      <div class="kpi"><div class="kpi-n" id="buDeriv">—</div><div class="kpi-l">→ VIDA</div></div>
+    </div>
+
+    <!-- BU TABLE igual al Excel -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3 id="buTableTitle">Resumen por Asesor</h3>
+        <button class="btn-icon" onclick="exportarBU()">⬇ Exportar</button>
+      </div>
+      <div class="tscroll" id="tablaBU">
+        <div class="loading"><div class="spin"></div>Cargando...</div>
+      </div>
+    </div>
+
+    <!-- Asesores VIDA vinculados -->
+    <div class="vida-row" id="vidaPanel"></div>
+  </div>
+
+  <!-- RANKING -->
+  <div class="panel" id="tab-ranking">
+    <div class="table-wrap">
+      <div class="table-head"><h3>Ranking — Cuota Neta del Mes</h3></div>
+      <div class="tscroll" id="tablaRanking">
+        <div class="loading"><div class="spin"></div>Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALLE VENTAS -->
+  <div class="panel" id="tab-detalle">
+    <div class="filtros">
+      <input class="fsearch" placeholder="🔍 Buscar asesor, afilmed o socio..." id="fBusca" oninput="renderDetalle()">
+      <select class="fsel" id="fFiltroEstado" onchange="renderDetalle()">
+        <option value="">Todos los estados</option>
+        <option>Impactado</option><option>OB en Proceso</option>
+        <option>Falta Cobro</option><option>Precarga</option>
+        <option>Carga</option><option>Auditado A.M. Central</option><option>Supervisado</option>
+      </select>
+      <select class="fsel" id="fFiltroDeriv" onchange="renderDetalle()">
+        <option value="">Derivación: todas</option>
+        <option value="Si">→ VIDA</option>
+        <option value="No">No derivadas</option>
+      </select>
+      <select class="fsel" id="fFiltroTipo" onchange="renderDetalle()">
+        <option value="">Tipo: todos</option>
+        <option>Directo</option><option>Directo Desregulado</option>
+        <option>Pyme</option><option>Pyme Nueva</option><option>Afinidad</option>
+        <option>CorRe</option><option>Venta Asistida Individuo</option><option>Venta Asistida PYME</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3>Todas las Ventas</h3>
+        <button class="btn-icon" onclick="exportarDetalle()">⬇ Exportar CSV</button>
+      </div>
+      <div class="tscroll" id="tablaDetalle">
+        <div class="loading"><div class="spin"></div>Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DERIVACIONES -->
+  <div class="panel" id="tab-derivaciones">
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">Derivaciones por Asesor Prepaga</div><div class="bar-chart" id="gDerivAsesor"></div></div>
+      <div class="chart-card"><div class="chart-title">Derivaciones por Asesor VIDA</div><div class="bar-chart" id="gDerivVida"></div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head"><h3>Detalle Derivaciones → VIDA</h3></div>
+      <div class="tscroll" id="tablaDerivaciones">
+        <div class="loading"><div class="spin"></div>Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBJETIVOS -->
+  <div class="panel" id="tab-objetivos">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:'Syne',sans-serif;font-weight:600">Objetivos Mensuales — Cuota Neta $</span>
+      <button class="btn-icon" onclick="abrirObj(null)">+ Editar todos</button>
+    </div>
+    <div class="obj-grid" id="objGrid">
+      <div class="loading"><div class="spin"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL EDITAR VENTA -->
+<div class="overlay" id="modalVenta">
+  <div class="modal">
+    <h3>Editar Venta</h3>
+    <div class="fg">
+      <div class="fgroup"><label>N° Afilmed</label><input id="eAfilmed" type="text"></div>
+      <div class="fgroup"><label>Socio</label><input id="eNombre" type="text"></div>
+      <div class="fgroup"><label>DNI</label><input id="eDNI" type="text"></div>
+      <div class="fgroup"><label>Plan</label>
+        <select id="ePlan"><option>SMG20</option><option>SMG40</option><option>S2</option><option>S3</option><option>Otro</option></select>
+      </div>
+      <div class="fgroup"><label>Estado</label>
+        <select id="eEstado">
+          <option>Impactado</option><option>OB en Proceso</option><option>Falta Cobro</option>
+          <option>Precarga</option><option>Carga</option><option>Auditado A.M. Central</option><option>Supervisado</option>
+        </select>
+      </div>
+      <div class="fgroup"><label>Capitas</label><input id="eCapitas" type="number"></div>
+      <div class="fgroup"><label>Cuota $</label><input id="eCuota" type="number"></div>
+      <div class="fgroup"><label>Tipo Venta</label>
+        <select id="eTipo">
+          <option>Directo</option><option>Directo Desregulado</option><option>Pyme</option>
+          <option>Pyme Nueva</option><option>Afinidad</option><option>CorRe</option>
+          <option>Venta Asistida Individuo</option><option>Venta Asistida PYME</option>
+        </select>
+      </div>
+      <div class="fgroup"><label>Origen</label>
+        <select id="eOrigen">
+          <option>Propio</option><option>PYME</option><option>Guardia Presencial</option>
+          <option>Web</option><option>Telefonica</option><option>Vta Asistida</option><option>CorRe</option>
+        </select>
+      </div>
+      <div class="fgroup"><label>Derivado VIDA</label>
+        <select id="eDeriv"><option value="Si">Sí</option><option value="No">No</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrar('modalVenta')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarVenta()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OBJETIVO -->
+<div class="overlay" id="modalObj">
+  <div class="modal">
+    <h3 id="objModalTitle">Editar Objetivo</h3>
+    <div class="fg" style="grid-template-columns:1fr">
+      <div class="fgroup full">
+        <label>Asesor</label>
+        <select id="oAsesor"></select>
+      </div>
+      <div class="fgroup full">
+        <label>Objetivo Mensual Cuota Neta $</label>
+        <input id="oValor" type="number" placeholder="Ej: 5500000">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrar('modalObj')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarObj()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxeAtIp3WOYyf7hFrxKbYUw2ynUjz2DJAY0uHGn0JMZLBESmTy9hH7qEHoPgn2JIyYJ/exec';
+
+const ASESORES = [
+  "Sonia Ferreyra","Belen Paez Pena","Maria Ines D'Errico","Hernan Calvo",
+  "Marisa Bello","Jose Sosa","Zulma Moreno","Marta de la Rosa",
+  "Tatiana Mayor","Esther Rissi","Flavia Banfi","Maria Marchetti",
+  "Fernando Yalis","Eliana Garcias","Gaston Pauer","Fabio Cacciagiu",
+  "Daiana Ricchieri","Evelyn Carrizo"
+];
+
+let todasVentas = [], objetivos = {}, semActual = 'mes';
+const bmap={'Impactado':'b-imp','OB en Proceso':'b-ob','Falta Cobro':'b-fc','Auditado A.M. Central':'b-aud','Precarga':'b-pre','Carga':'b-car','Supervisado':'b-sup'};
+
+window.onload = () => {
+  const hoy = new Date();
+  document.getElementById('hMes').textContent = hoy.toLocaleString('es-AR',{month:'long',year:'numeric'}).toUpperCase();
+  // Poblar select objetivo
+  const sel = document.getElementById('oAsesor');
+  const optTodos = document.createElement('option');
+  optTodos.value='__todos__'; optTodos.textContent='— Todos los asesores (mismo valor) —';
+  sel.appendChild(optTodos);
+  ASESORES.forEach(a => { const o=document.createElement('option'); o.value=a; o.textContent=a; sel.appendChild(o); });
+  generarSemanas();
+  cargarTodo();
+};
+
+function generarSemanas() {
+  const hoy=new Date(), mes=hoy.getMonth(), anio=hoy.getFullYear();
+  let d=new Date(anio,mes,1), n=1, sems=[{val:'mes',lbl:'Todo el Mes'}];
+  while(d.getMonth()===mes){
+    const ini=new Date(d);
+    while(d.getDay()!==0&&d.getMonth()===mes) d.setDate(d.getDate()+1);
+    const fin=d.getMonth()===mes?new Date(d):new Date(anio,mes+1,0);
+    sems.push({val:`S${n}`,lbl:`Sem ${n} (${ini.getDate()}/${ini.getMonth()+1}-${fin.getDate()}/${fin.getMonth()+1})`});
+    n++; d.setDate(d.getDate()+1);
+  }
+  const wrap = document.getElementById('semSelector');
+  sems.forEach(s=>{
+    const b=document.createElement('button');
+    b.className=`sem-btn ${s.val==='mes'?'active':''}`;
+    b.textContent=s.lbl; b.dataset.val=s.val;
+    b.onclick=()=>{ semActual=s.val; document.querySelectorAll('.sem-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderBU(); };
+    wrap.appendChild(b);
+  });
+}
+
+async function cargarTodo() {
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=getSupervisor`);
+    const d = await r.json();
+    todasVentas = d.ventas||[];
+    objetivos = d.objetivos||{};
+  } catch(e) { todasVentas=[]; ASESORES.forEach(a=>objetivos[a]=5500000); }
+  renderBU(); renderRanking(); renderDetalle(); renderDerivaciones(); renderObjetivos();
+}
+
+// ==================== UTILS FILTRO SEMANA ====================
+function ventasFiltradas() {
+  if (semActual==='mes') return todasVentas;
+  const n = parseInt(semActual.replace('S',''));
+  return todasVentas.filter(v => v.semana && v.semana.includes(`Sem ${n} `));
+}
+
+// ==================== TAB BU ====================
+function renderBU() {
+  const vf = ventasFiltradas();
+  // KPIs equipo
+  const imp = vf.filter(v=>v.estado==='Impactado');
+  const ob = vf.filter(v=>v.estado==='OB en Proceso');
+  const cuota = imp.reduce((s,v)=>s+(parseFloat(v.cuota)||0),0);
+  const cap = vf.reduce((s,v)=>s+(parseInt(v.capitas)||0),0);
+  const objTotal = Object.values(objetivos).reduce((s,v)=>s+v,0);
+  const alcance = objTotal>0?Math.round(cuota/objTotal*100):0;
+  const deriv = vf.filter(v=>v.derivadoVida==='Si').length;
+  document.getElementById('buCapitas').textContent = cap;
+  document.getElementById('buCuota').textContent = fmtM(cuota);
+  document.getElementById('buAlcance').textContent = alcance+'%';
+  document.getElementById('buImpactado').textContent = imp.length;
+  document.getElementById('buOB').textContent = ob.length;
+  document.getElementById('buDeriv').textContent = deriv;
+
+  // Tabla BU por asesor
+  const byAsesor = {};
+  ASESORES.forEach(a => byAsesor[a]={capitas:0,cuota:0,impactado:0,ob:0,fc:0,precarga:0,carga:0,auditado:0,supervisado:0,total:0,deriv:0,comision:0,premio:0,pmpm:0});
+  vf.forEach(v=>{
+    if(!byAsesor[v.asesor]) return;
+    const r = byAsesor[v.asesor];
+    r.capitas += parseInt(v.capitas)||0;
+    r.total++;
+    if(v.estado==='Impactado'){r.impactado++;r.cuota+=parseFloat(v.cuota)||0;}
+    if(v.estado==='OB en Proceso') r.ob++;
+    if(v.estado==='Falta Cobro') r.fc++;
+    if(v.estado==='Precarga') r.precarga++;
+    if(v.estado==='Carga') r.carga++;
+    if(v.estado==='Auditado A.M. Central') r.auditado++;
+    if(v.estado==='Supervisado') r.supervisado++;
+    if(v.derivadoVida==='Si') r.deriv++;
+    r.comision += parseFloat(v.comision)||0;
+    r.premio += parseFloat(v.premio)||0;
+  });
+  ASESORES.forEach(a=>{
+    const r=byAsesor[a];
+    r.pmpm = r.capitas>0 ? Math.round(r.cuota/r.capitas) : 0;
+    r.alcance = objetivos[a]>0 ? (r.cuota/objetivos[a]*100) : 0;
+  });
+
+  let h=`<table><thead><tr>
+    <th>Asesor</th><th>Capitas</th><th>Cuota Neta</th><th>Objetivo</th><th>% Alcance</th><th>PMPM</th>
+    <th>Impactado</th><th>OB Proc.</th><th>F. Cobro</th><th>Precarga</th><th>Carga</th><th>Aud. AM</th><th>Superv.</th><th>Total</th>
+    <th>→ VIDA</th><th>$ Comisión</th><th>$ Premio</th>
+  </tr></thead><tbody>`;
+  ASESORES.forEach(a=>{
+    const r=byAsesor[a];
+    const pct=r.alcance;
+    const dotC=pct>=100?'dg':pct>=40?'dy':'dr';
+    const barColor=pct>=100?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+    h+=`<tr>
+      <td><span class="dot ${dotC}"></span><strong>${a}</strong></td>
+      <td style="text-align:center;font-family:DM Mono,monospace">${r.capitas}</td>
+      <td style="font-family:DM Mono,monospace">${fmtM(r.cuota)}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--muted)">${fmtM(objetivos[a]||0)}</td>
+      <td>
+        <div class="mini-bar">
+          <div class="mb-track"><div class="mb-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div></div>
+          <span style="font-size:11px;font-family:DM Mono,monospace;color:${barColor};width:35px;flex-shrink:0">${Math.round(pct)}%</span>
+        </div>
+      </td>
+      <td style="font-family:DM Mono,monospace;font-size:12px">${fmtM(r.pmpm)}</td>
+      <td style="text-align:center;color:var(--accent);font-weight:600">${r.impactado||'—'}</td>
+      <td style="text-align:center;color:var(--yellow)">${r.ob||'—'}</td>
+      <td style="text-align:center;color:var(--red)">${r.fc||'—'}</td>
+      <td style="text-align:center;color:var(--muted)">${r.precarga||'—'}</td>
+      <td style="text-align:center;color:var(--muted)">${r.carga||'—'}</td>
+      <td style="text-align:center;color:var(--green)">${r.auditado||'—'}</td>
+      <td style="text-align:center;color:var(--green)">${r.supervisado||'—'}</td>
+      <td style="text-align:center;font-weight:700">${r.total}</td>
+      <td style="text-align:center;color:var(--accent)">${r.deriv||'—'}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--green);font-size:12px">${fmtM(r.comision)}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--yellow);font-size:12px">${fmtM(r.premio)}</td>
+    </tr>`;
+  });
+  // Totales
+  const tot = Object.values(byAsesor);
+  const sumCap=tot.reduce((s,r)=>s+r.capitas,0);
+  const sumCuota=tot.reduce((s,r)=>s+r.cuota,0);
+  const sumImp=tot.reduce((s,r)=>s+r.impactado,0);
+  const sumOb=tot.reduce((s,r)=>s+r.ob,0);
+  const sumFc=tot.reduce((s,r)=>s+r.fc,0);
+  const sumPre=tot.reduce((s,r)=>s+r.precarga,0);
+  const sumCar=tot.reduce((s,r)=>s+r.carga,0);
+  const sumAud=tot.reduce((s,r)=>s+r.auditado,0);
+  const sumSup=tot.reduce((s,r)=>s+r.supervisado,0);
+  const sumTot=tot.reduce((s,r)=>s+r.total,0);
+  const sumDer=tot.reduce((s,r)=>s+r.deriv,0);
+  const sumCom=tot.reduce((s,r)=>s+r.comision,0);
+  const sumPre2=tot.reduce((s,r)=>s+r.premio,0);
+  const objTot=Object.values(objetivos).reduce((s,v)=>s+v,0);
+  h+=`<tr style="background:rgba(99,179,237,0.07);font-weight:700;border-top:2px solid var(--border)">
+    <td>TOTAL</td>
+    <td style="text-align:center;font-family:DM Mono,monospace">${sumCap}</td>
+    <td style="font-family:DM Mono,monospace">${fmtM(sumCuota)}</td>
+    <td style="font-family:DM Mono,monospace;color:var(--muted)">${fmtM(objTot)}</td>
+    <td style="color:${sumCuota/objTot>=1?'var(--green)':sumCuota/objTot>=0.4?'var(--yellow)':'var(--red)'};font-family:DM Mono,monospace">${objTot>0?Math.round(sumCuota/objTot*100):0}%</td>
+    <td style="font-family:DM Mono,monospace;font-size:12px">${sumCap>0?fmtM(sumCuota/sumCap):'—'}</td>
+    <td style="text-align:center;color:var(--accent)">${sumImp}</td>
+    <td style="text-align:center;color:var(--yellow)">${sumOb}</td>
+    <td style="text-align:center;color:var(--red)">${sumFc}</td>
+    <td style="text-align:center">${sumPre}</td>
+    <td style="text-align:center">${sumCar}</td>
+    <td style="text-align:center;color:var(--green)">${sumAud}</td>
+    <td style="text-align:center;color:var(--green)">${sumSup}</td>
+    <td style="text-align:center">${sumTot}</td>
+    <td style="text-align:center;color:var(--accent)">${sumDer}</td>
+    <td style="font-family:DM Mono,monospace;color:var(--green)">${fmtM(sumCom)}</td>
+    <td style="font-family:DM Mono,monospace;color:var(--yellow)">${fmtM(sumPre2)}</td>
+  </tr>`;
+  h+='</tbody></table>';
+  document.getElementById('tablaBU').innerHTML=h;
+
+  // Panel asesores VIDA
+  const vidaStats = {'Nadia':{pol:0,prima:0},'Miguel':{pol:0,prima:0}};
+  vf.filter(v=>v.derivadoVida==='Si').forEach(v=>{
+    const av = v.asesorVida;
+    if(vidaStats[av]){vidaStats[av].pol++;vidaStats[av].prima+=parseFloat(v.cuota)||0;}
+  });
+  document.getElementById('vidaPanel').innerHTML = Object.entries(vidaStats).map(([n,d])=>`
+    <div class="vida-card">
+      <div class="vida-name">Asesor VIDA — ${n}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div style="font-size:22px;font-weight:700;font-family:DM Mono,monospace">${d.pol}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px">Derivaciones</div></div>
+        <div><div style="font-size:22px;font-weight:700;font-family:DM Mono,monospace;color:var(--accent)">${fmtM(d.prima)}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px">Cuota derivada</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ==================== RANKING ====================
+function renderRanking() {
+  const byA={};
+  ASESORES.forEach(a=>byA[a]={cuota:0,cap:0,imp:0,der:0,com:0,pre:0});
+  todasVentas.forEach(v=>{
+    if(!byA[v.asesor]) return;
+    const r=byA[v.asesor];
+    r.cap+=parseInt(v.capitas)||0;
+    if(v.estado==='Impactado'){r.imp++;r.cuota+=parseFloat(v.cuota)||0;}
+    if(v.derivadoVida==='Si') r.der++;
+    r.com+=parseFloat(v.comision)||0;
+    r.pre+=parseFloat(v.premio)||0;
+  });
+  const sorted=Object.entries(byA).sort((a,b)=>b[1].cuota-a[1].cuota);
+  const maxC=sorted[0]?.[1].cuota||1;
+  let h=`<table><thead><tr><th>#</th><th>Asesor</th><th>Cuota Neta</th><th>% Objetivo</th><th>Capitas</th><th>Impactados</th><th>→ VIDA</th><th>$ Comisión</th><th>$ Premio</th></tr></thead><tbody>`;
+  sorted.forEach(([a,d],i)=>{
+    const obj=objetivos[a]||0;
+    const pct=obj>0?d.cuota/obj*100:0;
+    const dc=pct>=100?'dg':pct>=40?'dy':'dr';
+    const bc=pct>=100?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+    h+=`<tr>
+      <td style="color:var(--muted);font-family:DM Mono,monospace;font-size:12px">${i+1}</td>
+      <td><span class="dot ${dc}"></span>${a}</td>
+      <td>
+        <div class="mini-bar">
+          <div class="mb-track"><div class="mb-fill" style="width:${Math.min(d.cuota/maxC*100,100)}%;background:var(--accent)"></div></div>
+          <span style="font-size:11px;font-family:DM Mono,monospace;width:55px;flex-shrink:0">${fmtM(d.cuota)}</span>
+        </div>
+      </td>
+      <td style="font-family:DM Mono,monospace;color:${bc}">${Math.round(pct)}%</td>
+      <td style="text-align:center">${d.cap}</td>
+      <td style="text-align:center;color:var(--accent)">${d.imp}</td>
+      <td style="text-align:center;color:${d.der>0?'var(--accent)':'var(--muted)'}">${d.der||'—'}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--green);font-size:12px">${fmtM(d.com)}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--yellow);font-size:12px">${fmtM(d.pre)}</td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('tablaRanking').innerHTML=h;
+}
+
+// ==================== DETALLE ====================
+function renderDetalle() {
+  const search=document.getElementById('fBusca').value.toLowerCase();
+  const est=document.getElementById('fFiltroEstado').value;
+  const der=document.getElementById('fFiltroDeriv').value;
+  const tipo=document.getElementById('fFiltroTipo').value;
+  const data=todasVentas.filter(v=>{
+    if(search&&!v.asesor?.toLowerCase().includes(search)&&!v.afilmed?.toLowerCase().includes(search)&&!v.nombre?.toLowerCase().includes(search)) return false;
+    if(est&&v.estado!==est) return false;
+    if(der&&v.derivadoVida!==der) return false;
+    if(tipo&&v.tipoVenta!==tipo) return false;
+    return true;
+  });
+  if(!data.length){document.getElementById('tablaDetalle').innerHTML='<div class="empty">Sin registros.</div>';return;}
+  let h=`<table><thead><tr>
+    <th>Sem</th><th>Asesor</th><th>Afilmed</th><th>Socio</th><th>Plan</th><th>Estado</th>
+    <th>Cap</th><th>Cuota</th><th>Tipo Venta</th><th>Origen</th><th>$ Com</th><th>$ Premio</th><th>→ VIDA</th><th>Asesor V.</th><th></th>
+  </tr></thead><tbody>`;
+  data.forEach((v,i)=>{
+    h+=`<tr>
+      <td style="color:var(--muted);font-size:11px">${(v.semana||'').replace(/Sem (\d+).*/,'S$1')}</td>
+      <td style="font-weight:500">${v.asesor}</td>
+      <td style="font-family:DM Mono,monospace;font-size:12px">${v.afilmed||'—'}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${v.nombre||'—'}</td>
+      <td style="font-family:DM Mono,monospace;font-size:12px;color:var(--accent)">${v.plan||'—'}</td>
+      <td><span class="badge ${bmap[v.estado]||'b-pre'}">${v.estado||'—'}</span></td>
+      <td style="text-align:center">${v.capitas||0}</td>
+      <td style="font-family:DM Mono,monospace">${fmtM(v.cuota)}</td>
+      <td style="font-size:12px;color:var(--muted)">${v.tipoVenta||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${v.origen||'—'}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--green);font-size:12px">${fmtM(v.comision)}</td>
+      <td style="font-family:DM Mono,monospace;color:var(--yellow);font-size:12px">${fmtM(v.premio)}</td>
+      <td>${v.derivadoVida==='Si'?'<span style="color:var(--accent);font-weight:700">VIDA</span>':'<span style="color:var(--muted)">No</span>'}</td>
+      <td style="font-size:12px;color:var(--muted)">${v.asesorVida||'—'}</td>
+      <td><button class="btn-icon" onclick="abrirEdicion(${i})">✏️</button></td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('tablaDetalle').innerHTML=h;
+}
+
+// ==================== DERIVACIONES ====================
+function renderDerivaciones() {
+  const der=todasVentas.filter(v=>v.derivadoVida==='Si');
+  // Gráficos
+  const byAsesor={}, byVida={};
+  der.forEach(v=>{byAsesor[v.asesor]=(byAsesor[v.asesor]||0)+1;byVida[v.asesorVida||'Sin asignar']=(byVida[v.asesorVida||'Sin asignar']||0)+1;});
+  const maxA=Math.max(...Object.values(byAsesor),1), maxV=Math.max(...Object.values(byVida),1);
+  document.getElementById('gDerivAsesor').innerHTML=Object.entries(byAsesor).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="bar-item"><span class="bar-lbl">${k.split(' ')[0]}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxA*100)}%"></div></div><span class="bar-val">${v}</span></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Sin datos</div>';
+  document.getElementById('gDerivVida').innerHTML=Object.entries(byVida).map(([k,v])=>`
+    <div class="bar-item"><span class="bar-lbl">${k}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxV*100)}%"></div></div><span class="bar-val">${v}</span></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Sin datos</div>';
+  if(!der.length){document.getElementById('tablaDerivaciones').innerHTML='<div class="empty">Sin derivaciones este mes.</div>';return;}
+  let h=`<table><thead><tr><th>Fecha</th><th>Asesor Prepaga</th><th>Afilmed</th><th>Socio</th><th>Plan</th><th>Cuota</th><th>Asesor VIDA</th><th>Estado Venta</th><th>Observación</th></tr></thead><tbody>`;
+  der.forEach(v=>{
+    h+=`<tr>
+      <td style="font-size:11px;color:var(--muted)">${v.fecha||'—'}</td>
+      <td>${v.asesor}</td>
+      <td style="font-family:DM Mono,monospace;font-size:12px">${v.afilmed||'—'}</td>
+      <td>${v.nombre||'—'}</td>
+      <td style="font-family:DM Mono,monospace;font-size:12px;color:var(--accent)">${v.plan||'—'}</td>
+      <td style="font-family:DM Mono,monospace">${fmtM(v.cuota)}</td>
+      <td style="color:var(--accent);font-weight:600">${v.asesorVida||'Sin asignar'}</td>
+      <td><span class="badge ${bmap[v.estado]||'b-pre'}">${v.estado||'—'}</span></td>
+      <td style="font-size:12px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis">${v.observacion||'—'}</td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('tablaDerivaciones').innerHTML=h;
+}
+
+// ==================== OBJETIVOS ====================
+function renderObjetivos() {
+  let h='';
+  ASESORES.forEach(a=>{
+    const obj=objetivos[a]||0;
+    const cuota=todasVentas.filter(v=>v.asesor===a&&v.estado==='Impactado').reduce((s,v)=>s+(parseFloat(v.cuota)||0),0);
+    const pct=obj>0?Math.round(cuota/obj*100):0;
+    const color=pct>=100?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+    h+=`<div class="obj-card">
+      <div class="obj-card-name">${a}</div>
+      <div class="obj-card-val" style="color:${color}">${fmtM(obj)}</div>
+      <div class="obj-card-sub">Logrado: ${fmtM(cuota)} (${pct}%)</div>
+      <button class="btn-icon" style="margin-top:8px" onclick="abrirObj('${a}')">Editar</button>
+    </div>`;
+  });
+  document.getElementById('objGrid').innerHTML=h;
+}
+
+// ==================== MODAL VENTA ====================
+let ventaEditIdx=null;
+function abrirEdicion(i) {
+  const search=document.getElementById('fBusca').value.toLowerCase();
+  const est=document.getElementById('fFiltroEstado').value;
+  const der=document.getElementById('fFiltroDeriv').value;
+  const tipo=document.getElementById('fFiltroTipo').value;
+  const data=todasVentas.filter(v=>{
+    if(search&&!v.asesor?.toLowerCase().includes(search)&&!v.afilmed?.toLowerCase().includes(search)&&!v.nombre?.toLowerCase().includes(search)) return false;
+    if(est&&v.estado!==est) return false;
+    if(der&&v.derivadoVida!==der) return false;
+    if(tipo&&v.tipoVenta!==tipo) return false;
+    return true;
+  });
+  const v=data[i]; if(!v) return;
+  ventaEditIdx=i;
+  document.getElementById('eAfilmed').value=v.afilmed||'';
+  document.getElementById('eNombre').value=v.nombre||'';
+  document.getElementById('eDNI').value=v.dni||'';
+  document.getElementById('ePlan').value=v.plan||'';
+  document.getElementById('eEstado').value=v.estado||'';
+  document.getElementById('eCapitas').value=v.capitas||0;
+  document.getElementById('eCuota').value=v.cuota||0;
+  document.getElementById('eTipo').value=v.tipoVenta||'';
+  document.getElementById('eOrigen').value=v.origen||'';
+  document.getElementById('eDeriv').value=v.derivadoVida||'No';
+  document.getElementById('modalVenta').classList.add('open');
+}
+async function guardarVenta() {
+  cerrar('modalVenta'); toast('✅ Cambios guardados');
+  setTimeout(()=>cargarTodo(),1000);
+}
+
+// ==================== MODAL OBJETIVO ====================
+function abrirObj(asesor) {
+  document.getElementById('oAsesor').value=asesor||'__todos__';
+  document.getElementById('oValor').value=asesor?(objetivos[asesor]||''):'';
+  document.getElementById('objModalTitle').textContent=asesor?`Objetivo — ${asesor}`:'Editar todos los objetivos';
+  document.getElementById('modalObj').classList.add('open');
+}
+async function guardarObj() {
+  const asesor=document.getElementById('oAsesor').value;
+  const valor=parseFloat(document.getElementById('oValor').value);
+  if(!valor||valor<=0){toast('Ingresá un valor válido',true);return;}
+  try {
+    await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'setObjetivo',asesor:asesor==='__todos__'?null:asesor,valor}),mode:'no-cors'});
+    if(asesor==='__todos__') ASESORES.forEach(a=>objetivos[a]=valor);
+    else objetivos[asesor]=valor;
+    cerrar('modalObj'); toast('✅ Objetivo actualizado');
+    renderObjetivos(); renderBU(); renderRanking();
+  } catch(e){toast('Error',true);}
+}
+
+// ==================== EXPORT ====================
+function exportarBU() {
+  const rows=[['Asesor','Capitas','Cuota Neta','Objetivo','% Alcance','Impactado','OB','Falta Cobro','Precarga','Carga','Auditado','Supervisado','Total','→ VIDA']];
+  ASESORES.forEach(a=>{
+    const vf=ventasFiltradas();
+    const rv=vf.filter(v=>v.asesor===a);
+    const imp=rv.filter(v=>v.estado==='Impactado');
+    const cuota=imp.reduce((s,v)=>s+(parseFloat(v.cuota)||0),0);
+    rows.push([a,rv.reduce((s,v)=>s+(parseInt(v.capitas)||0),0),cuota,objetivos[a]||0,objetivos[a]>0?Math.round(cuota/(objetivos[a]||1)*100)+'%':0+'%',imp.length,rv.filter(v=>v.estado==='OB en Proceso').length,rv.filter(v=>v.estado==='Falta Cobro').length,rv.filter(v=>v.estado==='Precarga').length,rv.filter(v=>v.estado==='Carga').length,rv.filter(v=>v.estado==='Auditado A.M. Central').length,rv.filter(v=>v.estado==='Supervisado').length,rv.length,rv.filter(v=>v.derivadoVida==='Si').length]);
+  });
+  dl(rows,'BU_Prepaga_Cordoba');
+}
+
+function exportarDetalle() {
+  const rows=[['Fecha','Asesor','Afilmed','Socio','DNI','Plan','Estado','Capitas','Cuota','Tipo Venta','Origen','% Com','$ Com','% Premio','$ Premio','Derivado VIDA','Asesor VIDA','Observacion','Semana']];
+  todasVentas.forEach(v=>rows.push([v.fecha,v.asesor,v.afilmed,v.nombre,v.dni,v.plan,v.estado,v.capitas,v.cuota,v.tipoVenta,v.origen,v.pctCom,v.comision,v.pctPre,v.premio,v.derivadoVida,v.asesorVida,v.observacion,v.semana]));
+  dl(rows,'Ventas_Prepaga_Cordoba');
+}
+
+function dl(rows,name){
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`${name}_${new Date().toLocaleDateString('es-AR').replace(/\//g,'-')}.csv`;
+  a.click(); toast('✅ Exportando...');
+}
+
+// ==================== UTILS ====================
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function cerrar(id){document.getElementById(id).classList.remove('open');}
+function fmtM(n){const v=parseFloat(n)||0;if(v>=1000000)return '$'+(v/1000000).toFixed(1)+'M';if(v>=1000)return '$'+Math.round(v/1000)+'k';return '$'+Math.round(v).toLocaleString('es-AR');}
+function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast show ${err?'err':''}`;setTimeout(()=>t.className='toast',3200);}
+</script>
+</body>
+</html>
