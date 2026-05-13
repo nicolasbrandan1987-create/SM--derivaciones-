@@ -463,7 +463,9 @@ async function enviar() {
   const btn=document.getElementById('btnEnviar');
   btn.textContent='Enviando...'; btn.disabled=true;
   try {
-    await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'registrarVenta',asesor,fecha:new Date().toLocaleDateString('es-AR'),...d}),mode:'no-cors'});
+    const _payload = {action:"registrarVenta",asesor,fecha:new Date().toLocaleDateString("es-AR"),...d};
+    const _url = SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(_payload));
+    await fetch(_url, {mode:"no-cors"});
     toast(derivVal==='Si'?'✅ Venta registrada y derivación enviada a VIDA':'✅ Venta registrada');
     resetForm(); setTimeout(cargar,1500);
   } catch(e) { toast('Error al enviar',true); }
