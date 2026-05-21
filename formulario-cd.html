@@ -33,7 +33,6 @@ textarea{resize:vertical;min-height:80px}
 .success .new-btn{display:inline-block;margin-top:20px;padding:12px 28px;background:#003366;color:white;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
 .error-msg{color:#c00;font-size:12px;margin-top:4px;display:none}
 .loading{display:none;text-align:center;padding:40px 24px;color:#64748b;font-size:14px}
-.asesor-vida-sel{margin-bottom:18px}
 </style>
 </head>
 <body>
@@ -52,6 +51,10 @@ textarea{resize:vertical;min-height:80px}
         <label>Nombre y apellido <span class="req">*</span></label>
         <input type="text" id="nombre" placeholder="Ej: Juan García" maxlength="100">
         <div class="error-msg" id="err-nombre">Campo obligatorio</div>
+      </div>
+      <div class="field">
+        <label>DNI</label>
+        <input type="text" id="dni" placeholder="Ej: 28345678" maxlength="12" inputmode="numeric">
       </div>
       <div class="field">
         <label>Teléfono <span class="req">*</span></label>
@@ -130,6 +133,7 @@ function jsonp(params,onOk,onErr){
 
 function enviar(){
   var nombre=document.getElementById('nombre').value.trim();
+  var dni=document.getElementById('dni').value.trim();
   var tel=document.getElementById('tel').value.trim();
   var producto=document.getElementById('producto').value;
   var vida=document.getElementById('asesor-vida').value;
@@ -144,6 +148,10 @@ function enviar(){
   if(!vida){errVida.style.display='block';ok=false;}else errVida.style.display='none';
   if(!ok)return;
 
+  // Incluir DNI en la observación si fue completado
+  var obsCompleta=obs;
+  if(dni)obsCompleta=(obsCompleta?obsCompleta+' | ':'')+'DNI: '+dni;
+
   document.getElementById('form-view').style.display='none';
   document.getElementById('loading-view').style.display='block';
 
@@ -152,7 +160,7 @@ function enviar(){
     clienteNombre:nombre,
     clienteTel:tel,
     productos:producto,
-    observacion:obs,
+    observacion:obsCompleta,
     asesorPrepaga:ASESOR||'Sin identificar',
     asesorZona:BRIGADA||'Canales Digitales',
     asesorVida:vida
@@ -174,6 +182,7 @@ function enviar(){
 
 function nueva(){
   document.getElementById('nombre').value='';
+  document.getElementById('dni').value='';
   document.getElementById('tel').value='';
   document.getElementById('producto').value='';
   document.getElementById('asesor-vida').value='';
