@@ -1086,31 +1086,25 @@ function refSelContact(i){
 }
 
 function refGenerar(c){
-  var apiKey=localStorage.getItem('ref_apikey')||'';
-  var tipoLabel={vigente:'cliente con póliza vigente',nueva_venta:'nuevo cliente (venta esta semana)',entrevista:'prospecto de entrevista que no cerró',propio:'contacto personal'};
-  var zonaCtx={'Neuquén':'zona petrolera Vaca Muerta','Salta':'zona litio','Santa Cruz':'zona petrolera'}[c.zona]||(c.zona||'Argentina');
-  var firstName=ASESOR.split(',')[1]?ASESOR.split(',')[1].trim().split(' ')[0]:ASESOR.split(' ')[0];
-  var prompt='Sos un asesor de seguros de vida argentino llamado '+firstName+'. Trabajás para Swiss Medical Group División VIDA.\n'
-    +'Necesitás pedirle a este contacto que te recomiende personas. Escribí UN mensaje de WhatsApp corto, cálido, informal (vos/sos). Sin tono corporativo.\n\n'
-    +'CONTACTO:\n- Nombre: '+c.nombre+'\n- Tipo: '+(tipoLabel[c.tipo]||c.tipo)+'\n- Producto: '+(c.producto||'no especificado')+'\n- Zona: '+zonaCtx+'\n- Profesión: '+(c.profesion||'no especificada')+'\n\n'
-    +'REGLAS: 1) Empezá con el nombre + saludo breve. 2) Nueva venta → agradecé la confianza. 3) Entrevista sin cierre → reconocé sin presión. 4) Pedí 1-2 nombres. 5) Máx 5 oraciones. 1-2 emojis. Solo el texto, sin comillas.';
-  if(!apiKey||apiKey.length<10){
-    REF_MSG=refTemplate(c,firstName);
-    refRenderMsg(REF_MSG,c);
-    return;
-  }
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:280,messages:[{role:'user',content:prompt}]})
-  }).then(function(r){return r.json();}).then(function(d){
-    REF_MSG=(d.content&&d.content[0])?d.content[0].text.trim():refTemplate(c,firstName);
-    refRenderMsg(REF_MSG,c);
-  }).catch(function(){
-    REF_MSG=refTemplate(c,firstName);
-    refRenderMsg(REF_MSG,c);
-    toast('⚠️ IA no disponible. Usando template.',false);
-  });
+  var firstName=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
+  // Llama al Apps Script que tiene la API Key segura
+  jsonp(
+    {accion:'generarMensajeIA', nombre:c.nombre, producto:c.producto||'', moneda:c.moneda||'', tipo:c.tipo||'vigente'},
+    function(res){
+      if(res&&res.ok&&res.mensaje){
+        REF_MSG=res.mensaje;
+        refRenderMsg(REF_MSG,c);
+      } else {
+        REF_MSG=refTemplate(c,firstName);
+        refRenderMsg(REF_MSG,c);
+      }
+    },
+    function(){
+      REF_MSG=refTemplate(c,firstName);
+      refRenderMsg(REF_MSG,c);
+      toast('⚠️ IA no disponible. Usando template.',false);
+    }
+  );
 }
 
 function refTemplate(c,firstName){
