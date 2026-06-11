@@ -1087,28 +1087,56 @@ function refSelContact(i){
 
 function refGenerar(c){
   var firstName=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
-  var apiKey=localStorage.getItem('ref_apikey')||('sk-ant-api03-oS7ad17YsZkkq5ZdXfp10QMCzJz'+('76huNkSWvoFcNdz3hJ9qUOhtCnd_B0pOLvkkTq95z_NJ8vGhcSC1QG0p6xw-KO_v6wAA'));
-  if(!apiKey||apiKey.length<20){REF_MSG=refTemplate(c,firstName);refRenderMsg(REF_MSG,c);return;}
-  var prompt='Sos un asesor de seguros de vida argentino. Escribí un mensaje de WhatsApp corto para pedirle a '+firstName+' que te recomiende conocidos. Producto: '+(c.producto||'seguro de vida')+'. Tipo: '+(c.tipo==='nueva_venta'?'nuevo cliente esta semana':c.tipo==='entrevista'?'entrevista sin cierre':'cliente vigente')+'. Máximo 4 oraciones, tono informal argentino (vos), 1-2 emojis. Solo el texto.';
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
-    body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:250,messages:[{role:'user',content:prompt}]})
-  }).then(function(r){return r.json();}).then(function(d){
-    REF_MSG=(d.content&&d.content[0])?d.content[0].text.trim():refTemplate(c,firstName);
-    refRenderMsg(REF_MSG,c);
-  }).catch(function(){
-    REF_MSG=refTemplate(c,firstName);
-    refRenderMsg(REF_MSG,c);
-  });
+  jsonp(
+    {accion:'generarMensajeIA',nombre:c.nombre,producto:c.producto||'',moneda:c.moneda||'',tipo:c.tipo||'vigente'},
+    function(res){
+      if(res&&res.ok&&res.mensaje){REF_MSG=res.mensaje;}
+      else{REF_MSG=refTemplate(c,firstName);}
+      refRenderMsg(REF_MSG,c);
+    },
+    function(){REF_MSG=refTemplate(c,firstName);refRenderMsg(REF_MSG,c);}
+  );
 }
 
 function refTemplate(c,firstName){
-  var nombre=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
-  if(c.tipo==='nueva_venta') return nombre+', antes que nada gracias por la confianza en armar tu seguro 🙏 Me alegra mucho que hayas dado ese paso.\n\nTe quería pedir un favor: ¿conocés a alguien del trabajo o tu entorno que también esté pensando en protegerse o ahorrar? No tiene que estar decidido. Con que me pases un nombre yo me encargo 😊';
-  if(c.tipo==='entrevista') return 'Hola '+nombre+', ¿cómo andás? 😊 Entiendo que el momento no era el indicado, sin apuro. Pero quería pedirte un favor: ¿conocés a alguien que sí esté buscando protegerse o ahorrar? Solo un nombre y teléfono, yo hablo con ellos. ¡Gracias!';
-  if((c.producto||'').includes('USD')||c.zona==='Neuquén'||c.zona==='Salta') return 'Hola '+nombre+', ¿cómo estás? ¿Conocés a alguien del trabajo o tu entorno que esté pensando en protegerse o dolarizar ahorros? Con un nombre y contacto es suficiente, yo me encargo de todo 💪';
-  return 'Hola '+nombre+', ¿cómo estás? Quería pedirte un favor rápido: ¿conocés a alguien —familiar, amigo o compañero— que esté pensando en protegerse o ahorrar?\n\nNo tiene que estar decidido. Con un nombre yo hago el resto 🙏';
+  var n=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
+  var r=Math.floor(Math.random()*3);
+  var prod=c.producto||'seguro de vida';
+  var usd=(prod.includes('USD')||prod.includes('DOLAR'));
+
+  if(c.tipo==='nueva_venta'){
+    var msgs=[
+      n+', antes que nada gracias por la confianza en armar tu seguro 🙏 Me alegra mucho que hayas dado ese paso.\n\nTe quería pedir un favor: ¿conocés a alguien del trabajo o tu entorno que también esté pensando en protegerse o ahorrar? No tiene que estar decidido. Con que me pases un nombre yo me encargo 😊',
+      '¡Hola '+n+'! Qué bueno poder acompañarte en esta decisión 💪 Aprovecho para pedirte algo: ¿tenés algún amigo, familiar o compañero que esté pensando en protegerse? No hace falta que esté decidido, solo que tenga curiosidad. Con un nombre me alcanza 🙏',
+      n+', gracias por elegir asegurarte con nosotros, de verdad me pone contento 😊 Te quiero pedir un favor rápido: ¿conocés a alguien que también esté buscando proteger a su familia o ahorrar de forma segura? Solo pasame un nombre y yo me encargo de todo.'
+    ];
+    return msgs[r];
+  }
+
+  if(c.tipo==='entrevista'){
+    var msgs=[
+      'Hola '+n+', ¿cómo andás? 😊 Entiendo que el momento no era el indicado para vos, sin apuro. Pero quería pedirte un favor: ¿conocés a alguien que sí esté buscando protegerse o ahorrar? Solo un nombre y teléfono, yo hablo con ellos.',
+      'Hola '+n+'! Espero que estés muy bien. Sé que no era el momento indicado para vos, y lo respeto totalmente. Pero quería consultarte: ¿tenés algún conocido —amigo, familiar, colega— que sí esté pensando en protegerse o hacer algo con sus ahorros? Con que me pases el contacto yo me encargo 🙌',
+      'Hola '+n+', ¿cómo estás? No te molesto con el seguro, tranquilo/a 😊 Solo quería pedirte un favor: si conocés a alguien que esté buscando opciones para protegerse o ahorrar, ¿me lo presentás? No tiene que estar decidido. Un nombre y yo hago el resto 🙏'
+    ];
+    return msgs[r];
+  }
+
+  if(usd){
+    var msgs=[
+      'Hola '+n+', ¿cómo estás? ¿Conocés a alguien del trabajo o tu entorno que esté pensando en protegerse o dolarizar ahorros? Con un nombre y contacto es suficiente, yo me encargo de todo 💪',
+      'Hola '+n+'! ¿Todo bien? Quería pedirte un favor: ¿tenés algún conocido que esté buscando proteger sus ahorros o cubrirse en dólares? No hace falta que sepa nada del tema, yo le explico todo. Solo pasame un nombre 😊',
+      n+', ¿cómo va todo? Rápido: ¿conocés a alguien de la industria o tu círculo que esté pensando en protegerse o ahorrar en dólares? Con que me pases un contacto yo me ocupo. ¡Gracias! 🙏'
+    ];
+    return msgs[r];
+  }
+
+  var msgs=[
+    'Hola '+n+', ¿cómo estás? Quería pedirte un favor rápido: ¿conocés a alguien —familiar, amigo o compañero— que esté pensando en protegerse o ahorrar?\n\nNo tiene que estar decidido. Con un nombre yo hago el resto 🙏',
+    'Hola '+n+'! ¿Todo bien? Te quiero pedir un favor: ¿tenés algún conocido que esté buscando proteger a su familia o empezar a ahorrar en serio? No hace falta que sepa nada, yo le cuento todo. Solo pasame un nombre y un teléfono 😊',
+    n+', ¿cómo andás? Quería consultarte algo rápido: ¿conocés a alguien de tu entorno que esté pensando en asegurarse o hacer algo con sus ahorros? Con que me des un nombre me alcanza, yo me encargo del resto 💪'
+  ];
+  return msgs[r];
 }
 
 function refRenderMsg(msg,c){
