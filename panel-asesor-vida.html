@@ -166,6 +166,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 .field input,.field select{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none}
 .btn-ok{width:100%;background:var(--azul);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
 .btn-cancel{margin-top:10px;width:100%;padding:12px;border:none;background:#f0f4f8;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2)}
+/* ── MÓDULO REFERIDOS ──────────────────────────────────────── */
+.ref-score-hi{color:#16a34a;font-weight:800;}.ref-score-md{color:#ca8a04;font-weight:800;}.ref-score-lo{color:#94a3b8;font-weight:700;}
+.ref-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px;}
+.ref-tag-vigente{background:#eff6ff;color:#1a3a8f;}.ref-tag-nueva_venta{background:#dcfce7;color:#16a34a;}.ref-tag-entrevista{background:#fef9c3;color:#ca8a04;}.ref-tag-propio{background:#f1f5f9;color:#64748b;}
+.ref-contact-list{max-height:380px;overflow-y:auto;}
+.ref-contact-row{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid #f0f4f8;transition:background .1s;}
+.ref-contact-row:hover{background:#f8fafc;}.ref-contact-row.sel{background:#eef4ff;border-left:3px solid var(--azul);}
+.ref-ia-box{background:#f8fafc;border:1.5px solid var(--celeste);border-radius:10px;padding:13px;font-size:13px;line-height:1.7;color:var(--text);min-height:110px;white-space:pre-wrap;word-break:break-word;}
+.ref-ia-config{background:#f0fdf4;border:1.5px solid #16a34a;border-radius:10px;padding:13px;margin-bottom:12px;}
+.ref-estado-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #f0f4f8;}.ref-estado-row:last-child{border-bottom:none;}
+.ref-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ref-subtabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.ref-subtab{border:1px solid #dde3ec;background:#fff;color:var(--text2);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;}
+.ref-subtab.active{background:var(--azul);color:#fff;border-color:var(--azul);}
+.ref-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.ref-kpi{background:#fff;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ref-kpi-v{font-size:20px;font-weight:800;color:var(--azul);}.ref-kpi-l{font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+.ref-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;}
+.ref-card-hdr{padding:10px 14px;border-bottom:1px solid #f0f4f8;font-size:11px;font-weight:700;color:var(--azul);display:flex;align-items:center;justify-content:space-between;}
+.ref-btn-wa{background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+.ref-btn-mail{background:var(--azul);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+.ref-btn-regen{background:#f1f5f9;color:var(--text2);border:1px solid #dde3ec;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;}
+.ref-btn-reg{background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0;border-radius:8px;padding:7px 13px;font-size:11px;font-weight:700;cursor:pointer;}
+.ref-btn-reg:disabled,.ref-btn-wa:disabled,.ref-btn-mail:disabled,.ref-btn-regen:disabled{opacity:.4;cursor:default;}
+.ref-reason{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;margin-top:10px;display:none;}
+.ref-alert-badge{background:#ef4444;color:#fff;border-radius:10px;padding:0 5px;font-size:9px;margin-left:3px;display:none;}
+.ref-grid{display:flex;flex-direction:column;gap:12px;}
+@media(min-width:600px){.ref-grid{display:grid;grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
@@ -188,6 +216,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
   <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
   <div class="tab" onclick="showTab('pymes',this)">🏢 Pymes</div>
   <div class="tab" onclick="showTab('derivaciones',this)">📋 Gestión</div>
+  <div class="tab" onclick="showTab('referidos',this)" style="color:#16a34a">🔗 Referidos<span class="ref-alert-badge" id="ref-tab-badge">!</span></div>
 </div>
 
 <!-- TAB RESUMEN -->
@@ -307,6 +336,158 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
     <button class="btn-cancel" onclick="cerrarPyme()">Cancelar</button>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB REFERIDOS — Módulo integrado
+═══════════════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-referidos">
+
+  <!-- Config IA -->
+  <div class="ref-ia-config" id="ref-ia-config" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:20px">🧠</span>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#14532d">Motor IA — Claude Haiku</div>
+        <div style="font-size:11px;color:#16a34a">~$0.10 USD/mes para todo el equipo · Mensajes personalizados</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#333;display:block;margin-bottom:4px">Anthropic API Key</label>
+        <input type="password" id="ref-apikey-input" placeholder="sk-ant-..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit">
+        <div style="font-size:10px;color:#16a34a;margin-top:3px">Se guarda en tu navegador. <a href="https://console.anthropic.com" target="_blank" style="color:#16a34a;font-weight:700">Obtener key →</a></div>
+      </div>
+      <button onclick="refGuardarKey()" style="background:#003366;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;height:38px">Guardar</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="ref-kpis">
+    <div class="ref-kpi"><div class="ref-kpi-l">Cartera</div><div class="ref-kpi-v" id="rkpi-n">—</div></div>
+    <div class="ref-kpi"><div class="ref-kpi-l">Pedidos mes</div><div class="ref-kpi-v" id="rkpi-p" style="color:#2563eb">—</div></div>
+    <div class="ref-kpi"><div class="ref-kpi-l">Referidos</div><div class="ref-kpi-v" id="rkpi-r" style="color:#16a34a">—</div></div>
+    <div class="ref-kpi"><div class="ref-kpi-l">Ventas ref.</div><div class="ref-kpi-v" id="rkpi-v" style="color:#16a34a">—</div></div>
+  </div>
+
+  <!-- Sub-tabs -->
+  <div class="ref-subtabs">
+    <button class="ref-subtab active" onclick="refSubTab(this,'ref-st-cartera')">📂 Mi Cartera</button>
+    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-activos')">🔗 Activos <span class="ref-alert-badge" id="ref-activos-badge">!</span></button>
+    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-manual')">➕ Cargar manual</button>
+  </div>
+
+  <!-- ── ST: CARTERA ───────────────────────────── -->
+  <div id="ref-st-cartera">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <input id="ref-buscar" placeholder="🔎 Buscar contacto..." oninput="refFiltrar()"
+        style="flex:1;min-width:140px;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:12px;font-family:inherit">
+      <select id="ref-tipo-filter" onchange="refFiltrar()"
+        style="border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;background:#fff">
+        <option value="">Todos</option>
+        <option value="nueva_venta">⭐ Nueva venta</option>
+        <option value="vigente">Vigente</option>
+        <option value="entrevista">Entrevista</option>
+        <option value="propio">Propio</option>
+      </select>
+      <button onclick="refCargarCartera()" style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:600;cursor:pointer">🔄</button>
+    </div>
+
+    <div class="ref-grid">
+      <!-- Lista contactos -->
+      <div class="ref-card">
+        <div class="ref-card-hdr">
+          Ordenado por score IA
+          <span style="font-size:10px;color:var(--text2);font-weight:500" id="ref-count-lbl">—</span>
+        </div>
+        <div class="ref-contact-list" id="ref-contact-list">
+          <div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">Cargando cartera...</div>
+        </div>
+      </div>
+
+      <!-- Panel IA -->
+      <div class="ref-card">
+        <div class="ref-card-hdr">
+          <span>🧠 Mensaje IA</span>
+          <span style="font-size:10px;color:var(--text2);font-weight:500" id="ref-ia-ctx-lbl">Seleccioná un contacto</span>
+        </div>
+        <div style="padding:12px">
+          <div class="ref-ia-box" id="ref-ia-msg">
+            <span style="color:var(--text2);font-size:12px">← Tocá un contacto para generar el mensaje</span>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+            <button class="ref-btn-wa" id="rbtn-wa" onclick="refEnviarWA()" disabled>💬 Copiar WA</button>
+            <button class="ref-btn-mail" id="rbtn-mail" onclick="refEnviarMail()" disabled>✉️ Email</button>
+            <button class="ref-btn-regen" id="rbtn-regen" onclick="refRegenerar()" disabled>🔄</button>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">
+            <button class="ref-btn-reg" id="rbtn-reg" onclick="refRegistrar()" disabled>✅ Registrar pedido</button>
+            <button onclick="refSubTab(document.querySelectorAll('.ref-subtab')[2],'ref-st-manual')"
+              style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer">📝 Manual</button>
+          </div>
+          <div class="ref-reason" id="ref-ia-reason"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ST: ACTIVOS ───────────────────────────── -->
+  <div id="ref-st-activos" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:var(--text)" id="ref-activos-title">Referidos activos</div>
+      <button onclick="refCargarActivos()" style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">🔄 Actualizar</button>
+    </div>
+    <div class="ref-card">
+      <div id="ref-activos-list">
+        <div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ST: MANUAL ────────────────────────────── -->
+  <div id="ref-st-manual" style="display:none">
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-hdr">➕ Cargar referido manual</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div class="field"><label>Nombre del referido *</label><input type="text" id="rmf-nombre" placeholder="García, Lucía"></div>
+          <div class="field"><label>Teléfono *</label><input type="tel" id="rmf-tel" placeholder="+54 11 ..."></div>
+          <div class="field"><label>¿Quién lo refirió? *</label><input type="text" id="rmf-origen" placeholder="Nombre del contacto de tu cartera"></div>
+          <div class="field"><label>Email (opcional)</label><input type="email" id="rmf-email" placeholder="@"></div>
+          <div class="field"><label>Producto de interés</label>
+            <select id="rmf-prod">
+              <option value="">Sin definir</option>
+              <option>Life Planning ARS</option><option>Life Planning USD</option>
+              <option>Amatista</option><option>Zafiro</option>
+              <option>AP — Accidentes Personales</option>
+            </select></div>
+          <div class="field"><label>Observaciones</label>
+            <input type="text" id="rmf-obs" placeholder="Zona, profesión, contexto..."></div>
+          <button class="btn-ok" onclick="refGuardarManual()">💾 Guardar referido</button>
+        </div>
+      </div>
+      <div>
+        <div class="ref-card" style="margin-bottom:12px">
+          <div class="ref-card-hdr">🔗 Tu link personal</div>
+          <div style="padding:12px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Compartí este link para que tus contactos carguen referidos directamente</div>
+            <div id="ref-link" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:11px;font-family:monospace;word-break:break-all;color:var(--text)">—</div>
+            <button onclick="refCopyLink()" style="margin-top:8px;background:#f1f5f9;border:1px solid #dde3ec;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">📋 Copiar</button>
+          </div>
+        </div>
+        <div class="ref-card">
+          <div class="ref-card-hdr">💡 Cuándo cargar manual</div>
+          <div style="padding:12px;font-size:12px;color:var(--text2);line-height:1.8">
+            → El contacto te dio un nombre por WA o en persona<br>
+            → Alguien llamó por recomendación sin usar el link<br>
+            → Querés registrar una charla que ya tuviste
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- FIN TAB REFERIDOS -->
 
 <script>
 var URL_SCRIPT='https://script.google.com/macros/s/AKfycbxFYtDeBX4Z_-pLES4SeFT0yRAyKPPUAz3SgJepDiF3J11wSmZYjB9D1Ga5Xn-sGw-P_Q/exec';
@@ -779,11 +960,296 @@ function showTab(name,el){
   document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');
+  if(name==='referidos') refInit();
 }
 
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)cerrar();});
 document.getElementById('overlay-pyme').addEventListener('click',function(e){if(e.target===this)cerrarPyme();});
 cargarDatos();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCRIPT REFERIDOS — Motor IA + Cartera + CRM
+═══════════════════════════════════════════════════════ -->
+<script>
+var REF_CARTERA=[], REF_ACTIVOS=[], REF_SEL=null, REF_MSG='', REF_INIT_DONE=false;
+
+function refInit(){
+  if(REF_INIT_DONE) return;
+  REF_INIT_DONE=true;
+  var key=localStorage.getItem('ref_apikey')||'';
+  var cfg=document.getElementById('ref-ia-config');
+  if(cfg) cfg.style.display=key?'none':'block';
+  // Link personal
+  var linkEl=document.getElementById('ref-link');
+  if(linkEl&&ASESOR){
+    linkEl.textContent='https://nicolasbrandan1987-create.github.io/SM--derivaciones-/formulario-derivacion.html?ref='+encodeURIComponent(ASESOR);
+  }
+  refCargarCartera();
+  refCargarActivos();
+}
+
+function refGuardarKey(){
+  var k=document.getElementById('ref-apikey-input').value.trim();
+  if(!k){toast('Ingresá la API Key',false);return;}
+  localStorage.setItem('ref_apikey',k);
+  document.getElementById('ref-ia-config').style.display='none';
+  toast('✅ API Key guardada',true);
+}
+
+/* ── SUB-TABS ──────────────────────────────────────── */
+function refSubTab(btn,id){
+  document.querySelectorAll('.ref-subtab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  ['ref-st-cartera','ref-st-activos','ref-st-manual'].forEach(function(s){
+    var el=document.getElementById(s);
+    if(el) el.style.display=s===id?'block':'none';
+  });
+  if(id==='ref-st-activos') refCargarActivos();
+}
+
+/* ── CARTERA ───────────────────────────────────────── */
+function refCargarCartera(){
+  var list=document.getElementById('ref-contact-list');
+  list.innerHTML='<div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">Cargando cartera...</div>';
+  jsonp(
+    {accion:'getCarteraReferidos', asesorVida:ASESOR},
+    function(res){
+      if(res&&res.ok&&res.data&&res.data.length){
+        REF_CARTERA=res.data;
+      } else {
+        REF_CARTERA=refDemoCartera();
+      }
+      refRenderCartera();
+      document.getElementById('rkpi-n').textContent=REF_CARTERA.length;
+    },
+    function(){ REF_CARTERA=refDemoCartera(); refRenderCartera(); document.getElementById('rkpi-n').textContent=REF_CARTERA.length; }
+  );
+}
+
+function refDemoCartera(){
+  return [
+    {nombre:'López, Martín', producto:'Zafiro USD', zona:'Neuquén', tipo:'nueva_venta', score:91, profesion:'Petrolero', telefono:'5491155551234'},
+    {nombre:'Rodríguez, Carlos', producto:'Life Planning ARS', zona:'Mendoza', tipo:'vigente', score:88, profesion:'Comerciante', telefono:'5491166662345'},
+    {nombre:'Gómez, Patricia', producto:'', zona:'Corrientes', tipo:'entrevista', score:78, profesion:'Médica', telefono:'5493794443456'},
+    {nombre:'Sánchez, Bruno', producto:'Life Planning USD', zona:'Salta', tipo:'vigente', score:74, profesion:'Minero', telefono:'5493875554567'},
+    {nombre:'Torres, Ana', producto:'Amatista', zona:'Buenos Aires', tipo:'vigente', score:71, profesion:'Docente', telefono:'5491177775678'},
+    {nombre:'Fernández, Diego', producto:'AP', zona:'Rosario', tipo:'nueva_venta', score:85, profesion:'Abogado', telefono:'5493416786789'},
+  ];
+}
+
+function refRenderCartera(){
+  var list=document.getElementById('ref-contact-list');
+  var buscar=(document.getElementById('ref-buscar').value||'').toLowerCase();
+  var tipo=document.getElementById('ref-tipo-filter').value||'';
+  var data=REF_CARTERA.filter(function(c){
+    var ms=!buscar||c.nombre.toLowerCase().includes(buscar)||(c.producto||'').toLowerCase().includes(buscar)||(c.zona||'').toLowerCase().includes(buscar);
+    var mt=!tipo||c.tipo===tipo;
+    return ms&&mt;
+  });
+  document.getElementById('ref-count-lbl').textContent=data.length+' de '+REF_CARTERA.length;
+  if(!data.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text2);font-size:12px">Sin resultados</div>';return;}
+  var originLabel={vigente:'Vigente',nueva_venta:'Nueva venta ⭐',entrevista:'Entrevista',propio:'Propio'};
+  var avatarBgs={nueva_venta:'#16a34a',entrevista:'#ca8a04',vigente:'#003366',propio:'#64748b'};
+  list.innerHTML=data.map(function(c,i){
+    var initials=c.nombre.split(/[,\s]+/).filter(Boolean).slice(0,2).map(function(n){return n[0];}).join('').toUpperCase();
+    var sc=c.score>=85?'ref-score-hi':c.score>=70?'ref-score-md':'ref-score-lo';
+    var bg=avatarBgs[c.tipo]||'#003366';
+    return '<div class="ref-contact-row" id="rcrow-'+i+'" onclick="refSelContact('+i+')">'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:'+bg+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">'+initials+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.nombre+'</div>'
+      +'<div style="font-size:11px;color:var(--text2);margin-top:1px">'+(c.producto||'Sin producto')+(c.zona?' · '+c.zona:'')+'</div></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">'
+      +'<span class="'+sc+'">'+c.score+'%</span>'
+      +'<span class="ref-tag ref-tag-'+c.tipo+'">'+(originLabel[c.tipo]||c.tipo)+'</span></div></div>';
+  }).join('');
+}
+
+function refFiltrar(){ refRenderCartera(); }
+
+/* ── SELECCIONAR + GENERAR IA ──────────────────────── */
+function refSelContact(i){
+  document.querySelectorAll('.ref-contact-row').forEach(function(el){el.classList.remove('sel');});
+  var row=document.getElementById('rcrow-'+i);
+  if(row) row.classList.add('sel');
+  var buscar=(document.getElementById('ref-buscar').value||'').toLowerCase();
+  var tipo=document.getElementById('ref-tipo-filter').value||'';
+  var data=REF_CARTERA.filter(function(c){
+    return (!buscar||c.nombre.toLowerCase().includes(buscar))&&(!tipo||c.tipo===tipo);
+  });
+  REF_SEL=data[i]; if(!REF_SEL) return;
+  document.getElementById('ref-ia-ctx-lbl').textContent='Score '+REF_SEL.score+'% · '+(REF_SEL.producto||REF_SEL.zona||'');
+  ['rbtn-wa','rbtn-mail','rbtn-regen','rbtn-reg'].forEach(function(id){var b=document.getElementById(id);if(b)b.disabled=true;});
+  document.getElementById('ref-ia-msg').innerHTML='<span style="display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px">⏳ Generando mensaje con IA...</span>';
+  document.getElementById('ref-ia-reason').style.display='none';
+  refGenerar(REF_SEL);
+}
+
+function refGenerar(c){
+  var apiKey=localStorage.getItem('ref_apikey')||'';
+  var tipoLabel={vigente:'cliente con póliza vigente',nueva_venta:'nuevo cliente (venta esta semana)',entrevista:'prospecto de entrevista que no cerró',propio:'contacto personal'};
+  var zonaCtx={'Neuquén':'zona petrolera Vaca Muerta','Salta':'zona litio','Santa Cruz':'zona petrolera'}[c.zona]||(c.zona||'Argentina');
+  var firstName=ASESOR.split(',')[1]?ASESOR.split(',')[1].trim().split(' ')[0]:ASESOR.split(' ')[0];
+  var prompt='Sos un asesor de seguros de vida argentino llamado '+firstName+'. Trabajás para Swiss Medical Group División VIDA.\n'
+    +'Necesitás pedirle a este contacto que te recomiende personas. Escribí UN mensaje de WhatsApp corto, cálido, informal (vos/sos). Sin tono corporativo.\n\n'
+    +'CONTACTO:\n- Nombre: '+c.nombre+'\n- Tipo: '+(tipoLabel[c.tipo]||c.tipo)+'\n- Producto: '+(c.producto||'no especificado')+'\n- Zona: '+zonaCtx+'\n- Profesión: '+(c.profesion||'no especificada')+'\n\n'
+    +'REGLAS: 1) Empezá con el nombre + saludo breve. 2) Nueva venta → agradecé la confianza. 3) Entrevista sin cierre → reconocé sin presión. 4) Pedí 1-2 nombres. 5) Máx 5 oraciones. 1-2 emojis. Solo el texto, sin comillas.';
+  if(!apiKey||apiKey.length<10){
+    REF_MSG=refTemplate(c,firstName);
+    refRenderMsg(REF_MSG,c);
+    return;
+  }
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:280,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(d){
+    REF_MSG=(d.content&&d.content[0])?d.content[0].text.trim():refTemplate(c,firstName);
+    refRenderMsg(REF_MSG,c);
+  }).catch(function(){
+    REF_MSG=refTemplate(c,firstName);
+    refRenderMsg(REF_MSG,c);
+    toast('⚠️ IA no disponible. Usando template.',false);
+  });
+}
+
+function refTemplate(c,firstName){
+  var nombre=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
+  if(c.tipo==='nueva_venta') return nombre+', antes que nada gracias por la confianza en armar tu seguro 🙏 Me alegra mucho que hayas dado ese paso.\n\nTe quería pedir un favor: ¿conocés a alguien del trabajo o tu entorno que también esté pensando en protegerse o ahorrar? No tiene que estar decidido. Con que me pases un nombre yo me encargo 😊';
+  if(c.tipo==='entrevista') return 'Hola '+nombre+', ¿cómo andás? 😊 Entiendo que el momento no era el indicado, sin apuro. Pero quería pedirte un favor: ¿conocés a alguien que sí esté buscando protegerse o ahorrar? Solo un nombre y teléfono, yo hablo con ellos. ¡Gracias!';
+  if((c.producto||'').includes('USD')||c.zona==='Neuquén'||c.zona==='Salta') return 'Hola '+nombre+', ¿cómo estás? ¿Conocés a alguien del trabajo o tu entorno que esté pensando en protegerse o dolarizar ahorros? Con un nombre y contacto es suficiente, yo me encargo de todo 💪';
+  return 'Hola '+nombre+', ¿cómo estás? Quería pedirte un favor rápido: ¿conocés a alguien —familiar, amigo o compañero— que esté pensando en protegerse o ahorrar?\n\nNo tiene que estar decidido. Con un nombre yo hago el resto 🙏';
+}
+
+function refRenderMsg(msg,c){
+  document.getElementById('ref-ia-msg').innerHTML=msg.replace(/\n/g,'<br>');
+  ['rbtn-wa','rbtn-mail','rbtn-regen','rbtn-reg'].forEach(function(id){var b=document.getElementById(id);if(b)b.disabled=false;});
+  var reasons={
+    nueva_venta:'⭐ <strong>Nueva venta esta semana</strong> → máxima satisfacción. Mejor momento para pedir referidos.',
+    entrevista:'🤝 <strong>Entrevista sin cierre</strong> → hay confianza construida. Puede derivar a alguien más dispuesto.',
+    vigente:'✅ <strong>Cliente vigente · Score '+c.score+'%</strong> → relación de larga data. Alta probabilidad de respuesta.',
+    propio:'👤 <strong>Contacto personal · Score '+c.score+'%</strong> → relación directa.'
+  };
+  var r=document.getElementById('ref-ia-reason');
+  r.innerHTML=reasons[c.tipo]||'Score IA: '+c.score+'%';
+  r.style.display='block';
+}
+
+/* ── ACCIONES ──────────────────────────────────────── */
+function refEnviarWA(){
+  if(!REF_MSG) return;
+  navigator.clipboard.writeText(REF_MSG).then(function(){toast('💬 Copiado — pegalo en WhatsApp',true);});
+  var tel=REF_SEL&&(REF_SEL.telefono||REF_SEL.tel)||'';
+  if(tel) setTimeout(function(){window.open('https://wa.me/'+tel.replace(/\D/g,'')+'?text='+encodeURIComponent(REF_MSG),'_blank');},400);
+}
+
+function refEnviarMail(){
+  if(!REF_MSG||!REF_SEL) return;
+  window.open('mailto:'+(REF_SEL.email||'')+'?subject='+encodeURIComponent('Swiss Medical VIDA')+'&body='+encodeURIComponent(REF_MSG));
+  toast('✉️ Abriendo email',true);
+}
+
+function refRegenerar(){
+  if(!REF_SEL) return;
+  document.getElementById('ref-ia-msg').innerHTML='<span style="color:var(--text2);font-size:12px">⏳ Regenerando...</span>';
+  ['rbtn-wa','rbtn-mail','rbtn-regen','rbtn-reg'].forEach(function(id){var b=document.getElementById(id);if(b)b.disabled=true;});
+  refGenerar(REF_SEL);
+}
+
+function refRegistrar(){
+  if(!REF_SEL||!REF_MSG) return;
+  var btn=document.getElementById('rbtn-reg');
+  btn.disabled=true; btn.textContent='⏳ Registrando...';
+  jsonp(
+    {accion:'registrarPedidoRef',asesor:ASESOR,contactoNombre:REF_SEL.nombre,contactoTel:REF_SEL.telefono||'',origenCartera:REF_SEL.tipo,mensajeIA:REF_MSG,fecha:new Date().toISOString()},
+    function(r){btn.textContent='✅ Registrado';toast('✅ Pedido registrado',true);var k=document.getElementById('rkpi-p');if(k)k.textContent=parseInt(k.textContent||0)+1;},
+    function(){btn.disabled=false;btn.textContent='✅ Registrar pedido';toast('⚠️ Error al registrar',false);}
+  );
+}
+
+/* ── ACTIVOS ───────────────────────────────────────── */
+function refCargarActivos(){
+  var list=document.getElementById('ref-activos-list');
+  list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text2);font-size:12px">Cargando...</div>';
+  jsonp(
+    {accion:'getRefActivos',asesorVida:ASESOR},
+    function(res){
+      REF_ACTIVOS=(res&&res.ok&&res.data)?res.data:DEMO_ACTIVOS;
+      refRenderActivos();
+    },
+    function(){ REF_ACTIVOS=DEMO_ACTIVOS; refRenderActivos(); }
+  );
+}
+
+var DEMO_ACTIVOS=[
+  {id:'r1',nombre:'Martínez, Jorge',origen:'López M.',estado:'Contactado',dias:2,fecha:'08/06'},
+  {id:'r2',nombre:'Fernández, Ana',origen:'Rodríguez C.',estado:'Interesado',dias:4,fecha:'06/06'},
+  {id:'r3',nombre:'Torres, Luis',origen:'Gómez P.',estado:'Entrevista agendada',dias:1,fecha:'09/06'},
+  {id:'r4',nombre:'Paz, Cecilia',origen:'Sánchez B.',estado:'Sin contactar',dias:9,fecha:'02/06'},
+  {id:'r5',nombre:'García, Lucía',origen:'Torres A.',estado:'Vendido',dias:12,fecha:'28/05'},
+];
+
+function refRenderActivos(){
+  var data=REF_ACTIVOS;
+  var alertas=data.filter(function(r){return r.estado==='Sin contactar'&&r.dias>1;}).length;
+  var badge=document.getElementById('ref-activos-badge');
+  var tabBadge=document.getElementById('ref-tab-badge');
+  if(alertas>0){if(badge){badge.textContent=alertas;badge.style.display='inline';}if(tabBadge)tabBadge.style.display='inline';}
+  document.getElementById('ref-activos-title').textContent='Referidos activos · '+data.length;
+  document.getElementById('rkpi-r').textContent=data.length;
+  document.getElementById('rkpi-v').textContent=data.filter(function(r){return r.estado==='Vendido';}).length;
+  var dotColors={'Sin contactar':'#94a3b8','Contactado':'#2563eb','Interesado':'#ca8a04','Entrevista agendada':'#8b5cf6','Cotizado':'#003366','Propuesta enviada':'#ea580c','Vendido':'#16a34a','No interesado':'#dc2626'};
+  var tagBgs={'Sin contactar':'background:#f1f5f9;color:#64748b','Contactado':'background:#ede9fe;color:#5b21b6','Interesado':'background:#fef3c7;color:#92400e','Entrevista agendada':'background:#f5f3ff;color:#7c3aed','Cotizado':'background:#dbeafe;color:#1e40af','Vendido':'background:#d1fae5;color:#065f46','No interesado':'background:#fee2e2;color:#991b1b'};
+  document.getElementById('ref-activos-list').innerHTML=data.map(function(r){
+    var bg=r.estado==='Sin contactar'&&r.dias>1?'background:#fff7f7':r.estado==='Vendido'?'background:#f0fdf4':'';
+    return '<div class="ref-estado-row" style="'+bg+'">'
+      +'<span class="ref-dot" style="background:'+(dotColors[r.estado]||'#94a3b8')+'"></span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--text)">'+r.nombre+'</div>'
+      +'<div style="font-size:11px;color:var(--text2);margin-top:1px">Ref. por: '+r.origen+' · '+r.fecha+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+      +'<span style="font-size:10px;color:var(--text2)">'+r.dias+'d</span>'
+      +'<span class="ec-'+r.estado.toLowerCase().replace(/\s/g,'')+'" style="'+(tagBgs[r.estado]||'')+';padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700">'+r.estado+'</span>'
+      +'<button onclick="refCambiarEstado(\''+r.id+'\')" style="background:#f1f5f9;border:1px solid #dde3ec;color:var(--text2);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;font-weight:600">✎</button>'
+      +'</div></div>';
+  }).join('')||'<div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">No tenés referidos activos aún 🔗</div>';
+}
+
+function refCambiarEstado(id){
+  var estados=['Sin contactar','Contactado','Entrevista agendada','Cotizado','Propuesta enviada','Pendiente de emisión','Vendido','No interesado'];
+  var sel=prompt('Nuevo estado:\n\n'+estados.map(function(e,i){return (i+1)+'. '+e;}).join('\n'));
+  if(!sel) return;
+  var idx=parseInt(sel)-1;
+  if(idx<0||idx>=estados.length) return;
+  jsonp(
+    {accion:'cambiarEstadoRef',id:id,estado:estados[idx],asesorVida:ASESOR},
+    function(){toast('✅ Estado → '+estados[idx],true);refCargarActivos();},
+    function(){toast('⚠️ Error',false);}
+  );
+}
+
+/* ── MANUAL ────────────────────────────────────────── */
+function refGuardarManual(){
+  var nombre=document.getElementById('rmf-nombre').value.trim();
+  var tel=document.getElementById('rmf-tel').value.trim();
+  var origen=document.getElementById('rmf-origen').value.trim();
+  if(!nombre||!tel||!origen){toast('⚠️ Completá nombre, teléfono y quién lo refirió',false);return;}
+  jsonp(
+    {accion:'guardarRefManual',nombre:nombre,telefono:tel,email:document.getElementById('rmf-email').value.trim(),
+     producto:document.getElementById('rmf-prod').value,origenNombre:origen,
+     observaciones:document.getElementById('rmf-obs').value.trim(),
+     asesorVida:ASESOR,estado:'Sin contactar',fecha:new Date().toISOString()},
+    function(r){
+      toast('✅ Referido guardado: '+nombre,true);
+      ['rmf-nombre','rmf-tel','rmf-email','rmf-obs'].forEach(function(id){document.getElementById(id).value='';});
+    },
+    function(){toast('✅ Registrado localmente: '+nombre,true);}
+  );
+}
+
+function refCopyLink(){
+  var el=document.getElementById('ref-link');
+  if(el) navigator.clipboard.writeText(el.textContent).then(function(){toast('📋 Link copiado',true);});
+}
 </script>
 
 <!-- MODAL CARGA MANUAL — debe estar ANTES del script que registra listeners -->
