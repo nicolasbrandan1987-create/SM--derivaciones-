@@ -1087,24 +1087,20 @@ function refSelContact(i){
 
 function refGenerar(c){
   var firstName=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
-  // Llama al Apps Script que tiene la API Key segura
-  jsonp(
-    {accion:'generarMensajeIA', nombre:c.nombre, producto:c.producto||'', moneda:c.moneda||'', tipo:c.tipo||'vigente'},
-    function(res){
-      if(res&&res.ok&&res.mensaje){
-        REF_MSG=res.mensaje;
-        refRenderMsg(REF_MSG,c);
-      } else {
-        REF_MSG=refTemplate(c,firstName);
-        refRenderMsg(REF_MSG,c);
-      }
-    },
-    function(){
-      REF_MSG=refTemplate(c,firstName);
-      refRenderMsg(REF_MSG,c);
-      toast('⚠️ IA no disponible. Usando template.',false);
-    }
-  );
+  var apiKey=localStorage.getItem('ref_apikey')||'';
+  if(!apiKey||apiKey.length<20){REF_MSG=refTemplate(c,firstName);refRenderMsg(REF_MSG,c);return;}
+  var prompt='Sos un asesor de seguros de vida argentino. Escribí un mensaje de WhatsApp corto para pedirle a '+firstName+' que te recomiende conocidos. Producto: '+(c.producto||'seguro de vida')+'. Tipo: '+(c.tipo==='nueva_venta'?'nuevo cliente esta semana':c.tipo==='entrevista'?'entrevista sin cierre':'cliente vigente')+'. Máximo 4 oraciones, tono informal argentino (vos), 1-2 emojis. Solo el texto.';
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:250,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(d){
+    REF_MSG=(d.content&&d.content[0])?d.content[0].text.trim():refTemplate(c,firstName);
+    refRenderMsg(REF_MSG,c);
+  }).catch(function(){
+    REF_MSG=refTemplate(c,firstName);
+    refRenderMsg(REF_MSG,c);
+  });
 }
 
 function refTemplate(c,firstName){
