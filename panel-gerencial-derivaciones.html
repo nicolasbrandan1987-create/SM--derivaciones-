@@ -198,6 +198,7 @@ tr:hover td{background:#f8fafc}
   <div class="tab" onclick="showTab('pymes',this)">🏢 Pymes</div>
   <div class="tab" onclick="showTab('semanal',this)">📅 Semanal</div>
   <div class="tab" onclick="showTab('lista',this)">📋 Lista</div>
+  <div class="tab" onclick="showTab('referidos',this)" style="color:#16a34a">🔗 Referidos</div>
 </div>
 
 <!-- RESUMEN -->
@@ -775,6 +776,7 @@ function showTab(name,el){
   document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');
+  if(name==='referidos') grCargarReferidos();
 }
 
 function abrirModalZona(zona){
@@ -1104,6 +1106,59 @@ cargarDatos();
     <button class="ger-btn-cancel" onclick="cerrarCargaGerencial()">Cancelar</button>
   </div>
 </div>
+<!-- TAB REFERIDOS GERENCIAL -->
+<div class="tab-content" id="tab-referidos" style="display:none">
+
+  <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi"><div class="val" id="gr-total">—</div><div class="lbl">Referidos totales</div></div>
+    <div class="kpi"><div class="val" id="gr-contactados" style="color:#8b5cf6">—</div><div class="lbl">Contactados</div></div>
+    <div class="kpi"><div class="val" id="gr-entrevistas" style="color:#2563eb">—</div><div class="lbl">Entrevistas</div></div>
+    <div class="kpi"><div class="val" id="gr-ventas" style="color:#10b981">—</div><div class="lbl">Ventas</div></div>
+    <div class="kpi"><div class="val" id="gr-conv" style="color:#f59e0b">—</div><div class="lbl">Conversión ref→venta</div></div>
+  </div>
+
+  <!-- Funnel nacional -->
+  <div style="background:white;border-radius:12px;padding:14px;margin:0 14px 12px;box-shadow:0 2px 6px rgba(0,0,0,.06)">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#003366;margin-bottom:12px">📊 Funnel de Conversión Nacional</div>
+    <div id="gr-funnel"></div>
+  </div>
+
+  <!-- Ranking asesores -->
+  <div style="background:white;border-radius:12px;margin:0 14px 12px;box-shadow:0 2px 6px rgba(0,0,0,.06);overflow:hidden">
+    <div style="padding:12px 14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#003366;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;justify-content:space-between">
+      👤 Ranking Asesores — Referidos
+      <button onclick="grCargarReferidos()" style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer">🔄</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:left">Asesor</th>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:center">Pedidos</th>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:center">Referidos</th>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:center">Entrevistas</th>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:center">Ventas</th>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:center">Conversión</th>
+          <th style="padding:8px 10px;font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0f4f8;text-align:center">Semáforo</th>
+        </tr></thead>
+        <tbody id="gr-ranking-body">
+          <tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Checklist compliance -->
+  <div style="background:white;border-radius:12px;margin:0 14px 12px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.06)">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#003366;margin-bottom:12px">✅ Compliance — Pedido de Referidos</div>
+    <div id="gr-compliance">
+      <div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Cargando datos de checklist...</div>
+    </div>
+  </div>
+
+</div>
+<!-- FIN TAB REFERIDOS GERENCIAL -->
+
+
 
 <script>
 var gerTipo='fisica';
@@ -1205,6 +1260,108 @@ function guardarCargaGerencial(){
 }
 
 document.getElementById('ger-overlay').addEventListener('click',function(e){if(e.target===this)cerrarCargaGerencial();});
+
+
+/* ── REFERIDOS GERENCIAL ──────────────────────────────── */
+var GR_PIPELINE=['Referido generado','Pendiente de contacto','Contactado','Interesado','Entrevista agendada','Cotizacion enviada','Negociacion','Venta emitida','Perdido'];
+var GR_COLORS=['#94a3b8','#f59e0b','#8b5cf6','#3b82f6','#7c3aed','#2563eb','#ea580c','#16a34a','#ef4444'];
+
+function grCargarReferidos(){
+  jsonp(
+    {accion:'getDashboardReferidos'},
+    function(res){
+      if(res&&res.ok&&res.data) grRenderDashboard(res.data);
+      else grRenderDashboard(null);
+    },
+    function(){ grRenderDashboard(null); }
+  );
+}
+
+function grRenderDashboard(data){
+  if(!data){
+    // Demo data
+    data={
+      total:87, contactados:62, entrevistas:34, ventas:14, conv:'16%',
+      funnel:{'Referido generado':87,'Pendiente de contacto':25,'Contactado':62,'Interesado':40,'Entrevista agendada':34,'Cotizacion enviada':22,'Negociacion':18,'Venta emitida':14,'Perdido':8},
+      ranking:[
+        {asesor:'Pierlucca, Julia',pedidos:31,referidos:14,entrevistas:8,ventas:4,conv:'29%',sema:'verde'},
+        {asesor:'Dominguez, Ana L.',pedidos:22,referidos:10,entrevistas:5,ventas:2,conv:'20%',sema:'verde'},
+        {asesor:'Flores, Gastón',pedidos:18,referidos:7,entrevistas:3,ventas:1,conv:'14%',sema:'amarillo'},
+        {asesor:'Bruno, Silvina',pedidos:12,referidos:4,entrevistas:2,ventas:1,conv:'25%',sema:'verde'},
+        {asesor:'Aguirre, Agustina',pedidos:8,referidos:3,entrevistas:1,ventas:0,conv:'0%',sema:'rojo'},
+      ],
+      compliance:[
+        {asesor:'Pierlucca, Julia',total_eventos:12,con_pedido:11,sin_pedido:1,pct:92},
+        {asesor:'Dominguez, Ana L.',total_eventos:9,con_pedido:7,sin_pedido:2,pct:78},
+        {asesor:'Flores, Gastón',total_eventos:8,con_pedido:5,sin_pedido:3,pct:63},
+        {asesor:'Bruno, Silvina',total_eventos:6,con_pedido:4,sin_pedido:2,pct:67},
+        {asesor:'Aguirre, Agustina',total_eventos:5,con_pedido:2,sin_pedido:3,pct:40},
+      ]
+    };
+  }
+
+  // KPIs
+  var set=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
+  set('gr-total',data.total||'—'); set('gr-contactados',data.contactados||'—');
+  set('gr-entrevistas',data.entrevistas||'—'); set('gr-ventas',data.ventas||'—');
+  set('gr-conv',data.conv||'—');
+
+  // Funnel
+  var fw=document.getElementById('gr-funnel');
+  if(fw&&data.funnel){
+    var max=Math.max.apply(null,Object.values(data.funnel))||1;
+    fw.innerHTML=GR_PIPELINE.map(function(s,i){
+      var n=data.funnel[s]||0;
+      if(n===0) return '';
+      var pct=Math.round(n/max*100);
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+        +'<div style="font-size:10px;font-weight:600;width:140px;text-align:right;color:#64748b">'+s+'</div>'
+        +'<div style="flex:1;height:24px;background:#f0f4f8;border-radius:6px;overflow:hidden">'
+        +'<div style="height:24px;border-radius:6px;background:'+GR_COLORS[i]+';width:'+pct+'%;display:flex;align-items:center;padding:0 8px">'
+        +'<span style="font-size:11px;font-weight:700;color:#fff">'+n+'</span></div></div>'
+        +'<div style="font-size:10px;color:#64748b;width:30px">'+Math.round(n/(data.total||1)*100)+'%</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  // Ranking
+  var tbody=document.getElementById('gr-ranking-body');
+  if(tbody&&data.ranking){
+    tbody.innerHTML=data.ranking.map(function(r,i){
+      var sc={'verde':'#d1fae5','amarillo':'#fef9c3','rojo':'#fee2e2'};
+      var st={'verde':'#065f46','amarillo':'#92400e','rojo':'#991b1b'};
+      var sl={'verde':'Verde ≥90%','amarillo':'Amarillo 70-89%','rojo':'Rojo <70%'};
+      var bg=sc[r.sema]||'#f8fafc'; var fg=st[r.sema]||'#64748b';
+      return '<tr>'
+        +'<td style="padding:9px 10px;font-weight:700;color:#003366">'+(i+1)+'. '+r.asesor+'</td>'
+        +'<td style="padding:9px 10px;text-align:center">'+r.pedidos+'</td>'
+        +'<td style="padding:9px 10px;text-align:center;font-weight:700;color:#7c3aed">'+r.referidos+'</td>'
+        +'<td style="padding:9px 10px;text-align:center;color:#2563eb">'+r.entrevistas+'</td>'
+        +'<td style="padding:9px 10px;text-align:center;font-weight:700;color:#16a34a">'+r.ventas+'</td>'
+        +'<td style="padding:9px 10px;text-align:center;font-weight:700">'+r.conv+'</td>'
+        +'<td style="padding:9px 10px;text-align:center"><span style="background:'+bg+';color:'+fg+';padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700">'+(sl[r.sema]||'—')+'</span></td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  // Compliance
+  var cw=document.getElementById('gr-compliance');
+  if(cw&&data.compliance){
+    cw.innerHTML=data.compliance.map(function(r){
+      var pct=r.pct||0;
+      var color=pct>=90?'#16a34a':pct>=70?'#f59e0b':'#ef4444';
+      var bg=pct>=90?'#d1fae5':pct>=70?'#fef3c7':'#fee2e2';
+      return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:12px;font-weight:700;width:150px;color:#003366">'+r.asesor+'</div>'
+        +'<div style="flex:1;height:20px;background:#f0f4f8;border-radius:5px;overflow:hidden">'
+        +'<div style="height:20px;border-radius:5px;background:'+color+';width:'+pct+'%;display:flex;align-items:center;padding:0 8px">'
+        +'<span style="font-size:10px;font-weight:700;color:#fff">'+pct+'%</span></div></div>'
+        +'<div style="font-size:10px;color:#64748b;white-space:nowrap">'+r.con_pedido+'/'+r.total_eventos+' eventos</div>'
+        +'<span style="font-size:10px;font-weight:700;background:'+bg+';color:'+color+';padding:2px 7px;border-radius:8px">'+(pct>=90?'Verde':pct>=70?'Amarillo':'Rojo')+'</span>'
+        +'</div>';
+    }).join('');
+  }
+}
 </script>
 </body>
 </html>
