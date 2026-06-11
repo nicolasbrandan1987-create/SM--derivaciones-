@@ -342,47 +342,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
 ═══════════════════════════════════════════════════════ -->
 <div class="tab-content" id="tab-referidos">
 
-  <!-- Config IA -->
-  <div class="ref-ia-config" id="ref-ia-config" style="display:none">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <span style="font-size:20px">🧠</span>
-      <div>
-        <div style="font-size:13px;font-weight:800;color:#14532d">Motor IA — Claude Haiku</div>
-        <div style="font-size:11px;color:#16a34a">~$0.10 USD/mes para todo el equipo · Mensajes personalizados</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:#333;display:block;margin-bottom:4px">Anthropic API Key</label>
-        <input type="password" id="ref-apikey-input" placeholder="sk-ant-..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit">
-        <div style="font-size:10px;color:#16a34a;margin-top:3px">Se guarda en tu navegador. <a href="https://console.anthropic.com" target="_blank" style="color:#16a34a;font-weight:700">Obtener key →</a></div>
-      </div>
-      <button onclick="refGuardarKey()" style="background:#003366;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;height:38px">Guardar</button>
-    </div>
-  </div>
-
-  <!-- KPIs -->
-  <div class="ref-kpis">
+  <!-- KPIs REFERIDOS -->
+  <div class="ref-kpis" style="grid-template-columns:repeat(5,1fr)">
     <div class="ref-kpi"><div class="ref-kpi-l">Cartera</div><div class="ref-kpi-v" id="rkpi-n">—</div></div>
     <div class="ref-kpi"><div class="ref-kpi-l">Pedidos mes</div><div class="ref-kpi-v" id="rkpi-p" style="color:#2563eb">—</div></div>
     <div class="ref-kpi"><div class="ref-kpi-l">Referidos</div><div class="ref-kpi-v" id="rkpi-r" style="color:#16a34a">—</div></div>
+    <div class="ref-kpi"><div class="ref-kpi-l">Entrevistas</div><div class="ref-kpi-v" id="rkpi-e" style="color:#7c3aed">—</div></div>
     <div class="ref-kpi"><div class="ref-kpi-l">Ventas ref.</div><div class="ref-kpi-v" id="rkpi-v" style="color:#16a34a">—</div></div>
   </div>
 
-  <!-- Sub-tabs -->
-  <div class="ref-subtabs">
-    <button class="ref-subtab active" onclick="refSubTab(this,'ref-st-cartera')">📂 Mi Cartera</button>
-    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-activos')">🔗 Activos <span class="ref-alert-badge" id="ref-activos-badge">!</span></button>
-    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-manual')">➕ Cargar manual</button>
+  <!-- FUNNEL -->
+  <div class="ref-card" style="margin-bottom:12px">
+    <div class="ref-card-hdr">📊 Pipeline de Referidos</div>
+    <div style="padding:10px 14px" id="ref-funnel-wrap">
+      <div id="ref-funnel-bars"></div>
+    </div>
   </div>
 
-  <!-- ── ST: CARTERA ───────────────────────────── -->
+  <!-- SUB-TABS -->
+  <!-- Separador visual claro -->
+  <div style="background:#fff8e6;border:1px solid #f59e0b;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#92400e">
+    <strong>📋 Gestión de cartera:</strong> Seleccioná un cliente y pedile referidos &nbsp;|&nbsp; <strong>🔗 Mis referidos:</strong> Gestioná las personas que te derivaron
+  </div>
+  <div class="ref-subtabs">
+    <button class="ref-subtab active" onclick="refSubTab(this,'ref-st-cartera')">📋 Pedir referidos</button>
+    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-pipeline')">🔗 Mis referidos <span class="ref-alert-badge" id="ref-activos-badge">!</span></button>
+    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-nuevo')">➕ Cargar referido</button>
+    <button class="ref-subtab" onclick="refSubTab(this,'ref-st-checklist')">✅ Checklist venta</button>
+  </div>
+
+  <!-- CARTERA -->
   <div id="ref-st-cartera">
     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <input id="ref-buscar" placeholder="🔎 Buscar contacto..." oninput="refFiltrar()"
-        style="flex:1;min-width:140px;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:12px;font-family:inherit">
-      <select id="ref-tipo-filter" onchange="refFiltrar()"
-        style="border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;background:#fff">
+      <input id="ref-buscar" placeholder="🔎 Buscar contacto..." oninput="refFiltrar()" style="flex:1;min-width:140px;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:12px;font-family:inherit">
+      <select id="ref-tipo-filter" onchange="refFiltrar()" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;background:#fff">
         <option value="">Todos</option>
         <option value="nueva_venta">⭐ Nueva venta</option>
         <option value="vigente">Vigente</option>
@@ -391,38 +384,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
       </select>
       <button onclick="refCargarCartera()" style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:600;cursor:pointer">🔄</button>
     </div>
-
     <div class="ref-grid">
-      <!-- Lista contactos -->
       <div class="ref-card">
-        <div class="ref-card-hdr">
-          Ordenado por score IA
-          <span style="font-size:10px;color:var(--text2);font-weight:500" id="ref-count-lbl">—</span>
-        </div>
-        <div class="ref-contact-list" id="ref-contact-list">
-          <div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">Cargando cartera...</div>
-        </div>
+        <div class="ref-card-hdr">Clientes para pedir referidos · Score IA <span style="font-size:10px;color:var(--text2);font-weight:500" id="ref-count-lbl">—</span></div>
+        <div class="ref-contact-list" id="ref-contact-list"><div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">Cargando cartera...</div></div>
       </div>
-
-      <!-- Panel IA -->
       <div class="ref-card">
-        <div class="ref-card-hdr">
-          <span>🧠 Mensaje IA</span>
-          <span style="font-size:10px;color:var(--text2);font-weight:500" id="ref-ia-ctx-lbl">Seleccioná un contacto</span>
-        </div>
+        <div class="ref-card-hdr"><span>🧠 Mensaje sugerido</span><span style="font-size:10px;color:var(--text2);font-weight:500" id="ref-ia-ctx-lbl">Seleccioná un contacto</span></div>
         <div style="padding:12px">
-          <div class="ref-ia-box" id="ref-ia-msg">
-            <span style="color:var(--text2);font-size:12px">← Tocá un contacto para generar el mensaje</span>
-          </div>
+          <div class="ref-ia-box" id="ref-ia-msg"><span style="color:var(--text2);font-size:12px">← Tocá un contacto para generar el mensaje</span></div>
           <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
             <button class="ref-btn-wa" id="rbtn-wa" onclick="refEnviarWA()" disabled>💬 Copiar WA</button>
             <button class="ref-btn-mail" id="rbtn-mail" onclick="refEnviarMail()" disabled>✉️ Email</button>
             <button class="ref-btn-regen" id="rbtn-regen" onclick="refRegenerar()" disabled>🔄</button>
           </div>
-          <div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">
+          <div style="display:flex;gap:7px;margin-top:7px">
             <button class="ref-btn-reg" id="rbtn-reg" onclick="refRegistrar()" disabled>✅ Registrar pedido</button>
-            <button onclick="refSubTab(document.querySelectorAll('.ref-subtab')[2],'ref-st-manual')"
-              style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer">📝 Manual</button>
           </div>
           <div class="ref-reason" id="ref-ia-reason"></div>
         </div>
@@ -430,58 +407,145 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padd
     </div>
   </div>
 
-  <!-- ── ST: ACTIVOS ───────────────────────────── -->
-  <div id="ref-st-activos" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div style="font-size:13px;font-weight:700;color:var(--text)" id="ref-activos-title">Referidos activos</div>
-      <button onclick="refCargarActivos()" style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">🔄 Actualizar</button>
+  <!-- PIPELINE -->
+  <div id="ref-st-pipeline" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:var(--text)" id="ref-pipeline-title">Referidos que me derivaron · gestión y seguimiento</div>
+      <button onclick="refCargarActivos()" style="background:#f1f5f9;border:1px solid #dde3ec;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">🔄</button>
+    </div>
+    <!-- Kanban compacto por etapa -->
+    <div style="overflow-x:auto;margin-bottom:12px">
+      <div style="display:flex;gap:8px;min-width:800px" id="ref-kanban"></div>
     </div>
     <div class="ref-card">
-      <div id="ref-activos-list">
-        <div style="text-align:center;padding:28px;color:var(--text2);font-size:12px">Cargando...</div>
-      </div>
+      <div class="ref-card-hdr">Lista completa · ordenada por urgencia</div>
+      <div id="ref-activos-list"><div style="text-align:center;padding:24px;color:var(--text2);font-size:12px">Cargando...</div></div>
     </div>
   </div>
 
-  <!-- ── ST: MANUAL ────────────────────────────── -->
-  <div id="ref-st-manual" style="display:none">
+  <!-- NUEVO REFERIDO -->
+  <div id="ref-st-nuevo" style="display:none">
     <div class="ref-grid">
       <div class="ref-card">
-        <div class="ref-card-hdr">➕ Cargar referido manual</div>
-        <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
-          <div class="field"><label>Nombre del referido *</label><input type="text" id="rmf-nombre" placeholder="García, Lucía"></div>
-          <div class="field"><label>Teléfono *</label><input type="tel" id="rmf-tel" placeholder="+54 11 ..."></div>
-          <div class="field"><label>¿Quién lo refirió? *</label><input type="text" id="rmf-origen" placeholder="Nombre del contacto de tu cartera"></div>
-          <div class="field"><label>Email (opcional)</label><input type="email" id="rmf-email" placeholder="@"></div>
-          <div class="field"><label>Producto de interés</label>
-            <select id="rmf-prod">
-              <option value="">Sin definir</option>
-              <option>Life Planning ARS</option><option>Life Planning USD</option>
-              <option>Amatista</option><option>Zafiro</option>
-              <option>AP — Accidentes Personales</option>
-            </select></div>
-          <div class="field"><label>Observaciones</label>
-            <input type="text" id="rmf-obs" placeholder="Zona, profesión, contexto..."></div>
+        <div class="ref-card-hdr">➕ Cargar nuevo referido</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:9px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>Nombre *</label><input type="text" id="rmf-nombre" placeholder="Juan"></div>
+            <div class="field"><label>Apellido *</label><input type="text" id="rmf-apellido" placeholder="García"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>Teléfono *</label><input type="tel" id="rmf-tel" placeholder="+54 11 ..."></div>
+            <div class="field"><label>Email</label><input type="email" id="rmf-email" placeholder="@"></div>
+          </div>
+          <div class="field"><label>Empresa</label><input type="text" id="rmf-empresa" placeholder="Empresa donde trabaja"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>Tipo de relación *</label>
+              <select id="rmf-relacion">
+                <option value="">Seleccionar...</option>
+                <option>Familiar</option><option>Amigo</option><option>Compañero de trabajo</option>
+                <option>Socio</option><option>Cliente</option><option>Productor</option><option>Otro</option>
+              </select>
+            </div>
+            <div class="field"><label>Producto de interés</label>
+              <select id="rmf-prod">
+                <option value="">Sin definir</option>
+                <option>Life Planning ARS</option><option>Life Planning USD</option>
+                <option>Excellent Savings</option><option>Amatista</option><option>Zafiro</option>
+                <option>AP — Accidentes Personales</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>¿Quién lo refirió? *</label><input type="text" id="rmf-origen" placeholder="Nombre del cliente que refirió"></div>
+          <div class="field"><label>Método de presentación</label>
+            <select id="rmf-metodo">
+              <option value="">Seleccionar...</option>
+              <option>Referido espontáneo</option><option>Presentación por WhatsApp</option>
+              <option>Presentación por Email</option><option>Presentación telefónica</option><option>Formulario web</option>
+            </select>
+          </div>
+          <div class="field"><label>Comentarios</label><input type="text" id="rmf-obs" placeholder="Perfil, contexto, observaciones..."></div>
           <button class="btn-ok" onclick="refGuardarManual()">💾 Guardar referido</button>
         </div>
       </div>
       <div>
-        <div class="ref-card" style="margin-bottom:12px">
+        <div class="ref-card" style="margin-bottom:10px">
+          <div class="ref-card-hdr">📋 Mis estadísticas</div>
+          <div style="padding:12px;font-size:12px;color:var(--text2);line-height:2.1">
+            <div style="display:flex;justify-content:space-between"><span>Solicitudes realizadas</span><strong id="rs-solicitudes">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>Referidos obtenidos</span><strong id="rs-obtenidos">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>Prom. referidos/cliente</span><strong id="rs-promedio">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>Tasa de contactación</span><strong id="rs-contactacion" style="color:#7c3aed">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>Tasa de entrevista</span><strong id="rs-entrevista" style="color:#2563eb">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>Tasa de cierre</span><strong id="rs-cierre" style="color:#16a34a">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>Prima generada</span><strong id="rs-prima" style="color:#003366">—</strong></div>
+          </div>
+        </div>
+        <div class="ref-card">
           <div class="ref-card-hdr">🔗 Tu link personal</div>
           <div style="padding:12px">
-            <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Compartí este link para que tus contactos carguen referidos directamente</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Compartí para que tus contactos carguen referidos directamente</div>
             <div id="ref-link" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:11px;font-family:monospace;word-break:break-all;color:var(--text)">—</div>
             <button onclick="refCopyLink()" style="margin-top:8px;background:#f1f5f9;border:1px solid #dde3ec;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">📋 Copiar</button>
           </div>
         </div>
-        <div class="ref-card">
-          <div class="ref-card-hdr">💡 Cuándo cargar manual</div>
-          <div style="padding:12px;font-size:12px;color:var(--text2);line-height:1.8">
-            → El contacto te dio un nombre por WA o en persona<br>
-            → Alguien llamó por recomendación sin usar el link<br>
-            → Querés registrar una charla que ya tuviste
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST POST-VENTA -->
+  <div id="ref-st-checklist" style="display:none">
+    <div class="ref-card">
+      <div class="ref-card-hdr">✅ Checklist de Referidos</div>
+      <div style="padding:16px">
+        <div style="background:#fff8e6;border:1.5px solid #f59e0b;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#92400e">
+          <strong>⚡ Recordá:</strong> El pedido de referidos es una etapa obligatoria del proceso comercial. Registrá el resultado después de cada venta o entrevista.
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Evento *</label>
+          <select id="chk-evento">
+            <option value="">Seleccionar evento...</option>
+            <option>Venta emitida</option><option>Venta Life Planning</option>
+            <option>Venta Excellent Savings</option><option>Venta Amatista</option><option>Venta Zafiro</option>
+            <option>Incremento de cartera</option><option>Reunión revisión de cartera</option>
+            <option>Entrevista comercial calificada</option><option>Reunión con productor</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Cliente relacionado</label>
+          <input type="text" id="chk-cliente" placeholder="Nombre del cliente de la venta o entrevista">
+        </div>
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px">¿Solicitó referidos en este evento?</div>
+          <div style="display:flex;gap:10px">
+            <button id="chk-si" onclick="chkRespuesta('si')" style="flex:1;padding:12px;border-radius:9px;border:2px solid #e2e8f0;background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2)">✅ SÍ, pedí referidos</button>
+            <button id="chk-no" onclick="chkRespuesta('no')" style="flex:1;padding:12px;border-radius:9px;border:2px solid #e2e8f0;background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2)">❌ NO pedí referidos</button>
           </div>
         </div>
+        <div id="chk-motivo-wrap" style="display:none;margin-bottom:14px">
+          <div class="field">
+            <label>Motivo *</label>
+            <select id="chk-motivo">
+              <option value="">Seleccionar motivo...</option>
+              <option>Olvido</option><option>Cliente no disponible</option>
+              <option>No correspondía en ese momento</option><option>Otro</option>
+            </select>
+          </div>
+        </div>
+        <div id="chk-referidos-wrap" style="display:none;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">¿Cuántos referidos obtuvo?</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+            <input type="number" id="chk-cantidad" min="0" max="20" value="0" style="width:80px;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-size:16px;font-weight:700;text-align:center;font-family:inherit">
+            <span style="font-size:12px;color:var(--text2)">referidos en esta instancia</span>
+          </div>
+          <div style="font-size:11px;color:var(--soft)">Si obtuvo referidos, cargalos en la pestaña "➕ Nuevo referido"</div>
+        </div>
+        <button class="btn-ok" id="chk-guardar" onclick="chkGuardar()" disabled>💾 Registrar checklist</button>
+      </div>
+    </div>
+    <div class="ref-card" style="margin-top:12px">
+      <div class="ref-card-hdr">📋 Historial <span id="chk-historial-count" style="font-weight:400;font-size:10px;color:var(--text2)"></span></div>
+      <div id="chk-historial-list" style="max-height:280px;overflow-y:auto">
+        <div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">Cargando historial...</div>
       </div>
     </div>
   </div>
@@ -977,35 +1041,31 @@ var REF_CARTERA=[], REF_ACTIVOS=[], REF_SEL=null, REF_MSG='', REF_INIT_DONE=fals
 function refInit(){
   if(REF_INIT_DONE) return;
   REF_INIT_DONE=true;
-  var key=localStorage.getItem('ref_apikey')||'';
-  var cfg=document.getElementById('ref-ia-config');
-  if(cfg) cfg.style.display=key?'none':'block';
-  // Link personal
   var linkEl=document.getElementById('ref-link');
-  if(linkEl&&ASESOR){
-    linkEl.textContent='https://nicolasbrandan1987-create.github.io/SM--derivaciones-/formulario-derivacion.html?ref='+encodeURIComponent(ASESOR);
-  }
+  if(linkEl&&ASESOR) linkEl.textContent='https://nicolasbrandan1987-create.github.io/SM--derivaciones-/formulario-derivacion.html?ref='+encodeURIComponent(ASESOR);
   refCargarCartera();
   refCargarActivos();
+  refCargarChecklist();
+  refCargarStats();
 }
 
 function refGuardarKey(){
-  var k=document.getElementById('ref-apikey-input').value.trim();
-  if(!k){toast('Ingresá la API Key',false);return;}
-  localStorage.setItem('ref_apikey',k);
-  document.getElementById('ref-ia-config').style.display='none';
-  toast('✅ API Key guardada',true);
+  var k=document.getElementById('ref-apikey-input');
+  if(k) localStorage.setItem('ref_apikey',k.value.trim());
+  toast('✅ Guardado',true);
 }
 
 /* ── SUB-TABS ──────────────────────────────────────── */
 function refSubTab(btn,id){
   document.querySelectorAll('.ref-subtab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  ['ref-st-cartera','ref-st-activos','ref-st-manual'].forEach(function(s){
+  ['ref-st-cartera','ref-st-pipeline','ref-st-nuevo','ref-st-checklist'].forEach(function(s){
     var el=document.getElementById(s);
     if(el) el.style.display=s===id?'block':'none';
   });
-  if(id==='ref-st-activos') refCargarActivos();
+  if(id==='ref-st-pipeline') refCargarActivos();
+  if(id==='ref-st-nuevo') refCargarStats();
+  if(id==='ref-st-checklist') refCargarChecklist();
 }
 
 /* ── CARTERA ───────────────────────────────────────── */
@@ -1208,12 +1268,27 @@ var DEMO_ACTIVOS=[
 ];
 
 function refRenderActivos(){
+  refRenderKanban(REF_ACTIVOS);
+  refRenderFunnel(REF_ACTIVOS);
+  // update pipeline title
+  var t=document.getElementById('ref-pipeline-title');
+  if(t) t.textContent='Mis referidos · '+REF_ACTIVOS.length+' activos';
+  refCargarStats();
+  // alert badge
+  var alertas=REF_ACTIVOS.filter(function(r){return r.estado=='Pendiente de contacto'&&r.dias>1;}).length;
+  var badge=document.getElementById('ref-activos-badge');
+  var tbadge=document.getElementById('ref-tab-badge');
+  if(alertas>0){
+    if(badge){badge.textContent=alertas;badge.style.display='inline';}
+    if(tbadge) tbadge.style.display='inline';
+  }
+  // real render below
   var data=REF_ACTIVOS;
   var alertas=data.filter(function(r){return r.estado==='Sin contactar'&&r.dias>1;}).length;
   var badge=document.getElementById('ref-activos-badge');
   var tabBadge=document.getElementById('ref-tab-badge');
   if(alertas>0){if(badge){badge.textContent=alertas;badge.style.display='inline';}if(tabBadge)tabBadge.style.display='inline';}
-  document.getElementById('ref-activos-title').textContent='Referidos activos · '+data.length;
+  var _rat=document.getElementById('ref-activos-title');if(_rat)_rat.textContent='Referidos activos · '+data.length;
   document.getElementById('rkpi-r').textContent=data.length;
   document.getElementById('rkpi-v').textContent=data.filter(function(r){return r.estado==='Vendido';}).length;
   var dotColors={'Sin contactar':'#94a3b8','Contactado':'#2563eb','Interesado':'#ca8a04','Entrevista agendada':'#8b5cf6','Cotizado':'#003366','Propuesta enviada':'#ea580c','Vendido':'#16a34a','No interesado':'#dc2626'};
@@ -1262,6 +1337,150 @@ function refGuardarManual(){
     },
     function(){toast('✅ Registrado localmente: '+nombre,true);}
   );
+}
+
+
+/* ── FUNNEL ─────────────────────────────────────────── */
+var PIPELINE_STAGES=['Referido generado','Pendiente de contacto','Contactado','Interesado','Entrevista agendada','Cotizacion enviada','Negociacion','Venta emitida','Perdido'];
+var PIPELINE_COLORS=['#94a3b8','#f59e0b','#8b5cf6','#3b82f6','#7c3aed','#2563eb','#ea580c','#16a34a','#ef4444'];
+
+function refRenderFunnel(data){
+  var counts={};
+  PIPELINE_STAGES.forEach(function(s){counts[s]=0;});
+  data.forEach(function(r){if(counts[r.estado]!==undefined)counts[r.estado]++;});
+  var total=data.length||1;
+  var wrap=document.getElementById('ref-funnel-bars');
+  if(!wrap) return;
+  wrap.innerHTML=PIPELINE_STAGES.map(function(s,i){
+    var n=counts[s]||0;
+    var pct=Math.round(n/total*100);
+    if(n===0) return '';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      +'<div style="font-size:10px;font-weight:600;width:130px;text-align:right;color:var(--text2)">'+s+'</div>'
+      +'<div style="flex:1;height:22px;background:#f0f4f8;border-radius:6px;overflow:hidden">'
+      +'<div style="height:22px;border-radius:6px;background:'+PIPELINE_COLORS[i]+';width:'+Math.max(pct,3)+'%;display:flex;align-items:center;padding:0 8px">'
+      +'<span style="font-size:10px;font-weight:700;color:#fff">'+n+'</span></div></div>'
+      +'<div style="font-size:10px;color:var(--text2);width:30px">'+pct+'%</div>'
+      +'</div>';
+  }).join('');
+}
+
+function refRenderKanban(data){
+  var kanban=document.getElementById('ref-kanban');
+  if(!kanban) return;
+  var active=PIPELINE_STAGES.slice(0,8);
+  var grouped={};
+  active.forEach(function(s){grouped[s]=[];});
+  data.forEach(function(r){if(grouped[r.estado]) grouped[r.estado].push(r);});
+  kanban.innerHTML=active.map(function(s,i){
+    var items=grouped[s]||[];
+    return '<div style="min-width:130px;flex:1;background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden">'
+      +'<div style="padding:8px 10px;font-size:9px;font-weight:700;text-transform:uppercase;background:'+PIPELINE_COLORS[i]+';color:#fff">'
+      +s+'<span style="float:right;background:rgba(255,255,255,.25);border-radius:10px;padding:0 5px">'+items.length+'</span></div>'
+      +'<div style="max-height:180px;overflow-y:auto">'
+      +(items.length?items.map(function(r){
+        var urg=r.dias>1&&s==='Pendiente de contacto';
+        return '<div style="padding:7px 9px;border-bottom:1px solid #f0f4f8;font-size:11px;'+(urg?'background:#fff7f7':'')+'">'
+          +'<div style="font-weight:700">'+(r.nombre||'?')+'</div>'
+          +'<div style="color:var(--text2);font-size:10px">'+(r.dias||0)+'d'+(urg?' ⚠️':'')+' </div>'
+          +'<button onclick="refCambiarEstado(\''+r.id+'\')" style="margin-top:3px;background:#f1f5f9;border:1px solid #dde3ec;border-radius:5px;padding:2px 7px;font-size:9px;cursor:pointer">✎</button>'
+          +'</div>';
+      }).join(''):'<div style="padding:12px;text-align:center;font-size:11px;color:var(--text2)">—</div>')
+      +'</div></div>';
+  }).join('');
+}
+
+function refCargarStats(){
+  if(REF_ACTIVOS.length) refRenderStats(refCalcStatsLocal());
+}
+
+function refCalcStatsLocal(){
+  var total=REF_ACTIVOS.length||0;
+  var contactados=REF_ACTIVOS.filter(function(r){return r.estado!='Referido generado'&&r.estado!='Pendiente de contacto';}).length;
+  var entrevistas=REF_ACTIVOS.filter(function(r){return r.estado=='Entrevista agendada'||r.estado=='Cotizacion enviada'||r.estado=='Negociacion'||r.estado=='Venta emitida';}).length;
+  var ventas=REF_ACTIVOS.filter(function(r){return r.estado=='Venta emitida';}).length;
+  return {solicitudes:'—',obtenidos:total,promedio:'—',contactacion:total?Math.round(contactados/total*100)+'%':'—',entrevista:total?Math.round(entrevistas/total*100)+'%':'—',cierre:total?Math.round(ventas/total*100)+'%':'—',prima:'—',entrevistas_n:entrevistas};
+}
+
+function refRenderStats(d){
+  var s=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
+  s('rs-solicitudes',d.solicitudes||'—'); s('rs-obtenidos',d.obtenidos||'—');
+  s('rs-promedio',d.promedio||'—'); s('rs-contactacion',d.contactacion||'—');
+  s('rs-entrevista',d.entrevista||'—'); s('rs-cierre',d.cierre||'—'); s('rs-prima',d.prima||'—');
+  var e=document.getElementById('rkpi-e'); if(e&&d.entrevistas_n) e.textContent=d.entrevistas_n;
+}
+
+/* ── CHECKLIST ──────────────────────────────────────── */
+var CHK_RESP=null;
+
+function chkRespuesta(resp){
+  CHK_RESP=resp;
+  var si=document.getElementById('chk-si'); var no=document.getElementById('chk-no');
+  var mw=document.getElementById('chk-motivo-wrap'); var rw=document.getElementById('chk-referidos-wrap');
+  var btn=document.getElementById('chk-guardar');
+  if(resp=='si'){
+    if(si){si.style.background='#d1fae5';si.style.borderColor='#16a34a';si.style.color='#065f46';}
+    if(no){no.style.background='#fff';no.style.borderColor='#e2e8f0';no.style.color='var(--text2)';}
+    if(mw) mw.style.display='none'; if(rw) rw.style.display='block';
+  } else {
+    if(no){no.style.background='#fee2e2';no.style.borderColor='#ef4444';no.style.color='#991b1b';}
+    if(si){si.style.background='#fff';si.style.borderColor='#e2e8f0';si.style.color='var(--text2)';}
+    if(mw) mw.style.display='block'; if(rw) rw.style.display='none';
+  }
+  if(btn) btn.disabled=false;
+}
+
+function chkGuardar(){
+  var evento=document.getElementById('chk-evento').value;
+  var cliente=document.getElementById('chk-cliente').value.trim();
+  if(!evento){toast('Selecciona el evento',false);return;}
+  if(!CHK_RESP){toast('Indica si pediste referidos',false);return;}
+  var motivo=CHK_RESP=='no'?(document.getElementById('chk-motivo').value||''):'';
+  var cantidad=CHK_RESP=='si'?(parseInt(document.getElementById('chk-cantidad').value)||0):0;
+  var btn=document.getElementById('chk-guardar');
+  btn.disabled=true; btn.textContent='Guardando...';
+  jsonp(
+    {accion:'guardarChecklist',asesorVida:ASESOR,evento:evento,cliente:cliente,solicito:CHK_RESP=='si'?'Si':'No',motivo:motivo,cantidad_referidos:cantidad,fecha:new Date().toISOString()},
+    function(){
+      toast('Checklist registrado',true); btn.disabled=false; btn.textContent='Registrar checklist';
+      CHK_RESP=null;
+      ['chk-evento','chk-cliente','chk-motivo'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+      var q=document.getElementById('chk-cantidad'); if(q) q.value=0;
+      var mw=document.getElementById('chk-motivo-wrap'); var rw=document.getElementById('chk-referidos-wrap');
+      if(mw) mw.style.display='none'; if(rw) rw.style.display='none';
+      var si=document.getElementById('chk-si'); var no=document.getElementById('chk-no');
+      if(si){si.style.background='#fff';si.style.borderColor='#e2e8f0';si.style.color='var(--text2)';}
+      if(no){no.style.background='#fff';no.style.borderColor='#e2e8f0';no.style.color='var(--text2)';}
+      refCargarChecklist();
+    },
+    function(){toast('Error al guardar',false);btn.disabled=false;btn.textContent='Registrar checklist';}
+  );
+}
+
+function refCargarChecklist(){
+  jsonp(
+    {accion:'getChecklist',asesorVida:ASESOR},
+    function(res){ if(res&&res.ok&&res.data) refRenderChecklist(res.data); else refRenderChecklist([]); },
+    function(){ refRenderChecklist([]); }
+  );
+}
+
+function refRenderChecklist(data){
+  var list=document.getElementById('chk-historial-list');
+  var cnt=document.getElementById('chk-historial-count');
+  if(cnt) cnt.textContent='· '+data.length+' registros';
+  if(!list) return;
+  if(!data.length){list.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">Sin registros. Complete su primer checklist.</div>';return;}
+  list.innerHTML=data.map(function(r){
+    var ok=r.solicito=='Si';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #f0f4f8">'
+      +'<span style="font-size:16px">'+(ok?'✅':'❌')+'</span>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text)">'+r.evento+'</div>'
+      +'<div style="font-size:11px;color:var(--text2)">'+(r.cliente||'—')+' · '+(r.fecha||'')+(r.motivo?' · '+r.motivo:'')+'</div></div>'
+      +(ok?'<span style="font-size:11px;font-weight:700;background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px">'+r.cantidad_referidos+' ref.</span>':'<span style="font-size:11px;color:#ef4444;font-weight:600">Sin pedido</span>')
+      +'</div>';
+  }).join('');
 }
 
 function refCopyLink(){
