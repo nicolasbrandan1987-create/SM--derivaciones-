@@ -1087,7 +1087,7 @@ function refSelContact(i){
 
 function refGenerar(c){
   var firstName=c.nombre.includes(',')?c.nombre.split(',')[1].trim().split(' ')[0]:c.nombre.split(' ')[0];
-  var apiKey=localStorage.getItem('ref_apikey')||'';
+  var apiKey=localStorage.getItem('ref_apikey')||'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';
   if(!apiKey||apiKey.length<20){REF_MSG=refTemplate(c,firstName);refRenderMsg(REF_MSG,c);return;}
   var prompt='Sos un asesor de seguros de vida argentino. Escribí un mensaje de WhatsApp corto para pedirle a '+firstName+' que te recomiende conocidos. Producto: '+(c.producto||'seguro de vida')+'. Tipo: '+(c.tipo==='nueva_venta'?'nuevo cliente esta semana':c.tipo==='entrevista'?'entrevista sin cierre':'cliente vigente')+'. Máximo 4 oraciones, tono informal argentino (vos), 1-2 emojis. Solo el texto.';
   fetch('https://api.anthropic.com/v1/messages',{
